@@ -9,10 +9,10 @@ import Image from "next/image";
 const menuDashboards = [
     {
         title: "Dashboard",
-        icon: "./assets/icons/home.svg",
-        alt: "Dashboard",
         items: [
             {
+                icon: "/assets/icons/home.svg",
+                alt: "Dashboard",
                 label: "Dashboard",
                 href: "/dashboard",
             },
@@ -20,72 +20,30 @@ const menuDashboards = [
     },
 ];
 
-const menuInbound = [
-  {
-    title: "Inbound Main Menu",
-    items: [
-      {
-        label: "Request Asset Masuk",
-        href: "/dashboard/requestassetmasuk",
-      },
-      {
-        label: "Pengecekan Asset Masuk",
-        href: "/dashboard/pengecekanassetmasuk",
-      },
-    ],
-  },
-];
-
-const menuOutbound = [
-  {
-    title: "Outbound Main Menu",
-    items: [
-      {
-        label: "Request Asset Keluar",
-        href: "/dashboard/requestassetkeluar",
-      },
-      {
-        label: "Pengecekan Asset Keluar",
-        href: "/dashboard/pengecekanassetkeluar",
-      },
-    ],
-  },
-];
-
-const menuRequest = [
-  {
-    title: "Request Main Menu",
-    items: [
-      {
-        label: "New Request Inbound",
-        href: "/dashboard/requestinbound",
-      },
-      {
-        label: "New Request Outbound",
-        href: "/dashboard/requestoutbound",
-      },
-    ],
-  },
-];
-
-const menuInput = [
-  {
-    title: "Management",
-    items: [
-      {
-        label: "User Management",
-        href: "/dashboard/usermanagement",
-      },
-      {
-        label: "Branch Management",
-        href: "/dashboard/branchmanagement",
-      },
-      {
-        label: "New Asset Management",
-        href: "/dashboard/newassetmanagement",
-      },
-    ],
-  },
+const factoryMenus = [
+    {
+        title: "Menu Factory",
+        items: [
+            {
+                icon: "/assets/icons/factory.svg",
+                alt: "Factory",
+                label: "Print Label Barang",
+                href: "/dashboard/print-label",
+            },
+            {
+                icon: "/assets/icons/pengecekkan-barang.svg",
+                alt: "Pengecekkan Barang",
+                label: "Pengecekkan Barang",
+                href: "/dashboard/pengecekkan-barang",
+            },
+            {
+                icon: "/assets/icons/delivery.svg",
+                alt: "Pengiriman Barang",
+                label: "Pengiriman Barang",
+                href: "/dashboard/pengiriman-barang",
+            },
+        ],
+    },
 ];
 
 type UserResponseDTO = {
@@ -102,14 +60,18 @@ interface Branch {
     branchId: string;
     branchName: string;
 }
+const allMenus = [...menuDashboards, ...factoryMenus];
 
 
 const Menu = () => {
     const [users, setUser] = useState<UserResponseDTO | null>(null);
-    const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+    const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>(
+        Object.fromEntries(allMenus.map((menu) => [menu.title, true]))
+    );
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [hasParentId, setHasParentId] = useState<boolean | null>(null);
     const [branches, setBranches] = useState<Branch[]>([]);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -119,9 +81,9 @@ const Menu = () => {
         try {
             const userId = localStorage.getItem("userId");
             if (!userId) {
-            setError("No user ID found. Please log in.");
-            setLoading(false);
-            return;
+                setError("No user ID found. Please log in.");
+                setLoading(false);
+                return;
             }
 
             const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/by-id/${userId}`);
@@ -161,22 +123,22 @@ const Menu = () => {
         };
 
         if (isMobileMenuOpen) {
-        document.addEventListener("mousedown", handleClickOutside);
-        document.body.style.overflow = "hidden";
+            document.addEventListener("mousedown", handleClickOutside);
+            document.body.style.overflow = "hidden";
         } else {
-        document.body.style.overflow = "auto";
+            document.body.style.overflow = "auto";
         }
 
         return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-        document.body.style.overflow = "auto";
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.body.style.overflow = "auto";
         };
     }, [isMobileMenuOpen]);
 
     const handleMenuClick = (title: string) => {
         setOpenMenus((prev) => ({
-        ...prev,
-        [title]: !prev[title],
+            ...prev,
+            [title]: !prev[title],
         }));
     };
 
@@ -190,41 +152,101 @@ const Menu = () => {
 
     useEffect(() => {
         if (isMobileMenuOpen) {
-        document.body.style.overflow = "hidden";
+            document.body.style.overflow = "hidden";
         } else {
-        document.body.style.overflow = "auto";
+            document.body.style.overflow = "auto";
         }
 
         return () => {
-        document.body.style.overflow = "auto";
+            document.body.style.overflow = "auto";
         };
     }, [isMobileMenuOpen]);
 
     return (
         <div className="text-sm">
-            <div className="flex lg:hidden items-center mb-4 justify-center mr-2">
+            <div className="flex lg:hidden items-center mb-4 justify-center">
                 <button 
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
                     className="text-white focus:outline-none cursor-pointer"
                 >
-                    {isMobileMenuOpen ? <IoClose className="w-6 h-6" /> : <IoMenu className="w-6 h-6" />}
+                    <div className="bg-blue-800 p-4 rounded-lg">
+                        <Image 
+                            src={'/assets/icons/hamburger-white.svg'} 
+                            width={20} 
+                            height={20} 
+                            alt={"Hamburger Menu"} 
+                        />
+                    </div>
                 </button>
             </div>
+            
+            {/* Icons Menu */}
+            <div className="flex flex-col items-center justify-center gap-4 lg:hidden">
+                {allMenus.map((menu) => menu.items.length === 1 ? (
+                    <Link
+                        href={menu.items[0].href}
+                        key={menu.items[0].label}
+                        className="flex items-center p-4 text-white hover:bg-blue-800 rounded"
+                    >
+                        <Image src={menu.items[0].icon} width={20} height={20} alt={menu.items[0].alt} className="block" />
+                    </Link>
+                ) : (
+                    <div key={menu.title} className="flex flex-col items-center gap-4">
+                        {menu.items.map((item) => (
+                            <Link
+                                href={item.href}
+                                key={item.label}
+                                className="flex items-center gap-3 p-4 text-white hover:bg-blue-800 rounded"
+                            >
+                                <Image
+                                    src={item.icon}
+                                    width={20}
+                                    height={20}
+                                    alt={item.alt}
+                                    className="block"
+                                />
+                            </Link>
+                        ))}
+                    </div>
+                ))}
+            </div>
+
             
             {/* Mobile Menu */}
             <div
                 ref={mobileMenuRef}
-                className={`fixed top-[4.5rem] left-0 h-[calc(100vh-4.5rem)] w-3/4 bg-gray-800 z-50 flex flex-col p-6 lg:hidden overflow-y-auto transition-all duration-500 transform ${
+                className={`fixed top-0 left-0 h-full w-1/2 bg-blue-900 z-50 flex flex-col p-6 lg:hidden overflow-y-auto transition-all duration-500 transform ${
                 isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
             }`}>
-                <div className="flex flex-col gap-6 text-lg mt-4">
-                    {menuDashboards.map((menu) => (
+                <div className="flex lg:hidden items-center justify-end">
+                    <button 
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+                        className="text-white focus:outline-none cursor-pointer"
+                    > 
+                        <div className="bg-blue-800 p-4 rounded-lg">
+                            <IoClose className="w-5 h-5 text-white" /> 
+                        </div>
+                    </button>
+                </div>
+                <div className="flex flex-col gap-3 text-lg mt-4">
+                    {allMenus.map((menu) => menu.items.length === 1 ? (
+                        <Link
+                            href={menu.items[0].href}
+                            key={menu.items[0].label}
+                            className="flex items-center gap-3 p-4 text-white hover:bg-blue-800 rounded-lg"
+                        >
+                            <Image src={menu.items[0].icon} width={20} height={20} alt={menu.items[0].alt} className="block" />
+                            {isSidebarOpen && (
+                                <span className="block text-sm">{menu.items[0].label}</span>
+                            )}
+                        </Link>
+                    ) : (
                         <div key={menu.title}>
                             <div
-                                className="flex justify-between items-center cursor-pointer text-white font-bold"
+                                className="flex justify-between items-center cursor-pointer text-white font-bold hover:bg-blue-800 p-4 rounded-lg"
                                 onClick={() => handleMenuClick(menu.title)}
                             >
-                                <span>{menu.title}</span>
+                                <span className="text-sm">{menu.title}</span>
                                 <IoCaretForward
                                     className={`transition-transform duration-300 ${
                                         openMenus[menu.title] ? "rotate-90" : "rotate-0"
@@ -232,23 +254,26 @@ const Menu = () => {
                                 />
                             </div>
                             {openMenus[menu.title] && (
-                                <div className="ml-4 flex flex-col gap-2 mt-3">
-                                {menu.items
-                                    .filter((item) => {
-                                        if (item.label === "Asset Dashboard" && hasParentId === false) {
-                                            return false;
-                                        }
-                                            return true;
-                                    })
-                                    .map((item) => (
-                                    <Link
-                                        href={item.href}
-                                        key={item.label}
-                                        className="text-white hover:bg-gray-700 p-2 rounded transition-colors duration-200"
-                                        onClick={handleMenuItemClick}
-                                    >
-                                        {item.label}
-                                    </Link>
+                                <div className="flex flex-col gap-2 mt-3">
+                                    {menu.items
+                                        .filter((item) => {
+                                            if (item.label === "Asset Dashboard" && hasParentId === false) {
+                                                return false;
+                                            }
+                                                return true;
+                                        })
+                                        .map((item) => (
+                                        <Link
+                                            href={item.href}
+                                            key={item.label}
+                                            className="flex items-center gap-3 p-4 text-white hover:bg-blue-800 rounded-lg"
+                                            onClick={handleMenuItemClick}
+                                        >
+                                            <Image src={menu.items[0].icon} width={20} height={20} alt={menu.items[0].alt} className="block" />
+                                            {isSidebarOpen && (
+                                                <span className="block text-sm">{menu.items[0].label}</span>
+                                            )}
+                                        </Link>
                                     ))}
                                 </div>
                             )}
@@ -258,52 +283,37 @@ const Menu = () => {
             </div>
         
             {/* Web Menu */}
-            <div className={`${isMobileMenuOpen ? "block" : "hidden"} lg:block bg-white lg:bg-transparent`}>
-                {menuDashboards.map((menu) => menu.items.length === 1 ? (
+            <div className={`hidden lg:block lg:bg-transparent`}>
+                {allMenus.map((menu) => menu.items.length === 1 ? (
                     <Link
                         href={menu.items[0].href}
                         key={menu.items[0].label}
-                        className="flex items-center justify-start gap-6 px-4 py-4 text-white hover:bg-blue-800 rounded"
+                        className="flex items-center justify-start gap-4 p-4 text-white hover:bg-blue-800"
                     >
                         <Image 
-                            src={menu.icon} 
+                            src={menu.items[0].icon} 
                             width={20} 
                             height={20} 
-                            alt={menu.alt} 
+                            alt={menu.items[0].alt} 
                         />
                         <span className="hidden lg:block text-sm">{menu.items[0].label}</span>
                     </Link>
                 ) : (
-                    <div className="flex flex-col gap-2" key={menu.title}>
+                    <div className="flex flex-col" key={menu.title}>
                         <div
-                            className="flex justify-between items-center px-4 hover:bg-blue-800 cursor-pointer"
+                            className="flex justify-between items-center cursor-pointer text-white font-bold hover:bg-blue-800 p-4"
                             onClick={() => handleMenuClick(menu.title)}
                         >
-                            <div className="flex gap-6">
-                                <Image
-                                    src={menu.icon}
-                                    width={20}
-                                    height={20}
-                                    alt={menu.alt}
-                                >
-                                </Image>
-                                <span className="hidden lg:block text-white my-4 cursor-pointer font-bold">
-                                    {menu.title}
-                                </span>
-                            </div>
-                            {menu.items.length > 1 && (
-                                <span
-                                    className={`transition-transform duration-300 cursor-pointer ${
+                            <span className="text-sm">{menu.title}</span>
+                            <IoCaretForward
+                                className={`transition-transform duration-300 ${
                                     openMenus[menu.title] ? "rotate-90" : "rotate-0"
-                                    }`}
-                                >
-                                    <IoCaretForward className="w-3 h-3 text-white" />
-                                </span>
-                            )}
+                                }`}
+                            />
                         </div>
 
                         {openMenus[menu.title] && (
-                            <div className="flex flex-col gap-2 px-4 hover:bg-blue-800 cursor-pointer">
+                            <div className="flex flex-col gap-2 cursor-pointer ">
                                 {menu.items
                                     .filter((item) => {
                                         if (item.label === "Asset Dashboard" && hasParentId === false) return false;
@@ -313,9 +323,13 @@ const Menu = () => {
                                         <Link
                                             href={item.href}
                                             key={item.label}
-                                            className="flex items-center justify-center lg:justify-start rounded text-white font-light py-4"
+                                            className="flex items-center gap-4 p-4 text-white hover:bg-blue-800"
+                                            onClick={handleMenuItemClick}
                                         >
-                                            <span className="hidden lg:block">{item.label}</span>
+                                            <Image src={item.icon} width={20} height={20} alt={item.alt} className="block" />
+                                            {isSidebarOpen && (
+                                                <span className="block text-sm">{item.label}</span>
+                                            )}
                                         </Link>
                                     ))
                                 }

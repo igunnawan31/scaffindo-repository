@@ -12,7 +12,7 @@ const Navbar = () => {
     const router = useRouter();
 
     return (
-        <div className="bg-white shadow-sm fixed w-[90%] lg:w-[80%] z-50">
+        <div className="bg-white shadow-sm w-full z-10">
             <div className="flex justify-end items-center p-5 bg-white shadow-md">
                 <div className="flex items-center gap-4 pr-2">
                     <div className="relative" ref={dropdownRef}>
@@ -22,7 +22,7 @@ const Navbar = () => {
                             <IoCaretDown className="text-blue-900" />
                         </div>
                         {isDropdownMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
+                            <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
                                 <ul className="py-2 text-sm text-black">
                                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Profile</li>
                                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Logout</li>

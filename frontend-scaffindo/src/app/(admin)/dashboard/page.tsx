@@ -1,6 +1,6 @@
 const AdminDashboard = () => {
     return (
-        <div className="px-8 py-24 text-[#202B51] mb-32 w-full">
+        <div className="px-8 text-blue-900 mb-32 w-full">
 
         </div>
     )

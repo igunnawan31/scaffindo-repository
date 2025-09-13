@@ -10,16 +10,16 @@ export default function AdminRootLayout({
 }>) {
     return (
         <div className="h-screen flex font-sans">
-            <div className="w-[10%] lg:w-[20%] bg-blue-900 h-screen flex flex-col">
+            <div className="w-[15%] lg:w-[20%] bg-blue-900 h-screen flex flex-col">
                 <div className="sticky top-0 bg-blue-900 z-10 p-4">
                     <Link href="/dashboard" className="flex items-center justify-center gap-2 xl:justify-start">
                         <div className="flex items-center gap-2 justify-start">
                             <div className="bg-white opacity-40 p-1 hidden lg:block">
                                 <Image 
-                                src="/assets/icons/sucoffindo.png"
-                                width={40} 
-                                height={40} 
-                                alt="Astra International"
+                                    src="/assets/icons/sucoffindo.png"
+                                    width={40} 
+                                    height={40} 
+                                    alt="Logo Sucoffindo"
                                 />
                             </div>
                             <div className="font-sans">
@@ -38,10 +38,12 @@ export default function AdminRootLayout({
                     <Menu/>
                 </div>
             </div>
-            <div className="w-[90%] lg:w-[80%] bg-[#F7F8FA] h-screen overflow-y-auto">
+            <div className="w-[85%] lg:w-[80%] bg-[#F7F8FA] h-screen overflow-y-auto">
                 <Navbar />
-                {children}
-          </div>
+                <div className="px-8 py-10 text-blue-900 w-full">
+                    {children}
+                </div>
+            </div>
         </div>
     )
 }
