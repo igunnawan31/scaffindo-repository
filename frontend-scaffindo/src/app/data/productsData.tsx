@@ -3,6 +3,10 @@ const dummyProducts = [
         id: 1,
         name: "Kaos Printing",
         description: "Kaos dengan desain custom printing.",
+        category: [
+            'Clothing',
+            ''
+        ],
         image: "/assets/images/sucofindo-1.jpg",
     },
     {

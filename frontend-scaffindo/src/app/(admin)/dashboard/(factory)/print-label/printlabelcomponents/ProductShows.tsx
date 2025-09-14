@@ -32,7 +32,7 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                 {displayedProducts.map((product) => (
                     <Link
-                        href='/dashboard'
+                        href={`/dashboard/print-label/${product.id}`}
                         key={product.id}
                         className="w-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
                     >
