@@ -1,28 +1,32 @@
 import React, { useEffect, useState } from 'react'
 import Webcam from "react-webcam";
 
-const ScanProduct = () => {
+interface Props {
+    onProductCode: (code: string) => void;
+}
+
+const ScanProduct:React.FC<Props> = ({onProductCode}) => {
     const [mode, setMode] = useState<"camera" | "upload" | "code">("camera");
     const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
     const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
-    const [productCode, setProductCode] = useState<string | null>(null);
-    
+    const [productCode, setProductCode] = useState<string>("");
+
     useEffect(() => {
         navigator.mediaDevices
-        .enumerateDevices()
-        .then((mediaDevices) => {
-            const videoDevices = mediaDevices.filter(
-            (device) => device.kind === "videoinput"
-            );
-            setDevices(videoDevices);
+            .enumerateDevices()
+            .then((mediaDevices) => {
+                const videoDevices = mediaDevices.filter(
+                    (device) => device.kind === "videoinput"
+                );
+                setDevices(videoDevices);
 
-            if (videoDevices.length > 0 && !selectedDeviceId) {
-            setSelectedDeviceId(videoDevices[0].deviceId);
-            }
-        })
-        .catch((err) => {
-            console.error("Error getting devices:", err);
-        });
+                if (videoDevices.length > 0 && !selectedDeviceId) {
+                    setSelectedDeviceId(videoDevices[0].deviceId);
+                }
+            })
+            .catch((err) => {
+                console.error("Error getting devices:", err);
+            });
     }, [selectedDeviceId]);
 
     return (
@@ -59,14 +63,14 @@ const ScanProduct = () => {
                         <p className="text-gray-500 mb-4">Enter Product Code</p>
                         <input
                             type="text"
-                            value={productCode ?? ""}
+                            value={productCode}
                             onChange={(e) => setProductCode(e.target.value)}
-                            placeholder="e.g. 123456789"
+                            placeholder="e.g. kaosprinting-1"
                             className="w-full max-w-sm px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
                         />
                         <button
-                            onClick={() => alert(`Product Code Entered: ${productCode}`)}
-                            className="mt-4 px-6 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition"
+                            onClick={() => onProductCode(productCode)}
+                            className="mt-4 px-6 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition cursor-pointer"
                         >
                             Submit
                         </button>
