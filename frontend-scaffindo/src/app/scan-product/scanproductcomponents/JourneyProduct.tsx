@@ -54,7 +54,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
         <div className="w-full p-6 bg-gray-200 rounded-lg mb-12">
             <div className="text-center mb-8">
                 <h2 className="text-blue-900 text-2xl font-bold flex items-center justify-center gap-2">
-                    {product.labels[0].id}
+                    {label.id}
                 </h2>
                 <p className="text-gray-500">
                     Dilacak secara transparan menggunakan teknologi blockchain

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import Webcam from "react-webcam";
+import { Html5QrcodeScanner } from 'html5-qrcode'
 
 interface Props {
     onProductCode: (code: string) => void;
@@ -7,50 +7,40 @@ interface Props {
 
 const ScanProduct:React.FC<Props> = ({onProductCode}) => {
     const [mode, setMode] = useState<"camera" | "upload" | "code">("camera");
-    const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
-    const [selectedDeviceId, setSelectedDeviceId] = useState<string | null>(null);
     const [productCode, setProductCode] = useState<string>("");
-
+    
     useEffect(() => {
-        navigator.mediaDevices
-            .enumerateDevices()
-            .then((mediaDevices) => {
-                const videoDevices = mediaDevices.filter(
-                    (device) => device.kind === "videoinput"
-                );
-                setDevices(videoDevices);
+        if (mode !== "camera") return;
 
-                if (videoDevices.length > 0 && !selectedDeviceId) {
-                    setSelectedDeviceId(videoDevices[0].deviceId);
-                }
-            })
-            .catch((err) => {
-                console.error("Error getting devices:", err);
-            });
-    }, [selectedDeviceId]);
+        const scanner = new Html5QrcodeScanner("reader", {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+        }, false);
+
+        scanner.render(
+            (decodedText) => {
+                onProductCode(decodedText);
+                scanner.clear();
+            },
+            (error) => {
+                console.warn("QR error:", error);
+            }
+        );
+
+        return () => {
+            scanner.clear().catch((err) => console.error("Clear failed:", err));
+        };
+    }, [mode, onProductCode]);
 
     return (
         <div className='mt-10 flex flex-col lg:flex-row gap-6'>
             <div className='lg:w-1/2 w-full order-1'>
                 {mode === "camera" ? (
-                    <div className='w-full h-[32rem] bg-black rounded-xl flex items-center justify-center text-white'>
-                        {selectedDeviceId ? (
-                                <Webcam
-                                    audio={false}
-                                    screenshotFormat="image/jpeg"
-                                    videoConstraints={{
-                                    deviceId: selectedDeviceId,
-                                    width: 640,
-                                    height: 480,
-                                    }}
-                                    className="w-full h-full object-cover rounded-xl"
-                                />
-                            ) : (
-                                <p>No camera available</p>
-                        )}
+                    <div className='w-full h-[40rem] bg-black flex items-center justify-center text-white'>
+                        <div id="reader" className="w-full h-[40rem]"></div>
                     </div>
                 ) : mode === "upload" ? (
-                    <div className="w-full h-[32rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400">
+                    <div className="w-full h-[40rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400">
                         <p className="text-gray-500 mb-2">Upload Product Image</p>
                         <input
                             type="file"
@@ -59,7 +49,7 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
                         />
                     </div>
                 ) : (
-                    <div className="w-full h-[32rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
+                    <div className="w-full h-[40rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
                         <p className="text-gray-500 mb-4">Enter Product Code</p>
                         <input
                             type="text"
