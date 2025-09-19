@@ -1,6 +1,6 @@
 "use client";
 
-import DetailedProduct from "../printlabelcomponents/DetailedProduct";
+import DetailedProduct from "../../../admincomponents/DetailedProduct";
 
 export default function ProductDetailPage() {
     return (

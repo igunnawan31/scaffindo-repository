@@ -52,9 +52,9 @@ const distributorMenus = [
         items: [
             {
                 icon: "/assets/icons/notification.svg",
-                alt: "Permintaan Product",
-                label: "Permintaan Product",
-                href: "/dashboard/permintaan-product",
+                alt: "Permintaan Barang",
+                label: "Permintaan Barang",
+                href: "/dashboard/permintaan-barang-distributor",
             },
             {
                 icon: "/assets/icons/pengecekkan-barang.svg",

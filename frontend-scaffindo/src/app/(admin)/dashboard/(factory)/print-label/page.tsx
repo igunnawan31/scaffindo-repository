@@ -1,8 +1,8 @@
 "use client"
 
-import SearchProducts from "./printlabelcomponents/SearchProducts"
-import CategoryProducts from "./printlabelcomponents/CategoryProducts";
-import ProductShows from "./printlabelcomponents/ProductShows";
+import SearchProducts from "../../admincomponents/SearchProducts"
+import CategoryProducts from "../../admincomponents/CategoryProducts";
+import ProductShows from "../../admincomponents/ProductShows";
 import dummyProducts from "@/app/data/productsData";
 import { useState } from 'react';
 

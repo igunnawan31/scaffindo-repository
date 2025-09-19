@@ -1,16 +1,19 @@
 "use client"
 
-import ProductShows from "../../admincomponents/ProductShows";
 import dummyProducts from "@/app/data/productsData";
 import SearchProducts from "../../admincomponents/SearchProducts";
 import CategoryProducts from "../../admincomponents/CategoryProducts";
+import ProductShows from "../../admincomponents/ProductShows";
 import { useState } from "react";
 import InvoiceShowsPage from "../../admincomponents/invoiceShows";
 
-const PengecekkanBarang = () => {
+const PermintaanBarangDistributor = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const handleSearch = (query: string) => {
         setSearchQuery(query);
+    };
+    const handleAcceptInvoice = (invoiceId: string) => {
+        console.log("Invoice diterima:", invoiceId);
     };
     return (
         <>
@@ -22,10 +25,10 @@ const PengecekkanBarang = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage link="pengecekkan-barang"/>
+                <InvoiceShowsPage link="permintaan-barang-distributor" showButton={true} buttonText="Accept" onButtonClick={ handleAcceptInvoice } />
             </div>
         </>
     )
 }
 
-export default PengecekkanBarang
+export default PermintaanBarangDistributor

@@ -1,4 +1,4 @@
-import DetailedInvoices from "../../../admincomponents/DetailedInvoices"
+import DetailedInvoices from "../../../admincomponents/DetailedInvoices";
 
 export default async function InvoiceDetailPage({
     params,

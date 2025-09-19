@@ -7,11 +7,12 @@ import CategoryProducts from "../../admincomponents/CategoryProducts";
 import { useState } from "react";
 import InvoiceShowsPage from "../../admincomponents/invoiceShows";
 
-const PengecekkanBarang = () => {
+const PengirimanBarangDistributor = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const handleSearch = (query: string) => {
         setSearchQuery(query);
     };
+
     return (
         <>
             <div className="flex gap-3">
@@ -22,10 +23,10 @@ const PengecekkanBarang = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage link="pengecekkan-barang"/>
+                <InvoiceShowsPage link="pengiriman-barang-distributor" />
             </div>
         </>
     )
 }
 
-export default PengecekkanBarang
+export default PengirimanBarangDistributor

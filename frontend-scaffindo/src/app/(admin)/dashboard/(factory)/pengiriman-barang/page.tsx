@@ -1,12 +1,11 @@
 "use client"
 
-import ProductShows from "../print-label/printlabelcomponents/ProductShows";
+import ProductShows from "../../admincomponents/ProductShows";
 import dummyProducts from "@/app/data/productsData";
-import SearchProducts from "../print-label/printlabelcomponents/SearchProducts";
-import CategoryProducts from "../print-label/printlabelcomponents/CategoryProducts";
+import SearchProducts from "../../admincomponents/SearchProducts";
+import CategoryProducts from "../../admincomponents/CategoryProducts";
 import { useState } from "react";
-import InvoiceShowsPage from "./pengirimanbarangcomponents/invoiceShows";
-
+import InvoiceShowsPage from "../../admincomponents/invoiceShows";
 
 const PengirimanBarang = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -24,7 +23,7 @@ const PengirimanBarang = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage />
+                <InvoiceShowsPage link="pengiriman-barang" />
             </div>
         </>
     )

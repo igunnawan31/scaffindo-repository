@@ -3,12 +3,37 @@
 import invoiceProducts from "@/app/data/invoiceProducts";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
-import Pagination from "../../print-label/printlabelcomponents/Pagination";
+import React, { useState } from "react";
+import Pagination from "./Pagination";
+import InvoiceActionModal from "./InvoiceActionModal";
 
-const InvoiceShowsPage = () => {
+type InvoiceShowsPageProps = {
+    // roleFilter?: string;
+    // statusFilter?: string;
+    showButton?: boolean;
+    buttonText?: string;
+    link: string;
+    onButtonClick?: (invoiceId: string) => void;
+};
+
+const InvoiceShowsPage:React.FC<InvoiceShowsPageProps> = ({showButton, buttonText, link, onButtonClick}) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const [modalInvoice, setModalInvoice] = useState<string | null>(null);
+
+    const allInvoices = invoiceProducts.flatMap((product) =>
+            product.invoices.map((invoice) => ({
+            ...invoice,
+            product,
+        }))
+    );
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedInvoices = allInvoices.slice(
+        startIndex,
+        startIndex + itemsPerPage
+    );
     
     return (
         <div className="flex flex-col gap-4 w-full">
@@ -16,7 +41,7 @@ const InvoiceShowsPage = () => {
                 product.invoices.map((invoice) => (
                     <Link
                         key={invoice.id}
-                        href={`/dashboard/pengecekkan-barang/${invoice.id}`}
+                        href={`/dashboard/${link}/${invoice.id}`}
                         className="w-full bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition"
                     >
                         <div className="p-4 flex flex-col gap-3">
@@ -65,14 +90,40 @@ const InvoiceShowsPage = () => {
                                 >
                                     Lihat Detail Transaksi
                                 </div>
-                                <button className="px-4 py-2 text-sm font-medium bg-blue-900 text-white rounded-lg hover:bg-blue-800 cursor-pointer">
-                                    Selesai
-                                </button>
+                                {showButton && (
+                                    <button
+                                        className="px-4 py-2 text-sm font-medium bg-blue-900 text-white rounded-lg hover:bg-blue-800 cursor-pointer"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (onButtonClick) {
+                                                setModalInvoice(invoice.id);
+                                            }
+                                        }}
+                                    >
+                                        {buttonText}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </Link>
                 ))
             )}
+
+            <InvoiceActionModal
+                isOpen={!!modalInvoice}
+                title="Konfirmasi Permintaan"
+                message={`Apakah Anda yakin untuk menerima invoice ${modalInvoice}?`}
+                confirmText="Terima"
+                cancelText="Batal"
+                onConfirm={() => {
+                    if (modalInvoice && onButtonClick) {
+                        onButtonClick(modalInvoice);
+                    }
+                    setModalInvoice(null);
+                }}
+                onCancel={() => setModalInvoice(null)}
+            />
+            
             <div className="mt-4 w-full">
                 <Pagination
                     totalItems={invoiceProducts.length}
