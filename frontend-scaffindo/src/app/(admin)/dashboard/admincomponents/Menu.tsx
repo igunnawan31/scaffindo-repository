@@ -72,6 +72,32 @@ const distributorMenus = [
     },
 ];
 
+const agentMenus = [
+    {
+        title: "Menu Agent",
+        items: [
+            {
+                icon: "/assets/icons/notification.svg",
+                alt: "Permintaan Barang",
+                label: "Permintaan Barang",
+                href: "/dashboard/permintaan-barang-agent",
+            },
+            {
+                icon: "/assets/icons/pengecekkan-barang.svg",
+                alt: "Pengecekkan Barang",
+                label: "Pengecekkan Barang",
+                href: "/dashboard/pengecekkan-barang-agent",
+            },
+            {
+                icon: "/assets/icons/delivery-white.svg",
+                alt: "Pengiriman Barang",
+                label: "Pengiriman Barang",
+                href: "/dashboard/pengiriman-barang-agent",
+            },
+        ],
+    },
+];
+
 type UserResponseDTO = {
     userId: string;
     userName: string;
@@ -86,7 +112,7 @@ interface Branch {
     branchId: string;
     branchName: string;
 }
-const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus];
+const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus, ...agentMenus];
 
 
 const Menu = () => {
@@ -289,17 +315,17 @@ const Menu = () => {
                                                 return true;
                                         })
                                         .map((item) => (
-                                        <Link
-                                            href={item.href}
-                                            key={item.label}
-                                            className="flex items-center gap-3 p-4 text-white hover:bg-blue-800 rounded-lg"
-                                            onClick={handleMenuItemClick}
-                                        >
-                                            <Image src={menu.items[0].icon} width={20} height={20} alt={menu.items[0].alt} className="block" />
-                                            {isSidebarOpen && (
-                                                <span className="block text-sm">{menu.items[0].label}</span>
-                                            )}
-                                        </Link>
+                                            <Link
+                                                href={item.href}
+                                                key={item.label}
+                                                className="flex items-center gap-3 p-4 text-white hover:bg-blue-800 rounded-lg"
+                                                onClick={handleMenuItemClick}
+                                            >
+                                                <Image src={item.icon} width={20} height={20} alt={item.alt} className="block" />
+                                                {isSidebarOpen && (
+                                                    <span className="block text-sm">{item.label}</span>
+                                                )}
+                                            </Link>
                                     ))}
                                 </div>
                             )}
