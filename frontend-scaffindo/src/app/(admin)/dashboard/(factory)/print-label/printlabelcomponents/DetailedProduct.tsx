@@ -52,7 +52,6 @@ const DetailedProduct = () => {
                     />
                 </div>
 
-                {/* Right: Product Information */}
                 <div className="mt-6 md:mt-0 md:w-1/2 w-full p-4 bg-gray-200 rounded-lg shadow-md">
                     <h1 className="text-2xl font-bold text-blue-900">{product.name}</h1>
                     <p className="text-gray-700 mt-2">{product.description}</p>

@@ -37,10 +37,36 @@ const factoryMenus = [
                 href: "/dashboard/pengecekkan-barang",
             },
             {
-                icon: "/assets/icons/delivery.svg",
+                icon: "/assets/icons/delivery-white.svg",
                 alt: "Pengiriman Barang",
                 label: "Pengiriman Barang",
                 href: "/dashboard/pengiriman-barang",
+            },
+        ],
+    },
+];
+
+const distributorMenus = [
+    {
+        title: "Menu Distributor",
+        items: [
+            {
+                icon: "/assets/icons/notification.svg",
+                alt: "Permintaan Product",
+                label: "Permintaan Product",
+                href: "/dashboard/permintaan-product",
+            },
+            {
+                icon: "/assets/icons/pengecekkan-barang.svg",
+                alt: "Pengecekkan Barang",
+                label: "Pengecekkan Barang",
+                href: "/dashboard/pengecekkan-barang-distributor",
+            },
+            {
+                icon: "/assets/icons/delivery-white.svg",
+                alt: "Pengiriman Barang",
+                label: "Pengiriman Barang",
+                href: "/dashboard/pengiriman-barang-distributor",
             },
         ],
     },
@@ -60,7 +86,7 @@ interface Branch {
     branchId: string;
     branchName: string;
 }
-const allMenus = [...menuDashboards, ...factoryMenus];
+const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus];
 
 
 const Menu = () => {

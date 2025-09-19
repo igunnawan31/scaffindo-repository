@@ -5,7 +5,7 @@ import dummyProducts from "@/app/data/productsData";
 import SearchProducts from "../print-label/printlabelcomponents/SearchProducts";
 import CategoryProducts from "../print-label/printlabelcomponents/CategoryProducts";
 import { useState } from "react";
-import InvoiceShowsPage from "../pengecekkan-barang/pengecekkanbarangcomponents/invoiceShows";
+import InvoiceShowsPage from "./pengirimanbarangcomponents/invoiceShows";
 
 
 const PengirimanBarang = () => {
