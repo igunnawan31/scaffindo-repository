@@ -23,7 +23,7 @@ const PengecekkanBarangAgent = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage link="pengecekkan-barang-distributor" />
+                <InvoiceShowsPage link="pengecekkan-barang-agent" />
             </div>
         </>
     )

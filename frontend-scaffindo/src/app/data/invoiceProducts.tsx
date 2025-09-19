@@ -7,6 +7,7 @@ const invoiceProducts = [
         description: "Kaos dengan desain custom printing.",
         category: ["Clothing"],
         image: "/assets/images/sucofindo-1.jpg",
+        harga: 100000,
         certification: [
             {
                 certificationId: "CERT-KAOS-001",
@@ -79,6 +80,7 @@ const invoiceProducts = [
         name: "Sticker",
         description: "Sticker vinyl tahan air untuk berbagai kebutuhan.",
         image: "/assets/images/sucofindo-1.jpg",
+        harga: 20000,
         certification: [
             {
                 certificationId: "CERT-STICKER-001",
@@ -121,6 +123,7 @@ const invoiceProducts = [
         name: "Banner",
         description: "Banner promosi dengan bahan berkualitas tinggi.",
         image: "/assets/images/sucofindo-1.jpg",
+        harga: 50000,
         certification: [
             {
                 certificationId: "CERT-BANNER-001",
@@ -170,6 +173,7 @@ const invoiceProducts = [
         name: "Totebag",
         description: "Totebag custom printing ramah lingkungan.",
         image: "/assets/images/sucofindo-1.jpg",
+        harga: 800000,
         certification: [
             {
                 certificationId: "CERT-TOTEBAG-001",

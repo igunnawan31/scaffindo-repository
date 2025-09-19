@@ -7,7 +7,7 @@ import ProductShows from "../../admincomponents/ProductShows";
 import { useState } from "react";
 import InvoiceShowsPage from "../../admincomponents/invoiceShows";
 
-const PermintaanBarangAgent = () => {
+const PermintaanBarangRetail = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const handleSearch = (query: string) => {
         setSearchQuery(query);
@@ -25,10 +25,10 @@ const PermintaanBarangAgent = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage link="permintaan-barang-agent" showButton={true} buttonText="Accept" onButtonClick={ handleAcceptInvoice } />
+                <InvoiceShowsPage link="permintaan-barang-retail" showButton={true} buttonText="Accept" onButtonClick={ handleAcceptInvoice } />
             </div>
         </>
     )
 }
 
-export default PermintaanBarangAgent
+export default PermintaanBarangRetail

@@ -94,9 +94,29 @@ const agentMenus = [
                 label: "Pengiriman Barang",
                 href: "/dashboard/pengiriman-barang-agent",
             },
+            {
+                icon: "/assets/icons/shop.svg",
+                alt: "Penjualan Customer",
+                label: "Penjualan Customer",
+                href: "/dashboard/penjualan-customer",
+            },
         ],
     },
 ];
+
+const userManages = [
+    {
+        title: "Manage User",
+        items: [
+            {
+                icon: "/assets/icons/user.svg",
+                alt: "Manage User",
+                label: "Manage User",
+                href: "/dashboard/manage-user",
+            }
+        ]
+    }
+]
 
 type UserResponseDTO = {
     userId: string;
@@ -112,7 +132,7 @@ interface Branch {
     branchId: string;
     branchName: string;
 }
-const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus, ...agentMenus];
+const allMenus = [...menuDashboards, ...userManages, ...factoryMenus, ...distributorMenus, ...agentMenus];
 
 
 const Menu = () => {

@@ -92,7 +92,7 @@ const InvoiceShowsPage:React.FC<InvoiceShowsPageProps> = ({showButton, buttonTex
                                 </div>
                                 {showButton && (
                                     <button
-                                        className="px-4 py-2 text-sm font-medium bg-blue-900 text-white rounded-lg hover:bg-blue-800 cursor-pointer"
+                                        className="px-4 py-2 text-sm font-medium bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             if (onButtonClick) {

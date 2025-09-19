@@ -89,7 +89,7 @@ const ScanProductAdmin: React.FC<Props> = ({ onProductCode, disabled = false }) 
                         <button
                             onClick={() => onProductCode(productCode)}
                             disabled={disabled}
-                            className="mt-4 px-6 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"
                         >
                             Submit
                         </button>

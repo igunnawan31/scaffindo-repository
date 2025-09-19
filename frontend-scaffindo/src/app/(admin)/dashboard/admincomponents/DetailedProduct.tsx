@@ -106,7 +106,7 @@ const DetailedProduct = () => {
                 </form>
             </div>
             
-            <button className="mt-4 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800">
+            <button className="mt-4 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600">
                 Print Label
             </button>
         </div>

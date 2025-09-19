@@ -57,7 +57,7 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
                     <div className="mt-5">
                         {acceptButton && (
                             <button
-                                className="w-full py-5 bg-blue-900 text-white rounded-lg flex items-center justify-center hover:bg-blue-800 cursor-pointer"
+                                className="w-full py-5 bg-yellow-500 text-white rounded-lg flex items-center justify-center hover:bg-yellow-600 cursor-pointer"
                                 onClick={(e) => {
                                     e.preventDefault();
                                     if (onButtonClick) {
@@ -73,7 +73,7 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
             </div>
             {showButton && (
                 <div
-                    className="w-full py-5 bg-blue-900 text-white rounded-lg flex items-center justify-center hover:bg-blue-800 cursor-pointer"
+                    className="w-full py-5 bg-yellow-500 text-white rounded-lg flex items-center justify-center hover:bg-yellow-600 cursor-pointer"
                     onClick={() => setOpenModal(true)}
                 >
                     <span className="font-semibold">Scan Invoice</span>
@@ -82,7 +82,7 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
 
             {scannedCode && (
                 <div className="mt-3 p-3 border border-green-600 rounded-lg bg-green-50 text-green-700">
-                    ✅ Scanned Code: {scannedCode}
+                    Scanned Code: {scannedCode}
                 </div>
             )}
 
@@ -103,7 +103,7 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
                             {showButton && (
                                 <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-5">
                                     <span>Butuh Pengecekkan</span>
-                                    <button className="block px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800 cursor-pointer">
+                                    <button className="block px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer">
                                         Scan Product
                                     </button>
                                 </div>
