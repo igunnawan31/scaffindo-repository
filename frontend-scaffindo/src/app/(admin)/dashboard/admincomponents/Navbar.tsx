@@ -17,8 +17,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-4 pr-2">
                     <div className="relative" ref={dropdownRef}>
                         <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsDropdownMenuOpen(!isDropdownMenuOpen)}>
-                            <div className="bg-blue-900 rounded-full w-10 h-10 flex items-center justify-center">
-                            </div>
+                            <span className="text-blue-900">Username</span>
                             <IoCaretDown className="text-blue-900" />
                         </div>
                         {isDropdownMenuOpen && (

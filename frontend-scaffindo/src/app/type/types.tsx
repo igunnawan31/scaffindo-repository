@@ -26,3 +26,11 @@ type Product = {
     labels: Label[];
     invoices: Invoice[];
 };
+
+type User = {
+    id: number;
+    name: string;
+    email: string;
+    role: "Factory" | "Distributor";
+    subRole: "Admin" | "User";
+};
