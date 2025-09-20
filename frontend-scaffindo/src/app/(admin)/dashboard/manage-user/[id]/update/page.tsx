@@ -4,9 +4,12 @@ import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
+import SuccessModal from "../../../admincomponents/SuccessPopUpModal"
 
 const UpdateUser = () => {
-    const { id } = useParams()
+    const { id } = useParams();
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -32,6 +35,7 @@ const UpdateUser = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
+        setShowSuccess(true);
         console.log("Updated user:", { id, ...formData })
     }
 
@@ -114,6 +118,12 @@ const UpdateUser = () => {
                     </button>
                 </div>
             </form>
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => setShowSuccess(false)}
+                title="User Berhasil diupdate"
+                message={successMessage}
+            />
         </div>
     )
 }
