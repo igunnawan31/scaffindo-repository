@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -15,17 +14,150 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(cuid())
-  name     String
-  email    String    @unique
-  password String
-  role     Role
+  id         String       @id @default(cuid())
+  name       String
+  email      String       @unique
+  password   String
+  companyId  String?
+  Company    Company?     @relation(fields: [companyId], references: [id])
+  role       Role
+  subRole    SubRole?
+  inChargeOf InvoicePIC[]
+  Tracking   Tracking[]
+}
+
+model InvoicePIC {
+  userId    String
+  invoiceId String
+
+  User    User    @relation(fields: [userId], references: [id])
+  Invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@id([userId, invoiceId])
+}
+
+model Product {
+  id             Int               @id @default(autoincrement())
+  name           String
+  description    String
+  image          Json // Foto Produknya
+  price          String
+  companyId      String
+  Company        Company           @relation(fields: [companyId], references: [id])
+  category       ProductCategory[]
+  certifications Certification[]
+  labels         Label[]
+  Invoice        Invoice[]
+}
+
+model Certification {
+  id        String   @id @default(cuid())
+  name      String
+  expired   DateTime
+  details   String
+  document  Json
+  Product   Product? @relation(fields: [productId], references: [id])
+  productId Int?
+}
+
+model Label {
+  id          String      @id // NAMA-TANGGAL-BATCH-0001 - NAMA-TANGGAL-BATCH-1000
+  qrCode      Json // Gambar QR 
+  status      LabelStatus
+  Product     Product     @relation(fields: [productId], references: [id])
+  productId   Int
+  Invoice     Invoice     @relation(fields: [invoiceId], references: [id])
+  invoiceId   String
+  Penjualan   Penjualan   @relation(fields: [penjualanId], references: [id])
+  penjualanId String
+  trackings   Tracking[]
+}
+
+model Invoice {
+  id        String       @id // INVOICE-001
+  PICs      InvoicePIC[]
+  labels    Label[]
+  qrCode    Json // Gambar QR
+  Product   Product      @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Penjualan {
+  id            String        @id @default(cuid())
+  labels        Label[]
+  totalHarga    String
+  paymentMethod PaymentMethod
+  createdAt     DateTime      @default(now())
+}
+
+model Company {
+  id        String     @id @default(cuid())
+  name      String
+  Users     User[]
+  Products  Product[]
+  Trackings Tracking[]
+}
+
+model Tracking {
+  id          String      @id @default(cuid())
+  userId      String
+  pic         User        @relation(fields: [userId], references: [id])
+  role        Role
+  title       String
+  description String
+  status      TrackStatus
+  createdAt   DateTime    @default(now())
+  Label       Label?      @relation(fields: [labelId], references: [id])
+  labelId     String?
+  companyId   String
+  Company     Company     @relation(fields: [companyId], references: [id])
+}
+
+enum LabelStatus {
+  FACTORY_DONE // produk selesai
+  WAITING_DISTRIBUTOR // menunggu distributor
+  DISTRIBUTOR_ACCEPTED // distributor accept tapi belum diambil
+  DISTRIBUTOR_PICKED_UP // distributor bawa udah diambil
+  ARRIVED_AT_DISTRIBUTOR // barang nyampe milih agent
+  AGENT_ACCEPTED // agent accept belum diambil
+  DISTRIBUTOR_TO_AGENT // barang dikirim ke agent
+  ARRIVED_AT_AGENT // barang sampe di agent milih retail
+  RETAIL_ACCEPTED // retail accept belum diambil
+  AGENT_TO_RETAIL // barang dikirim ke retail
+  ARRIVED_AT_RETAIL // barang sampe di retail
+  PURCHASED_BY_CUSTOMER // barang dibeli customer (scan retail)
+}
+
+enum TrackStatus {
+  FACTORY_DONE
+  ARRIVED_AT_DISTRIBUTOR
+  ARRIVED_AT_AGENT
+  ARRIVED_AT_RETAIL
+  PURCHASED_BY_CUSTOMER
+}
+
+enum ProductCategory {
+  CLOTHING
+  FOOD_BEVERAGE
+  ELECTRONIC
 }
 
 enum Role {
+  SUPERADMIN
   CONSUMER
   FACTORY
   DISTRIBUTOR
   AGENT
   RETAIL
+}
+
+enum SubRole {
+  ADMIN
+  USER
+}
+
+enum PaymentMethod {
+  QRIS
+  TRANSFER
+  CASH
 }

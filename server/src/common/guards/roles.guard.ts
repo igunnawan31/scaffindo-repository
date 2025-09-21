@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { Role } from 'generated/prisma';
+import { Role, SubRole } from '@prisma/client';
 
 // Define the request type with user attached
 interface RequestWithUser extends Request {
@@ -14,6 +14,7 @@ interface RequestWithUser extends Request {
     id: string;
     email: string;
     role: Role;
+    subRole: SubRole;
   };
 }
 
@@ -22,10 +23,10 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(ctx: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
-      ctx.getHandler(),
-      ctx.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<(Role | SubRole)[]>(
+      ROLES_KEY,
+      [ctx.getHandler(), ctx.getClass()],
+    );
 
     if (!requiredRoles) {
       return true; // no roles required
