@@ -73,7 +73,10 @@ export class UsersService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
-        select: { id: true, email: true, name: true, role: true },
+        include: {
+          inChargeOf: { select: { invoiceId: true } },
+          Tracking: { select: { id: true } },
+        },
       });
       if (!user) throw new NotFoundException(`User with id ${id} not found`);
       return plainToInstance(GetUserResponseDto, user);

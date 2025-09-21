@@ -49,7 +49,7 @@ export class UsersController {
   @Roles(Role.SUPERADMIN, SubRole.ADMIN)
   @ApiResponse({
     type: GetAllUserResponseDto,
-    status: 201,
+    status: 200,
   })
   findAll(@Query() filters: UserFilterDto) {
     return this.usersService.findAll(filters);
@@ -58,7 +58,7 @@ export class UsersController {
   @Get(':id')
   @ApiResponse({
     type: GetUserResponseDto,
-    status: 201,
+    status: 200,
   })
   findOne(
     @Param('id') id: string,
@@ -75,7 +75,7 @@ export class UsersController {
   @Patch(':id')
   @ApiResponse({
     type: UpdateUserResponseDto,
-    status: 201,
+    status: 200,
   })
   update(
     @Param('id') id: string,
@@ -96,7 +96,7 @@ export class UsersController {
   @Roles(Role.SUPERADMIN, SubRole.ADMIN)
   @ApiResponse({
     type: DeleteUserResponseDto,
-    status: 201,
+    status: 200,
   })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

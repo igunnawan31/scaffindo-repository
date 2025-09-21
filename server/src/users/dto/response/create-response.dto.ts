@@ -26,4 +26,12 @@ export class CreateUserResponseDto {
   @Expose()
   @ApiResponseProperty()
   subRole: SubRole;
+
+  @Expose()
+  @ApiResponseProperty({})
+  InvoiceIds: string[];
+
+  @Expose()
+  @ApiResponseProperty()
+  trackingIds: string[];
 }
