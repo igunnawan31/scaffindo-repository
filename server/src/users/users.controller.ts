@@ -72,6 +72,22 @@ export class UsersController {
     return result;
   }
 
+  @Patch('forgot/:id')
+  forgotPassword(
+    @Param('id') id: string,
+    @Body() dto: string,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    if (
+      id !== req.user.id &&
+      (req.user.subRole !== SubRole.ADMIN || req.user.role !== Role.SUPERADMIN)
+    )
+      throw new UnauthorizedException(
+        `User role ${req.user.role} not permitted for this action`,
+      );
+    return this.usersService.update(id, dto);
+  }
+
   @Patch(':id')
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({

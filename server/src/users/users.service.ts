@@ -85,6 +85,23 @@ export class UsersService {
     }
   }
 
+  async forgot(id: string, dto: string): Promise<UpdateUserResponseDto> {
+    try {
+      const existingUser = await this.findOne(id);
+      if (!existingUser) throw new NotFoundException(`User ${id} not found`);
+      const hashed = await bcrypt.hash(dto, 10);
+      const result = await this.prisma.user.update({
+        data: {
+          password: hashed,
+        },
+        where: { id },
+      });
+      return plainToInstance(UpdateUserResponseDto, result);
+    } catch (err) {
+      handlePrismaError(err, 'User', id);
+    }
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
