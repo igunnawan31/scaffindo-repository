@@ -41,7 +41,7 @@ model Product {
   name           String
   description    String
   image          Json // Foto Produknya
-  price          String
+  price          Int 
   companyId      String
   Company        Company           @relation(fields: [companyId], references: [id])
   category       ProductCategory[]
@@ -56,7 +56,7 @@ model Certification {
   expired   DateTime
   details   String
   document  Json
-  Product   Product? @relation(fields: [productId], references: [id])
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int?
 }
 
@@ -85,7 +85,7 @@ model Invoice {
 model Penjualan {
   id            String        @id @default(cuid())
   labels        Label[]
-  totalHarga    String
+  totalHarga    Int
   paymentMethod PaymentMethod
   createdAt     DateTime      @default(now())
 }

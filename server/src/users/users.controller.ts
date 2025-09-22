@@ -20,7 +20,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role, SubRole } from '@prisma/client';
 import { UserFilterDto } from './dto/request/user-filter.dto';
 import { UserRequest } from './entities/UserRequest.dto';
-import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { CreateUserResponseDto } from './dto/response/create-response.dto';
 import {
   GetAllUserResponseDto,
@@ -73,6 +73,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
     type: UpdateUserResponseDto,
     status: 200,

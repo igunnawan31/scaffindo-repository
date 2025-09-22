@@ -41,8 +41,15 @@ async function main() {
     data: {
       name: 'Premium Widget',
       description: 'A high-quality widget for all your needs.',
-      image: { url: 'https://example.com/widget.jpg', alt: 'Premium Widget' }, // Example JSON structure
-      price: '99900',
+      image: [
+        {
+          path: 'uploads/image/image-1758458687440-234224783.pdf',
+          size: 14068,
+          filename: 'gambar.png',
+          mimetype: 'image/png',
+        },
+      ], // Example JSON structure
+      price: 99900,
       companyId: company.id,
     },
   });
@@ -52,7 +59,7 @@ async function main() {
   const penjualan = await prisma.penjualan.create({
     data: {
       id: 'sale_' + uuidv4().substring(0, 8),
-      totalHarga: '99900',
+      totalHarga: 99900,
       paymentMethod: 'QRIS',
     },
   });
