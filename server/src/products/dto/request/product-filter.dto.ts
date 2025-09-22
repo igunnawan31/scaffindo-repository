@@ -1,25 +1,25 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsArray, IsOptional, IsString, IsInt } from 'class-validator';
 
 export class productFilterDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   searchTerm?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsInt()
   @IsOptional()
   @Type(() => Number)
   minPrice?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
   @IsOptional()
   companyId?: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsArray()
   @IsOptional()
   @IsString({ each: true })
@@ -31,13 +31,13 @@ export class productFilterDto {
   })
   categories?: string[];
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsInt()
   @IsOptional()
   @Type(() => Number)
   page?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsInt()
   @IsOptional()
   @Type(() => Number)

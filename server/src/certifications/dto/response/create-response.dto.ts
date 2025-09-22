@@ -1,6 +1,6 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { FileMetaData, FileMetaDataResponse } from 'src/types/FileMeta.dto';
+import { FileMetaDataResponse } from 'src/types/FileMeta.dto';
 
 export class CreateCertificationResponseDto {
   @ApiResponseProperty()
