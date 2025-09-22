@@ -27,7 +27,7 @@ export class CreateProductResponseDto {
   @Expose()
   categories: string[];
 
-  @ApiResponseProperty({ type: [GetCertificationResponseDto] })
+  @ApiResponseProperty({ type: [String] })
   @Expose()
   certifications: GetCertificationResponseDto[];
 

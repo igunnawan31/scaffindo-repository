@@ -11,6 +11,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { TrackingsModule } from './trackings/trackings.module';
 import { AuthModule } from './auth/auth.module';
 import { FilesModule } from './files/files.module';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { FilesModule } from './files/files.module';
     TrackingsModule,
     AuthModule,
     FilesModule,
+    CompaniesModule,
   ],
   controllers: [AppController],
   providers: [
