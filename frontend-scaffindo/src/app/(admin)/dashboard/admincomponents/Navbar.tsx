@@ -5,11 +5,20 @@ import { IoCaretDown } from "react-icons/io5"
 import { useState } from "react";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
     const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
     const dropdownRef = useRef(null);
     const router = useRouter();
+
+    const handleLogout = () => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        
+        router.push("/sign-in");
+        toast.success("Logout berhasil");
+    };
 
     return (
         <div className="bg-white shadow-sm w-full z-10">
@@ -24,7 +33,7 @@ const Navbar = () => {
                             <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg z-10">
                                 <ul className="py-2 text-sm text-black">
                                     <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Profile</li>
-                                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Logout</li>
+                                    <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleLogout}>Logout</li>
                                 </ul>
                             </div>
                         )}
