@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { CertificationsService } from './certifications.service';
 import { CreateCertificationDto } from './dto/request/create-certification.dto';
@@ -22,13 +23,28 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
+import {
+  ApiBearerAuth,
+  ApiQuery,
+  ApiResponse,
+  ApiResponseProperty,
+} from '@nestjs/swagger';
+import { CreateCertificationResponseDto } from './dto/response/create-response.dto';
+import {
+  GetAllCertificationResponseDto,
+  GetCertificationResponseDto,
+} from './dto/response/read-response.dto';
+import { UpdateCertificationResponseDto } from './dto/response/update-response.dto';
+import { DeleteCertificationResponseDto } from './dto/response/delete-response.dto';
 
 @Controller('certifications')
+@ApiBearerAuth('access-token')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class CertificationsController {
   constructor(private readonly certificationsService: CertificationsService) {}
 
   @Post()
+  @ApiResponse({ type: CreateCertificationResponseDto })
   @Roles(Role.SUPERADMIN)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'certificationDocs', maxCount: 5 }], {
@@ -53,32 +69,93 @@ export class CertificationsController {
       }),
     }),
   )
-  create(@Body() createCertificationDto: CreateCertificationDto) {
-    return this.certificationsService.create(createCertificationDto);
+  create(
+    @Body() createCertificationDto: CreateCertificationDto,
+    @UploadedFiles() files: { certificationDocs: Express.Multer.File[] },
+  ) {
+    const certificateMeta =
+      files.certificationDocs?.map((file) => ({
+        filename: file.originalname,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+      })) ?? [];
+    return this.certificationsService.create(createCertificationDto, {
+      certificateMeta: certificateMeta,
+    });
   }
 
   @Get()
+  @ApiResponseProperty({ type: GetAllCertificationResponseDto })
   findAll(@Query() filters: CertificationFilterDto) {
     return this.certificationsService.findAll(filters);
   }
 
   @Get(':id')
+  @ApiResponseProperty({ type: GetCertificationResponseDto })
   findOne(@Param('id') id: string) {
-    return this.certificationsService.findOne(+id);
+    return this.certificationsService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(Role.SUPERADMIN)
+  @ApiResponseProperty({ type: UpdateCertificationResponseDto })
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'certificationDocs', maxCount: 5 }], {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const folder = './uploads/certificationDocs';
+
+          if (!fs.existsSync(folder)) {
+            fs.mkdirSync(folder, { recursive: true });
+          }
+
+          cb(null, folder);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
+          );
+        },
+      }),
+    }),
+  )
+  @ApiQuery({
+    name: 'replaceCerts',
+    required: false,
+    type: Boolean,
+    description:
+      'If true, replaces all existing certifications. If false or omitted, appends to existing.',
+    example: false,
+  })
   update(
     @Param('id') id: string,
     @Body() updateCertificationDto: UpdateCertificationDto,
+    @UploadedFiles() files?: { certificationDocs: Express.Multer.File[] },
+    @Query('replaceCerts') replaceCerts?: string,
   ) {
-    return this.certificationsService.update(+id, updateCertificationDto);
+    const certificateMeta =
+      files.certificationDocs?.map((file) => ({
+        filename: file.originalname,
+        path: file.path,
+        mimetype: file.mimetype,
+        size: file.size,
+      })) ?? [];
+    return this.certificationsService.update(
+      id,
+      updateCertificationDto,
+      { certificationMeta: certificateMeta },
+      { replaceCerts: replaceCerts === 'true' },
+    );
   }
 
   @Delete(':id')
   @Roles(Role.SUPERADMIN)
+  @ApiResponseProperty({ type: DeleteCertificationResponseDto })
   remove(@Param('id') id: string) {
-    return this.certificationsService.remove(+id);
+    return this.certificationsService.remove(id);
   }
 }

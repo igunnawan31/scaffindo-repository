@@ -150,121 +150,129 @@ export class ProductsService {
   }
 
   async findAll(filters: productFilterDto): Promise<GetAllProductResponseDto> {
-    const {
-      searchTerm,
-      minPrice,
-      companyId,
-      categories,
-      page = 1,
-      limit = 10,
-    } = filters;
-    const skip = (page - 1) * limit;
-
-    const where: Prisma.ProductWhereInput = {};
-
-    if (searchTerm) {
-      where.OR = [
-        { name: { contains: searchTerm, mode: 'insensitive' } },
-        { description: { contains: searchTerm, mode: 'insensitive' } },
-      ];
-    }
-
-    if (minPrice !== undefined) {
-      where.price = { gte: minPrice };
-    }
-
-    if (companyId) {
-      where.companyId = companyId;
-    }
-
-    if (categories && categories.length > 0) {
-      // Validate and cast to enum
-      const validCategories = Object.values(ProductCategory);
-      const filtered = categories.filter((cat) =>
-        validCategories.includes(cat as ProductCategory),
-      );
-
-      if (filtered.length > 0) {
-        where.category = { hasSome: filtered as ProductCategory[] };
-      }
-    }
-
-    let products: Prisma.ProductGetPayload<{
-        include: {
-          labels: { select: { id: true } };
-          certifications: { select: { id: true } };
-          Invoice: { select: { id: true } };
-        };
-      }>[],
-      total: number;
     try {
-      [products, total] = await Promise.all([
-        this.prisma.product.findMany({
-          where,
-          skip,
-          take: limit,
+      const {
+        searchTerm,
+        minPrice,
+        companyId,
+        categories,
+        page = 1,
+        limit = 10,
+      } = filters;
+      const skip = (page - 1) * limit;
+
+      const where: Prisma.ProductWhereInput = {};
+
+      if (searchTerm) {
+        where.OR = [
+          { name: { contains: searchTerm, mode: 'insensitive' } },
+          { description: { contains: searchTerm, mode: 'insensitive' } },
+        ];
+      }
+
+      if (minPrice !== undefined) {
+        where.price = { gte: minPrice };
+      }
+
+      if (companyId) {
+        where.companyId = companyId;
+      }
+
+      if (categories && categories.length > 0) {
+        // Validate and cast to enum
+        const validCategories = Object.values(ProductCategory);
+        const filtered = categories.filter((cat) =>
+          validCategories.includes(cat as ProductCategory),
+        );
+
+        if (filtered.length > 0) {
+          where.category = { hasSome: filtered as ProductCategory[] };
+        }
+      }
+
+      let products: Prisma.ProductGetPayload<{
           include: {
-            certifications: { select: { id: true } },
-            labels: { select: { id: true } },
-            Invoice: { select: { id: true } },
-          },
-          orderBy: { id: 'desc' },
-        }),
-        this.prisma.product.count({ where }),
-      ]);
-    } catch (error) {
-      handlePrismaError(error);
+            labels: { select: { id: true } };
+            certifications: { select: { id: true } };
+            Invoice: { select: { id: true } };
+          };
+        }>[],
+        total: number;
+      try {
+        [products, total] = await Promise.all([
+          this.prisma.product.findMany({
+            where,
+            skip,
+            take: limit,
+            include: {
+              certifications: { select: { id: true } },
+              labels: { select: { id: true } },
+              Invoice: { select: { id: true } },
+            },
+            orderBy: { id: 'desc' },
+          }),
+          this.prisma.product.count({ where }),
+        ]);
+      } catch (error) {
+        handlePrismaError(error);
+      }
+
+      const meta: meta = {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      };
+
+      return plainToInstance(GetAllProductResponseDto, {
+        data: products.map((p) =>
+          plainToInstance(GetProductResponseDto, {
+            ...p,
+            labels: p.labels.map((l) => l.id),
+            certifications: p.certifications.map((c) => c.id),
+            Invoice: p.Invoice.map((i) => i.id),
+          }),
+        ),
+        meta,
+      });
+    } catch (err) {
+      handlePrismaError(err, 'Product');
     }
-
-    const meta: meta = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    };
-
-    return plainToInstance(GetAllProductResponseDto, {
-      data: products.map((p) =>
-        plainToInstance(GetProductResponseDto, {
-          ...p,
-          labels: p.labels.map((l) => l.id),
-          certifications: p.certifications.map((c) => c.id),
-          Invoice: p.Invoice.map((i) => i.id),
-        }),
-      ),
-      meta,
-    });
   }
 
   // =============================
   // FIND ONE
   // =============================
   async findOne(id: number): Promise<GetProductResponseDto> {
-    let product: Prisma.ProductGetPayload<{
-      include: {
-        labels: true;
-        certifications: true;
-        Invoice: true;
-      };
-    }> | null;
     try {
-      product = await this.prisma.product.findUnique({
-        where: { id },
+      let product: Prisma.ProductGetPayload<{
         include: {
-          labels: true,
-          certifications: true,
-          Invoice: true,
-        },
-      });
-    } catch (error) {
-      handlePrismaError(error);
-    }
+          labels: true;
+          certifications: true;
+          Invoice: true;
+        };
+      }> | null;
+      try {
+        product = await this.prisma.product.findUnique({
+          where: { id },
+          include: {
+            labels: true,
+            certifications: true,
+            Invoice: true,
+          },
+        });
+      } catch (error) {
+        handlePrismaError(error);
+      }
 
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
+      if (!product) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
 
-    return plainToInstance(GetProductResponseDto, product);
+      return plainToInstance(GetProductResponseDto, product);
+    } catch (err) {
+      handlePrismaError(err, 'Product', id);
+    }
   }
 
   // =============================
@@ -464,7 +472,7 @@ export class ProductsService {
         );
       }
 
-      handlePrismaError(err, 'Product');
+      handlePrismaError(err, 'Product', id);
     }
   }
 
@@ -494,7 +502,7 @@ export class ProductsService {
         ),
       });
     } catch (error) {
-      handlePrismaError(error, 'Room', id);
+      handlePrismaError(error, 'Product', id);
     }
   }
 }

@@ -4,8 +4,20 @@ import { ValidationPipe } from '@nestjs/common';
 import { LoggerService } from './logger/logger.service';
 import { AllExceptionsFilter } from './all-exceptions.filter';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as path from 'path';
+import * as fs from 'fs';
 
 async function bootstrap() {
+  const uploadDirs = [
+    path.join(__dirname, '..', 'uploads', 'reservationLetters'),
+    path.join(__dirname, '..', 'uploads', 'proposalLetters'),
+  ];
+  uploadDirs.forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
