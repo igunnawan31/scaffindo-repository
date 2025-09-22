@@ -1,14 +1,38 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/app/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { Toaster, toast } from "react-hot-toast";
 
 const CardLogin = () => {
+    const {login, loading, error} = useAuth();
+    const [form, setForm] = useState({
+        email: "",
+        password: ""
+    });
+    const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
-    const handleSubmit = () => {
-        alert("Button Login clicked");
-    }
+    
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        console.log("Submitting login", form);
+        try {
+            const user = await login(form.email, form.password);
+            console.log("Login result", user);
+            if (user) {
+                toast.success("Login Berhasil");
+                router.push("/dashboard");
+            } else {
+                toast.error("Login gagal");
+            }
+        } catch (err) {
+            console.error("Login error", err);
+            toast.error("Login failed");
+        }
+    };
 
     return (
         <div className="w-full mx-10 lg:w-1/4 md:w-1/2 bg-white shadow-lg p-6 border border-gray-200 rounded-lg">
@@ -36,13 +60,11 @@ const CardLogin = () => {
                         <input
                             type="email"
                             id="email"
-                            // value={formData.email}
-                            // onChange={handleChange}
+                            value={form.email}
+                            onChange={(e) => setForm({ ...form, email: e.target.value})}
                             placeholder="Email"
                             className={`w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 `}
-                            // ${errors.email ? 'focus:ring-red-400 border border-red-400' : 'focus:ring-red-400'} error
                         />
-                        {/* {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>} */}
                     </div>
 
                     <div className="relative">
@@ -50,11 +72,10 @@ const CardLogin = () => {
                         <input
                             type={showPassword ? 'text' : 'password'}
                             id="password"
-                            // value={formData.password}
-                            // onChange={handleChange}
+                            value={form.password}
+                            onChange={(e) => setForm({ ...form, password: e.target.value})}
                             placeholder="Password"
                             className={`w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2`}
-                            // ${errors.password ? 'focus:ring-red-400 border border-red-400' : 'focus:ring-red-400'} error
                         />
                         <span
                             onClick={() => setShowPassword(!showPassword)}
@@ -79,7 +100,6 @@ const CardLogin = () => {
                                 />
                             }
                         </span>
-                        {/* {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>} */}
                     </div>
 
                     <div className='flex justify-center mt-5'>
@@ -88,10 +108,14 @@ const CardLogin = () => {
                         </a>
                     </div>
                     <div className="flex justify-center mt-5">
-                        <button type="submit" className="w-2/6 py-3 rounded-full bg-blue-900 border-2 border-blue-900 text-white font-semibold hover:bg-white hover:text-blue-900 hover:border-blue-900 transition cursor-pointer">
-                            Login
+                        <button 
+                            type="submit"
+                            disabled={loading} 
+                            className={`w-2/6 py-3 rounded-full bg-blue-900 border-2 border-blue-900 text-white font-semibold hover:bg-white hover:text-blue-900 hover:border-blue-900 transition cursor-pointer ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            {loading ? "Loading..." : "Login"}
                         </button>
                     </div>
+                    {error && <p className="text-red-500">{error}</p>}
                 </form>
             </div>
         </div>

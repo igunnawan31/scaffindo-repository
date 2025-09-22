@@ -5,6 +5,7 @@ import Link from "next/link";
 // import { IoCaretForward } from "react-icons/io5";
 import { IoCaretForward, IoCaretDown, IoMenu, IoClose } from "react-icons/io5";
 import Image from "next/image";
+import { useAuth } from "@/app/hooks/useAuth";
 
 const menuDashboards = [
     {
@@ -118,73 +119,45 @@ const userManages = [
     }
 ]
 
-type UserResponseDTO = {
-    userId: string;
-    userName: string;
-    userEmail: string;
-    userBranch: string;
-    userPhone: string;
-    userRole: string;
-    userSubRole: string;
-};
-
-interface Branch {
-    branchId: string;
-    branchName: string;
-}
 const allMenus = [...menuDashboards, ...userManages, ...factoryMenus, ...distributorMenus, ...agentMenus];
 
 
 const Menu = () => {
-    const [users, setUser] = useState<UserResponseDTO | null>(null);
     const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>(
         Object.fromEntries(allMenus.map((menu) => [menu.title, true]))
     );
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [hasParentId, setHasParentId] = useState<boolean | null>(null);
-    const [branches, setBranches] = useState<Branch[]>([]);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
+    const [menusToRender, setMenusToRender] = useState<any[]>([]);
+    
     useEffect(() => {
-        const fetchUserAndBranchData = async () => {
-        try {
-            const userId = localStorage.getItem("userId");
-            if (!userId) {
-                setError("No user ID found. Please log in.");
-                setLoading(false);
-                return;
-            }
+        const userJson = localStorage.getItem("user");
+        if (!userJson) return;
 
-            const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/by-id/${userId}`);
-            if (!userResponse.ok) throw new Error("Failed to fetch user data");
-            const userData = await userResponse.json();
-            setUser(userData);
+        const user = JSON.parse(userJson);
+        const menus: any[] = [...menuDashboards];
 
-            if (userData.userBranch) {
-            const branchResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/branch/by-id/${userData.userBranch}`);
-            if (!branchResponse.ok) throw new Error("Failed to fetch branch data");
-            
-            const branchData = await branchResponse.json();
-            setHasParentId(branchData.parentId !== null && branchData.parentId !== undefined);
-            }
-
-            const branchesResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/branch/index`);
-            if (branchesResponse.ok) {
-            const branchesData = await branchesResponse.json();
-            setBranches(branchesData);
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "An unknown error occurred");
-            setHasParentId(true);
-        } finally {
-            setLoading(false);
+        if (user.role === "SUPERADMIN") {
+            menus.push(...userManages);
         }
-        };
+        if (user.role === "FACTORY") {
+            menus.push(...factoryMenus);
+            if (user.subRole === "ADMIN") 
+                menus.push(...userManages);
+        }
+        if (user.role === "DISTRIBUTOR") 
+            menus.push(...distributorMenus
+        );
+        if (user.role === "AGENT") 
+            menus.push(...agentMenus
+        );
 
-        fetchUserAndBranchData();
+        setMenusToRender(menus);
+        setOpenMenus(Object.fromEntries(menus.map((menu) => [menu.title, false])));
     }, []);
 
     useEffect(() => {
@@ -254,7 +227,7 @@ const Menu = () => {
             
             {/* Icons Menu */}
             <div className="flex flex-col items-center justify-center gap-4 lg:hidden">
-                {allMenus.map((menu) => menu.items.length === 1 ? (
+                {menusToRender.map((menu) => menu.items.length === 1 ? (
                     <Link
                         href={menu.items[0].href}
                         key={menu.items[0].label}
@@ -264,7 +237,7 @@ const Menu = () => {
                     </Link>
                 ) : (
                     <div key={menu.title} className="flex flex-col items-center gap-4">
-                        {menu.items.map((item) => (
+                        {menu.items.map((item:any) => (
                             <Link
                                 href={item.href}
                                 key={item.label}
@@ -301,7 +274,7 @@ const Menu = () => {
                     </button>
                 </div>
                 <div className="flex flex-col gap-3 text-lg mt-4">
-                    {allMenus.map((menu) => menu.items.length === 1 ? (
+                    {menusToRender.map((menu) => menu.items.length === 1 ? (
                         <Link
                             href={menu.items[0].href}
                             key={menu.items[0].label}
@@ -328,13 +301,13 @@ const Menu = () => {
                             {openMenus[menu.title] && (
                                 <div className="flex flex-col gap-2 mt-3">
                                     {menu.items
-                                        .filter((item) => {
+                                        .filter((item:any) => {
                                             if (item.label === "Asset Dashboard" && hasParentId === false) {
                                                 return false;
                                             }
                                                 return true;
                                         })
-                                        .map((item) => (
+                                        .map((item:any) => (
                                             <Link
                                                 href={item.href}
                                                 key={item.label}
@@ -356,7 +329,7 @@ const Menu = () => {
         
             {/* Web Menu */}
             <div className={`hidden lg:block lg:bg-transparent`}>
-                {allMenus.map((menu) => menu.items.length === 1 ? (
+                {menusToRender.map((menu) => menu.items.length === 1 ? (
                     <Link
                         href={menu.items[0].href}
                         key={menu.items[0].label}
@@ -387,11 +360,11 @@ const Menu = () => {
                         {openMenus[menu.title] && (
                             <div className="flex flex-col gap-2 cursor-pointer ">
                                 {menu.items
-                                    .filter((item) => {
+                                    .filter((item:any) => {
                                         if (item.label === "Asset Dashboard" && hasParentId === false) return false;
                                         return true;
                                     })
-                                    .map((item) => (
+                                    .map((item:any) => (
                                         <Link
                                             href={item.href}
                                             key={item.label}
