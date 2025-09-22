@@ -73,6 +73,7 @@ export class UsersController {
   }
 
   @Patch('forgot/:id')
+  @ApiResponse({ type: String, status: 200 })
   forgotPassword(
     @Param('id') id: string,
     @Body() dto: string,
@@ -85,7 +86,7 @@ export class UsersController {
       throw new UnauthorizedException(
         `User role ${req.user.role} not permitted for this action`,
       );
-    return this.usersService.update(id, dto);
+    return this.usersService.forgot(id, dto);
   }
 
   @Patch(':id')
