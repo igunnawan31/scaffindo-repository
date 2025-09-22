@@ -10,6 +10,7 @@ import { LabelsModule } from './labels/labels.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { TrackingsModule } from './trackings/trackings.module';
 import { AuthModule } from './auth/auth.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
     InvoicesModule,
     TrackingsModule,
     AuthModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
