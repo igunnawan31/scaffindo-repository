@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsArray, IsOptional, IsString, IsInt } from 'class-validator';
+import { sortOrder } from 'src/types/sortBy.dto';
 
 export class productFilterDto {
   @ApiPropertyOptional()
@@ -42,4 +43,17 @@ export class productFilterDto {
   @IsOptional()
   @Type(() => Number)
   limit?: number;
+
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional()
+  sortBy?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional({
+    enum: sortOrder,
+    enumName: 'SortOrder',
+    description: 'Sort order: asc or desc',
+  })
+  sortOrder?: 'asc' | 'desc';
 }

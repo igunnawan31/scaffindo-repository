@@ -158,6 +158,8 @@ export class ProductsService {
         categories,
         page = 1,
         limit = 10,
+        sortBy,
+        sortOrder,
       } = filters;
       const skip = (page - 1) * limit;
 
@@ -189,34 +191,30 @@ export class ProductsService {
           where.category = { hasSome: filtered as ProductCategory[] };
         }
       }
-
-      let products: Prisma.ProductGetPayload<{
-          include: {
-            labels: { select: { id: true } };
-            certifications: { select: { id: true } };
-            Invoice: { select: { id: true } };
-          };
-        }>[],
-        total: number;
-      try {
-        [products, total] = await Promise.all([
-          this.prisma.product.findMany({
-            where,
-            skip,
-            take: limit,
-            include: {
-              certifications: { select: { id: true } },
-              labels: { select: { id: true } },
-              Invoice: { select: { id: true } },
-            },
-            orderBy: { id: 'desc' },
-          }),
-          this.prisma.product.count({ where }),
-        ]);
-      } catch (error) {
-        handlePrismaError(error);
+      const orderBy: Prisma.ProductOrderByWithRelationInput = {};
+      if (
+        sortBy &&
+        ['name', 'productId', 'price', 'companyId'].includes(sortBy)
+      ) {
+        orderBy[sortBy] = sortOrder === 'desc' ? 'desc' : 'asc';
+      } else {
+        orderBy.name = 'asc';
       }
 
+      const [products, total] = await Promise.all([
+        this.prisma.product.findMany({
+          where,
+          skip,
+          take: limit,
+          include: {
+            certifications: { select: { id: true } },
+            labels: { select: { id: true } },
+            Invoice: { select: { id: true } },
+          },
+          orderBy,
+        }),
+        this.prisma.product.count({ where }),
+      ]);
       const meta: meta = {
         page,
         limit,
@@ -245,25 +243,14 @@ export class ProductsService {
   // =============================
   async findOne(id: number): Promise<GetProductResponseDto> {
     try {
-      let product: Prisma.ProductGetPayload<{
+      const product = await this.prisma.product.findUnique({
+        where: { id },
         include: {
-          labels: true;
-          certifications: true;
-          Invoice: true;
-        };
-      }> | null;
-      try {
-        product = await this.prisma.product.findUnique({
-          where: { id },
-          include: {
-            labels: true,
-            certifications: true,
-            Invoice: true,
-          },
-        });
-      } catch (error) {
-        handlePrismaError(error);
-      }
+          labels: true,
+          certifications: true,
+          Invoice: true,
+        },
+      });
 
       if (!product) {
         throw new NotFoundException(`Product with ID ${id} not found`);
@@ -306,7 +293,6 @@ export class ProductsService {
 
       // 2. Fetch existing product (for file cleanup)
       const existingProduct = await this.findOne(id);
-      console.log(existingProduct);
       if (!existingProduct) {
         throw new NotFoundException(`Product with ID ${id} not found`);
       }
@@ -380,7 +366,7 @@ export class ProductsService {
                     const docsToDelete = Array.isArray(cert.document)
                       ? (cert.document as FileMetaData[])
                       : [cert.document as FileMetaData];
-                    await deleteFileArray(docsToDelete, 'certification');
+                    await deleteFileArray(docsToDelete, 'certificationDoc');
                   }
                 }),
               );
@@ -479,7 +465,7 @@ export class ProductsService {
   async remove(id: number): Promise<DeleteProductResponseDto> {
     try {
       const product = await this.findOne(id);
-      if (!product) throw new NotFoundException(`Room ${id} not found`);
+      if (!product) throw new NotFoundException(`Product ${id} not found`);
       // Delete all associated files with proper typing
       await Promise.all([deleteFileArray(product.image, 'image')]);
       await Promise.all([

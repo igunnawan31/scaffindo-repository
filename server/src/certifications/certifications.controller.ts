@@ -23,12 +23,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
-import {
-  ApiBearerAuth,
-  ApiQuery,
-  ApiResponse,
-  ApiResponseProperty,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CreateCertificationResponseDto } from './dto/response/create-response.dto';
 import {
   GetAllCertificationResponseDto,
@@ -86,20 +81,20 @@ export class CertificationsController {
   }
 
   @Get()
-  @ApiResponseProperty({ type: GetAllCertificationResponseDto })
+  @ApiResponse({ type: GetAllCertificationResponseDto })
   findAll(@Query() filters: CertificationFilterDto) {
     return this.certificationsService.findAll(filters);
   }
 
   @Get(':id')
-  @ApiResponseProperty({ type: GetCertificationResponseDto })
+  @ApiResponse({ type: GetCertificationResponseDto })
   findOne(@Param('id') id: string) {
     return this.certificationsService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(Role.SUPERADMIN)
-  @ApiResponseProperty({ type: UpdateCertificationResponseDto })
+  @ApiResponse({ type: UpdateCertificationResponseDto })
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'certificationDocs', maxCount: 5 }], {
       storage: diskStorage({
@@ -134,8 +129,7 @@ export class CertificationsController {
   update(
     @Param('id') id: string,
     @Body() updateCertificationDto: UpdateCertificationDto,
-    @UploadedFiles() files?: { certificationDocs: Express.Multer.File[] },
-    @Query('replaceCerts') replaceCerts?: string,
+    @UploadedFiles() files: { certificationDocs?: Express.Multer.File[] },
   ) {
     const certificateMeta =
       files.certificationDocs?.map((file) => ({
@@ -144,17 +138,18 @@ export class CertificationsController {
         mimetype: file.mimetype,
         size: file.size,
       })) ?? [];
-    return this.certificationsService.update(
-      id,
-      updateCertificationDto,
-      { certificationMeta: certificateMeta },
-      { replaceCerts: replaceCerts === 'true' },
-    );
+    if (certificateMeta.length > 0) {
+      return this.certificationsService.update(id, updateCertificationDto, {
+        certificateMeta: certificateMeta,
+      });
+    } else {
+      return this.certificationsService.update(id, updateCertificationDto);
+    }
   }
 
   @Delete(':id')
   @Roles(Role.SUPERADMIN)
-  @ApiResponseProperty({ type: DeleteCertificationResponseDto })
+  @ApiResponse({ type: DeleteCertificationResponseDto })
   remove(@Param('id') id: string) {
     return this.certificationsService.remove(id);
   }
