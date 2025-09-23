@@ -101,13 +101,15 @@ export class UsersController {
     @Req() req: Request & { user: UserRequest },
   ) {
     if (
-      id !== req.user.id &&
-      (req.user.subRole !== SubRole.ADMIN || req.user.role !== Role.SUPERADMIN)
-    )
+      req.user.subRole === SubRole.ADMIN ||
+      req.user.role === Role.SUPERADMIN
+    ) {
+      return this.usersService.update(id, updateUserDto);
+    } else {
       throw new UnauthorizedException(
         `User role ${req.user.role} not permitted for this action`,
       );
-    return this.usersService.update(id, updateUserDto);
+    }
   }
 
   @Delete(':id')
