@@ -27,10 +27,20 @@ type Product = {
     invoices: Invoice[];
 };
 
-type User = {
-    id: number;
+export type User = {
+    id: string;
     name: string;
     email: string;
-    role: "Factory" | "Distributor";
-    subRole: "Admin" | "User";
+    role: string;
+    subRole: string;
 };
+
+export type UserResponse = {
+    data: User[];
+    meta: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    };
+}

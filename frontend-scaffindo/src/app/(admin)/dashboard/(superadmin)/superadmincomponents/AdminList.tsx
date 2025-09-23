@@ -2,23 +2,34 @@
 
 import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
-import SuccessModal from "./SuccessPopUpModal"
-import CategoryProducts from "./CategoryProducts"
-import SearchProducts from "./SearchProducts"
-import Pagination from "./Pagination"
+import SuccessModal from "../../admincomponents/SuccessPopUpModal"
+import CategoryProducts from "../../admincomponents/CategoryProducts"
+import SearchProducts from "../../admincomponents/SearchProducts"
+import Pagination from "../../admincomponents/Pagination"
 import { User } from "@/app/type/types"
+import { useUser } from "@/app/hooks/useUser"
 
-const UserLists = () => {
-    const [users, setUsers] = useState<User[]>(UserDummy)
+const AdminList = () => {
+    const { users ,fetchUsersAdmin, loading } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const displayedUsers = users.slice(
+    useEffect(() => {
+        fetchUsersAdmin();
+    }, [fetchUsersAdmin]);
+
+    const filteredUsers = users.filter(
+        (user: User) =>
+            user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const displayedUsers = filteredUsers.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
@@ -28,6 +39,7 @@ const UserLists = () => {
     }
     const handleSearch = (query: string) => {
         setSearchQuery(query);
+        setCurrentPage(1);
     };
 
     return (
@@ -48,9 +60,9 @@ const UserLists = () => {
                     Create New User
                 </Link>
             </div>
-            {users.length > 0 ? (
+            {displayedUsers.length > 0 ? (
                 <div className="space-y-3 mt-3">
-                    {users.map((user) =>
+                    {displayedUsers.map((user) =>
                         <div
                             key={user.id}
                             className="flex justify-between items-center rounded-lg p-3 shadow-md gap-3"
@@ -64,7 +76,7 @@ const UserLists = () => {
                             </div>
                             <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-2">
                                 <Link
-                                    href={`/dashboard/manage-user/${user.id}/update`}
+                                    href={`/dashboard/list-admin/${user.id}/update`}
                                     className="flex items-center gap-2 p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer"
                                 >
                                     <IoCreateOutline size={18} />
@@ -90,7 +102,7 @@ const UserLists = () => {
             />
             <div className="mt-4 w-full">
                 <Pagination
-                    totalItems={users.length}
+                    totalItems={filteredUsers.length}
                     itemsPerPage={itemsPerPage}
                     currentPage={currentPage}
                     onPageChange={(page) => setCurrentPage(page)}
@@ -104,4 +116,4 @@ const UserLists = () => {
     )
 }
 
-export default UserLists
+export default AdminList
