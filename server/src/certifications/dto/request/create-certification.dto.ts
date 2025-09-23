@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsDateString,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsDateString, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateCertificationDto {
   @ApiProperty()
@@ -25,7 +19,7 @@ export class CreateCertificationDto {
   details: string;
 
   @IsInt()
-  @IsOptional()
   @Type(() => Number)
-  productId?: number;
+  @IsNotEmpty()
+  productId: number;
 }

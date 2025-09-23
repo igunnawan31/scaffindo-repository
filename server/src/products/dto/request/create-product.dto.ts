@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsString, IsInt, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  IsInt,
+  IsOptional,
+} from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { CertificationDto } from 'src/certifications/dto/request/CertificationProduct.dto';
