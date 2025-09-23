@@ -119,7 +119,39 @@ const userManages = [
     }
 ]
 
-const allMenus = [...menuDashboards, ...userManages, ...factoryMenus, ...distributorMenus, ...agentMenus];
+const superAdminMenus = [
+    {
+        title: "Menu Super Admin",
+        items: [
+            {
+                icon: "/assets/icons/company.svg",
+                alt: "Company Lists",
+                label: "List Company",
+                href: "/dashboard/list-company",
+            },
+            {
+                icon: "/assets/icons/product.svg",
+                alt: "Product Lists",
+                label: "List Product",
+                href: "/dashboard/list-product",
+            },
+            {
+                icon: "/assets/icons/certificate.svg",
+                alt: "Certificate Lists",
+                label: "List Certificate",
+                href: "/dashboard/list-certificate",
+            },
+            {
+                icon: "/assets/icons/user.svg",
+                alt: "Admin Lists",
+                label: "List Admin",
+                href: "/dashboard/list-admin",
+            },
+        ],
+    },
+]
+
+const allMenus = [...menuDashboards, ...userManages, ...factoryMenus, ...distributorMenus, ...agentMenus, ...superAdminMenus];
 
 
 const Menu = () => {
@@ -142,22 +174,26 @@ const Menu = () => {
         const menus: any[] = [...menuDashboards];
 
         if (user.role === "SUPERADMIN") {
-            menus.push(...userManages);
+            menus.push(...superAdminMenus);
         }
         if (user.role === "FACTORY") {
             menus.push(...factoryMenus);
             if (user.subRole === "ADMIN") 
                 menus.push(...userManages);
         }
-        if (user.role === "DISTRIBUTOR") 
-            menus.push(...distributorMenus
-        );
-        if (user.role === "AGENT") 
-            menus.push(...agentMenus
-        );
+        if (user.role === "DISTRIBUTOR") {
+            menus.push(...distributorMenus);
+            if (user.subRole === "ADMIN") 
+                menus.push(...userManages);
+        }
+        if (user.role === "AGENT")  {
+            menus.push(...agentMenus);
+            if (user.subRole === "ADMIN") 
+                menus.push(...userManages);
+        }
 
         setMenusToRender(menus);
-        setOpenMenus(Object.fromEntries(menus.map((menu) => [menu.title, false])));
+        setOpenMenus(Object.fromEntries(menus.map((menu) => [menu.title, true])));
     }, []);
 
     useEffect(() => {
