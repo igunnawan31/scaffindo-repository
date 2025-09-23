@@ -1,10 +1,4 @@
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsNotEmpty,
-  IsString,
-  IsInt,
-} from 'class-validator';
+import { IsArray, IsNotEmpty, IsString, IsInt, IsOptional } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { CertificationDto } from 'src/certifications/dto/request/CertificationProduct.dto';
@@ -30,8 +24,8 @@ export class CreateProductDto {
   companyId: string;
 
   @IsArray()
-  @ArrayNotEmpty()
   @ApiProperty()
+  @IsOptional()
   @IsString({ each: true })
   @Transform(({ value }): string[] => {
     if (typeof value === 'string') {
@@ -39,9 +33,10 @@ export class CreateProductDto {
     }
     return value;
   })
-  categories: string[];
+  categories?: string[];
 
   @IsArray()
+  @IsOptional()
   @ApiProperty({ type: [CertificationDto] })
   @Type(() => CertificationDto)
   @Transform(({ value }): CertificationDto[] => {
@@ -57,5 +52,5 @@ export class CreateProductDto {
     }
     return value;
   })
-  certifications: CertificationDto[];
+  certifications?: CertificationDto[];
 }

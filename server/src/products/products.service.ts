@@ -40,17 +40,19 @@ export class ProductsService {
     // =============================
     // 1. VALIDATE CATEGORIES
     // =============================
-    const validCategories = Object.values(ProductCategory);
-    for (const cat of categories) {
-      if (!validCategories.includes(cat as ProductCategory)) {
-        throw new BadRequestException(`Invalid category: ${cat}`);
+    if (categories && categories.length > 0) {
+      const validCategories = Object.values(ProductCategory);
+      for (const cat of categories) {
+        if (!validCategories.includes(cat as ProductCategory)) {
+          throw new BadRequestException(`Invalid category: ${cat}`);
+        }
       }
     }
 
     // =============================
     // 2. VALIDATE CERTIFICATION ↔ METADATA MATCH
     // =============================
-    if (certifications?.length > 0) {
+    if (certifications && certifications?.length > 0) {
       if (!certificateMeta || certificateMeta.length === 0) {
         throw new BadRequestException(
           'Certificate metadata required when certifications provided.',

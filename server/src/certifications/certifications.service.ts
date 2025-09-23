@@ -31,7 +31,7 @@ export class CertificationsService {
           name: name,
           expired: new Date(expired),
           details: details,
-          productId: productId,
+          productId: productId ?? undefined,
           document: certificateMeta,
         },
       });
