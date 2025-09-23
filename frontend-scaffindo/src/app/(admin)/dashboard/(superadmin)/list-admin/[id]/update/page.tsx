@@ -6,12 +6,14 @@ import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 import { useUser } from "@/app/hooks/useUser"
+import { useRouter } from "next/navigation"
 
 const UpdateAdmin = () => {
     const { id } = useParams<{id: string}>();
     const { user, fetchUserById, updateUser, loading } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -45,6 +47,9 @@ const UpdateAdmin = () => {
             await updateUser(id, formData);
             setSuccessMessage("User berhasil diupdate!");
             setShowSuccess(true);
+            setTimeout(() => {
+                router.push('/dashboard/list-admin');
+            }, 2000)
         } catch (err) {
             console.error("Update gagal:", err);
             setSuccessMessage("Gagal update user");
@@ -127,7 +132,7 @@ const UpdateAdmin = () => {
                     </Link>
                     <button
                         type="submit"
-                        className="p-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600"
+                        className="p-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 cursor-pointer"
                     >
                         Update User
                     </button>

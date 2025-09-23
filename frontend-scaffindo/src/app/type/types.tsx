@@ -44,3 +44,24 @@ export type UserResponse = {
         totalPages: number;
     };
 }
+
+export type Company = {
+    id: string;
+    name: string;
+}
+
+export interface FileMetaDataResponse {
+    fileName: string;
+    url: string;
+    mimeType: string;
+    size: number;
+}
+
+export interface Certificate {
+    id: string;
+    name: string;
+    expired: string;
+    details: string;
+    document: FileMetaDataResponse[];
+    productId: string;
+}

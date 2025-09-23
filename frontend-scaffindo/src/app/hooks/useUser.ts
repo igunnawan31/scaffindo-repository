@@ -22,7 +22,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -63,7 +63,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=FACTORY`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=FACTORY&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -104,7 +104,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=DISTRIBUTOR`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=DISTRIBUTOR&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -145,7 +145,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=AGENT`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=AGENT&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -186,7 +186,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=RETAIL`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?Role=RETAIL&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -281,7 +281,67 @@ export function useUser() {
         } finally {
             setLoading(false);
         }
-    }, [])
+    }, []);
+
+    const createAdmin = useCallback(async (createUserDTO: any) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                console.warn("⚠️ No token found in localStorage");
+                return;
+            }
+
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/users`, createUserDTO,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            return res.data;
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to update user");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const deleteUser = useCallback(async (id: string) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+            
+            if (!token) {
+                setError("No authentication token found");
+                return;
+            }
+
+            const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/users/${id}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            console.log("Delete response:", res.data);
+            setUsers((prev) => prev.filter((u) => u.id !== id));
+
+            return res.data;
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to delete user");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     return { 
         users, 
@@ -296,5 +356,7 @@ export function useUser() {
         clearUsers,
         fetchUserById,
         updateUser,
+        createAdmin,
+        deleteUser
     };
 }

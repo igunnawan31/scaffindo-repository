@@ -8,11 +8,11 @@ import SuccessModal from "../../admincomponents/SuccessPopUpModal"
 import CategoryProducts from "../../admincomponents/CategoryProducts"
 import SearchProducts from "../../admincomponents/SearchProducts"
 import Pagination from "../../admincomponents/Pagination"
-import { User } from "@/app/type/types"
-import { useUser } from "@/app/hooks/useUser"
+import { Company } from "@/app/type/types"
+import { useCompany } from "@/app/hooks/useCompany"
 
-const AdminList = () => {
-    const { users ,fetchUsersAdmin, deleteUser ,loading } = useUser();
+const CompanyList = () => {
+    const { companies, fetchCompanies, deleteCompany } = useCompany();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,28 +20,30 @@ const AdminList = () => {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        fetchUsersAdmin();
-    }, [fetchUsersAdmin]);
+        fetchCompanies();
+    }, [fetchCompanies]);
 
-    const filteredUsers = users.filter(
-        (user: User) =>
-            user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredCompanies = companies.filter(
+        (company: Company) =>
+            company.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const displayedUsers = filteredUsers.slice(
+    console.log(filteredCompanies.length);
+
+    const displayedCompanies = filteredCompanies.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteUser(id);
-            setSuccessMessage("User berhasil dihapus");
+            await deleteCompany(id);
+            setSuccessMessage("Company berhasil dihapus");
             setShowSuccess(true);
-            await fetchUsersAdmin();
+
+            await fetchCompanies();
         } catch (error: any) {
-            setSuccessMessage(error?.response?.data?.message || "Gagal menghapus user");
+            setSuccessMessage(error?.response?.data?.message || "Gagal menghapus company");
             setShowSuccess(true);
         }
     }
@@ -61,36 +63,32 @@ const AdminList = () => {
             </div>
             <div className="flex items-center justify-end mt-3">
                 <Link
-                    href={'/dashboard/list-admin/create'}
+                    href={'/dashboard/list-company/create'}
                     className="w-2/12 flex items-center justify-center gap-2 p-2 bg-blue-900 text-white rounded-lg hover:bg-yellow-600 cursor-pointer text-sm"
                 >
                     < IoAddCircle />
-                    Create New User
+                    Create New Company
                 </Link>
             </div>
-            {displayedUsers.length > 0 ? (
+            {displayedCompanies.length > 0 ? (
                 <div className="space-y-3 mt-3">
-                    {displayedUsers.map((user) =>
+                    {displayedCompanies.map((company) =>
                         <div
-                            key={user.id}
+                            key={company.id}
                             className="flex justify-between items-center rounded-lg p-3 shadow-md gap-3"
                         >
                             <div className="flex justify-center flex-col gap-0 items-start">
-                                <p className="font-medium">{user.name}</p>
-                                <p className="text-sm text-gray-500">{user.email}</p>
-                                <p className="text-xs text-gray-400">
-                                    {user.role} • {user.subRole}
-                                </p>
+                                <p className="font-medium">{company.name}</p>
                             </div>
                             <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-2">
                                 <Link
-                                    href={`/dashboard/list-admin/${user.id}/update`}
+                                    href={`/dashboard/list-company/${company.id}/update`}
                                     className="flex items-center gap-2 p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer"
                                 >
                                     <IoCreateOutline size={18} />
                                 </Link>
                                 <button 
-                                    onClick={() => handleDelete(user.id)}
+                                    onClick={() => handleDelete(company.id)} 
                                     className="flex items-center gap-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                                 >
                                     <IoTrashOutline size={18} />
@@ -110,7 +108,7 @@ const AdminList = () => {
             />
             <div className="mt-4 w-full">
                 <Pagination
-                    totalItems={filteredUsers.length}
+                    totalItems={filteredCompanies.length}
                     itemsPerPage={itemsPerPage}
                     currentPage={currentPage}
                     onPageChange={(page) => setCurrentPage(page)}
@@ -124,4 +122,4 @@ const AdminList = () => {
     )
 }
 
-export default AdminList
+export default CompanyList
