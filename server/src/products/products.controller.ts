@@ -47,16 +47,17 @@ export class ProductsController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'certificationDocs', maxCount: 5 },
+        // { name: 'certificationDocs', maxCount: 5 },
         { name: 'image', maxCount: 3 },
       ],
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
-            const folder =
-              file.fieldname === 'certificationDocs'
-                ? './uploads/certificationDocs'
-                : './uploads/image';
+            // const folder =
+            //   file.fieldname === 'certificationDocs'
+            //     ? './uploads/certificationDocs'
+            //     : './uploads/image';
+            const folder = './uploads/image';
 
             if (!fs.existsSync(folder)) {
               fs.mkdirSync(folder, { recursive: true });
@@ -80,17 +81,17 @@ export class ProductsController {
     @Body() dto: CreateProductDto,
     @UploadedFiles()
     files: {
-      certificationDocs?: Express.Multer.File[];
+      // certificationDocs?: Express.Multer.File[];
       image?: Express.Multer.File[];
     },
   ) {
-    const certificateMeta =
-      files.certificationDocs?.map((file) => ({
-        filename: file.originalname,
-        path: file.path,
-        mimetype: file.mimetype,
-        size: file.size,
-      })) ?? [];
+    // const certificateMeta =
+    //   files.certificationDocs?.map((file) => ({
+    //     filename: file.originalname,
+    //     path: file.path,
+    //     mimetype: file.mimetype,
+    //     size: file.size,
+    //   })) ?? [];
 
     const imageMeta =
       files.image?.map((file) => ({
@@ -101,7 +102,7 @@ export class ProductsController {
       })) ?? [];
 
     return this.productsService.create(dto, {
-      certificateMeta: certificateMeta,
+      // certificateMeta: certificateMeta,
       imageMeta: imageMeta,
     });
   }

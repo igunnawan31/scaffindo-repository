@@ -130,6 +130,7 @@ export class CertificationsController {
     @Param('id') id: string,
     @Body() updateCertificationDto: UpdateCertificationDto,
     @UploadedFiles() files: { certificationDocs?: Express.Multer.File[] },
+    @Query('replaceCerts') replaceCert?: string,
   ) {
     const certificateMeta =
       files.certificationDocs?.map((file) => ({
@@ -139,11 +140,18 @@ export class CertificationsController {
         size: file.size,
       })) ?? [];
     if (certificateMeta.length > 0) {
-      return this.certificationsService.update(id, updateCertificationDto, {
-        certificateMeta: certificateMeta,
-      });
+      return this.certificationsService.update(
+        id,
+        updateCertificationDto,
+        { replaceCert: replaceCert === 'true' },
+        {
+          certificateMeta: certificateMeta,
+        },
+      );
     } else {
-      return this.certificationsService.update(id, updateCertificationDto);
+      return this.certificationsService.update(id, updateCertificationDto, {
+        replaceCert: replaceCert === 'true',
+      });
     }
   }
 

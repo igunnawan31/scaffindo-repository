@@ -141,6 +141,7 @@ export class CertificationsService {
   async update(
     id: string,
     updateCertificationDto: UpdateCertificationDto,
+    options?: { replaceCert?: boolean },
     filesMeta?: { certificateMeta: any[] },
   ): Promise<UpdateCertificationResponseDto> {
     try {
@@ -155,13 +156,15 @@ export class CertificationsService {
         filesMeta.certificateMeta &&
         filesMeta.certificateMeta.length > 0
       ) {
-        await Promise.all(
-          existingCert.document.map(async (cert) => {
-            if (cert) {
-              await deleteFileArray([cert], 'certificationDoc');
-            }
-          }),
-        );
+        if (existingCert.document && options?.replaceCert) {
+          await Promise.all(
+            existingCert.document.map(async (cert) => {
+              if (cert) {
+                await deleteFileArray([cert], 'certificationDoc');
+              }
+            }),
+          );
+        }
       }
 
       const updateData: Prisma.CertificationUpdateInput = {

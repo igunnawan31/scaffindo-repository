@@ -55,7 +55,7 @@ model Certification {
   name      String
   expired   DateTime
   details   String
-  document  Json
+  document  Json?
   Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int?
 }

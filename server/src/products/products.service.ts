@@ -29,13 +29,14 @@ export class ProductsService {
   async create(
     createProductDto: CreateProductDto,
     filesMeta: {
-      certificateMeta: FileMetaData[];
+      // certificateMeta: FileMetaData[];
       imageMeta: any[];
     },
   ): Promise<CreateProductResponseDto> {
     const { name, description, price, companyId, categories, certifications } =
       createProductDto;
-    const { certificateMeta, imageMeta } = filesMeta;
+    // const { certificateMeta, imageMeta } = filesMeta;
+    const { imageMeta } = filesMeta;
 
     // =============================
     // 1. VALIDATE CATEGORIES
@@ -52,22 +53,22 @@ export class ProductsService {
     // =============================
     // 2. VALIDATE CERTIFICATION ↔ METADATA MATCH
     // =============================
-    if (certifications && certifications?.length > 0) {
-      if (!certificateMeta || certificateMeta.length === 0) {
-        throw new BadRequestException(
-          'Certificate metadata required when certifications provided.',
-        );
-      }
-      if (certifications.length !== certificateMeta.length) {
-        throw new BadRequestException(
-          `Mismatch: ${certifications.length} certifications but ${certificateMeta.length} metadata provided.`,
-        );
-      }
-    } else if (!certifications && certificateMeta.length > 0) {
-      throw new BadRequestException(
-        'Certificate required when certificate metadata provided.',
-      );
-    }
+    // if (certifications && certifications?.length > 0) {
+    //   if (!certificateMeta || certificateMeta.length === 0) {
+    //     throw new BadRequestException(
+    //       'Certificate metadata required when certifications provided.',
+    //     );
+    //   }
+    //   if (certifications.length !== certificateMeta.length) {
+    //     throw new BadRequestException(
+    //       `Mismatch: ${certifications.length} certifications but ${certificateMeta.length} metadata provided.`,
+    //     );
+    //   }
+    // } else if (!certifications && certificateMeta.length > 0) {
+    //   throw new BadRequestException(
+    //     'Certificate required when certificate metadata provided.',
+    //   );
+    // }
 
     // =============================
     // 3. TRANSACTION: CREATE PRODUCT + CERTIFICATIONS
@@ -94,18 +95,18 @@ export class ProductsService {
         // Create Certifications (if any)
         if (certifications && certifications.length > 0) {
           await tx.certification.createMany({
-            data: certifications.map((cert, index) => ({
+            data: certifications.map((cert) => ({
               name: cert.name,
               expired: new Date(cert.expired),
               details: cert.details,
-              document: [
-                {
-                  filename: certificateMeta[index].filename,
-                  path: certificateMeta[index].path,
-                  size: certificateMeta[index].size,
-                  mimetype: certificateMeta[index].mimetype,
-                },
-              ],
+              // document: [
+              //   {
+              //     filename: certificateMeta[index].filename,
+              //     path: certificateMeta[index].path,
+              //     size: certificateMeta[index].size,
+              //     mimetype: certificateMeta[index].mimetype,
+              //   },
+              // ],
               productId: product.id,
             })),
           });
