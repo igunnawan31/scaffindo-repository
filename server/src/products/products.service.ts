@@ -63,6 +63,10 @@ export class ProductsService {
           `Mismatch: ${certifications.length} certifications but ${certificateMeta.length} metadata provided.`,
         );
       }
+    } else if (!certifications && certificateMeta.length > 0) {
+      throw new BadRequestException(
+        'Certificate required when certificate metadata provided.',
+      );
     }
 
     // =============================
@@ -136,6 +140,7 @@ export class ProductsService {
       companyId: productWithCerts.companyId,
       categories: productWithCerts.category || [],
       certifications: productWithCerts.certifications.map((cert) => cert.id),
+      image: productWithCerts.image,
       // certifications: (productWithCerts.certifications || []).map((cert) =>
       //   plainToInstance(GetCertificationResponseDto, {
       //     id: cert.id,
