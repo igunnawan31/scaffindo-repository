@@ -19,7 +19,7 @@ model User {
   email      String       @unique
   password   String
   companyId  String?
-  Company    Company?     @relation(fields: [companyId], references: [id])
+  Company    Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
   role       Role
   subRole    SubRole?
   inChargeOf InvoicePIC[]
@@ -30,8 +30,8 @@ model InvoicePIC {
   userId    String
   invoiceId String
 
-  User    User    @relation(fields: [userId], references: [id])
-  Invoice Invoice @relation(fields: [invoiceId], references: [id])
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@id([userId, invoiceId])
 }
@@ -56,20 +56,20 @@ model Certification {
   expired   DateTime
   details   String
   document  Json?
-  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int?
+  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
 }
 
 model Label {
   id          String      @id // NAMA-TANGGAL-BATCH-0001 - NAMA-TANGGAL-BATCH-1000
   qrCode      Json // Gambar QR 
   status      LabelStatus
-  Product     Product     @relation(fields: [productId], references: [id])
+  Product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId   Int
-  Invoice     Invoice     @relation(fields: [invoiceId], references: [id])
+  Invoice     Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   invoiceId   String
-  Penjualan   Penjualan   @relation(fields: [penjualanId], references: [id])
-  penjualanId String
+  Penjualan   Penjualan?   @relation(fields: [penjualanId], references: [id], onDelete: SetNull)
+  penjualanId String?
   trackings   Tracking[]
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -80,6 +80,7 @@ model Invoice {
   PICs      InvoicePIC[]
   labels    Label[]
   qrCode    Json // Gambar QR
+  status    LabelStatus  @default(FACTORY_DONE)
   Product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   createdAt   DateTime    @default(now())
@@ -105,16 +106,16 @@ model Company {
 model Tracking {
   id          String      @id @default(cuid())
   userId      String
-  pic         User        @relation(fields: [userId], references: [id])
+  pic         User        @relation(fields: [userId], references: [id], onDelete: SetNull)
   role        Role
   title       String
   description String
   status      TrackStatus
   createdAt   DateTime    @default(now())
-  Label       Label?      @relation(fields: [labelId], references: [id])
+  Label       Label?      @relation(fields: [labelId], references: [id], onDelete: SetNull)
   labelId     String?
   companyId   String
-  Company     Company     @relation(fields: [companyId], references: [id])
+  Company     Company     @relation(fields: [companyId], references: [id], onDelete: SetNull)
 }
 
 enum LabelStatus {

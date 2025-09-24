@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/request/create-invoice.dto';
@@ -16,6 +17,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { InvoiceFilterDto } from './dto/request/invoice-filter.dto';
+import { UpdateInvoiceDto } from './dto/request/update-invoice.dto';
 
 @Controller('invoices')
 @ApiBearerAuth('access-token')
@@ -39,6 +41,15 @@ export class InvoicesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.invoicesService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateInvoiceDto,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.invoicesService.update(id, dto, req.user);
   }
 
   @Delete(':id')

@@ -1,35 +1,276 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateInvoiceDto } from './dto/request/create-invoice.dto';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ProductsService } from 'src/products/products.service';
-import { UpdateInvoiceDto } from './dto/request/update-invoice.dto';
+import { LabelStatus, Prisma } from '@prisma/client'; // Make sure to import enums from Prisma
+import { CreateInvoiceResponseDto } from './dto/response/create-response.dto';
+import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
+import { plainToInstance } from 'class-transformer';
 import { InvoiceFilterDto } from './dto/request/invoice-filter.dto';
+import { UpdateInvoiceDto } from './dto/request/update-invoice.dto';
+import {
+  GetAllInvoiceResponseDto,
+  GetInvoiceResponseDto,
+} from './dto/response/read-response.dto';
+import { DeleteInvoiceResponseDto } from './dto/response/delete-response.dto';
 
 @Injectable()
 export class InvoicesService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(createInvoiceDto: CreateInvoiceDto, user: UserRequest) {
-    const { PICIds, totalLabel, productId } = createInvoiceDto;
-    const totalInvoice = await this.prisma.invoice.count({
-      where: { productId },
-    });
-    // const invoiceId = `INVOICE-${productData.name}-${totalInvoice + 1}`;
+  create(
+    createInvoiceDto: CreateInvoiceDto,
+    user: UserRequest,
+  ): Promise<CreateInvoiceResponseDto> {
+    try {
+      const { totalLabel, productId } = createInvoiceDto;
+      const { id: userId } = user;
+
+      if (totalLabel <= 0) {
+        throw new BadRequestException('totalLabel must be at least 1');
+      }
+
+      // if (!Array.isArray(PICIds) || PICIds.length === 0) {
+      //   throw new BadRequestException(
+      //     'At least one PIC (Person in Charge) is required',
+      //   );
+      // }
+
+      const query = this.prisma.$transaction(async (tx) => {
+        // 1. Fetch product with company
+        const product = await tx.product.findUnique({
+          where: { id: productId },
+        });
+
+        if (!product) {
+          throw new BadRequestException(
+            `Product with id ${productId} not found`,
+          );
+        }
+
+        // 2. Sanitize product name for use in label ID
+        const cleanProductName = product.name
+          .replace(/[^a-zA-Z0-9\s]/g, '') // remove special chars
+          .replace(/\s+/g, '-') // spaces → single hyphen
+          .replace(/-+/g, '-')
+          .trim();
+
+        // 3. Count existing invoices for this product → generate invoice ID
+        const invoiceCount = await tx.invoice.count({
+          where: { productId },
+        });
+        const globalCount = await tx.invoice.count();
+        const invoiceNumber = invoiceCount + 1; // PRODUCT BATCH
+        const invoiceGlobalNum = globalCount + 1; // INVOICE GLOBAL COUNT
+        const invoiceId = `INVOICE-${invoiceGlobalNum}-${cleanProductName}-${String(invoiceNumber).padStart(3, '0')}`; // e.g., INVOICE-001
+        const defStatus = LabelStatus.FACTORY_DONE;
+
+        if (!cleanProductName) {
+          throw new BadRequestException(
+            'Product name must contain valid characters for label generation',
+          );
+        }
+
+        // 5. Create Invoice
+        const invoice = await tx.invoice.create({
+          data: {
+            id: invoiceId,
+            productId: productId,
+            status: defStatus,
+            qrCode: {}, // placeholder doang
+          },
+        });
+
+        // 6. Create Labels (totalLabel times)
+        for (let i = 1; i <= totalLabel; i++) {
+          const seq = String(i).padStart(4, '0'); // 0001, 0002, ...
+          const labelId = `${invoiceId}-${seq}`;
+
+          await tx.label.create({
+            data: {
+              id: labelId,
+              qrCode: {}, // placeholder doang
+              status: defStatus,
+              productId: productId,
+              invoiceId: invoiceId,
+            },
+          });
+        }
+
+        // 7. Create InvoicePIC relationships
+        // await Promise.all(
+        //   PICIds.map((userId) =>
+        //     tx.invoicePIC.create({
+        //       data: {
+        //         userId,
+        //         invoiceId,
+        //       },
+        //     }),
+        //   ),
+        // );
+        await tx.invoicePIC.create({
+          data: {
+            userId,
+            invoiceId,
+          },
+        });
+
+        const result = await tx.invoice.findUnique({
+          where: { id: invoice.id },
+          include: {
+            labels: { select: { id: true } },
+            PICs: { select: { userId: true } },
+          },
+        });
+
+        return plainToInstance(CreateInvoiceResponseDto, {
+          ...result,
+          labelIds: result?.labels.map((l) => l.id),
+          PICIds: result?.PICs.map((p) => p.userId),
+        });
+      });
+
+      return query;
+    } catch (err) {
+      handlePrismaError(err, 'Invoice');
+    }
   }
 
-  findAll(filters: InvoiceFilterDto) {
-    return `This action returns all invoices`;
+  async findAll(filters: InvoiceFilterDto): Promise<GetAllInvoiceResponseDto> {
+    try {
+      const { productId, page = 1, limit = 10, sortBy, sortOrder } = filters;
+      const where: Prisma.InvoiceWhereInput = {
+        productId: productId ?? undefined,
+      };
+      const orderBy: Prisma.InvoiceOrderByWithRelationInput = {};
+      if (sortBy && ['productId'].includes(sortBy)) {
+        orderBy[sortBy] = sortOrder === 'desc' ? 'desc' : 'asc';
+      } else {
+        orderBy.productId = 'asc';
+      }
+
+      const [invoices, total] = await Promise.all([
+        this.prisma.invoice.findMany({
+          where,
+          skip: (page - 1) * limit,
+          take: limit,
+          include: { labels: { select: { id: true } } },
+          orderBy,
+        }),
+        this.prisma.invoice.count({ where }),
+      ]);
+      return plainToInstance(GetAllInvoiceResponseDto, {
+        data: invoices.map((i) =>
+          plainToInstance(GetInvoiceResponseDto, {
+            ...i,
+            labelIds: i.labels.map((l) => l.id),
+            labels: undefined,
+          }),
+        ),
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    } catch (err) {
+      handlePrismaError(err, 'Invoice');
+    }
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} invoice`;
+  async findOne(id: string): Promise<GetInvoiceResponseDto> {
+    try {
+      const invoice = await this.prisma.invoice.findUnique({
+        where: { id },
+        include: {
+          labels: { select: { id: true } },
+          PICs: { select: { userId: true } },
+        },
+      });
+
+      if (!invoice)
+        throw new NotFoundException(`Invoice with ID ${id} not found`);
+
+      return plainToInstance(GetInvoiceResponseDto, {
+        ...invoice,
+        labelIds: invoice.labels.map((l) => l.id),
+        PICIds: invoice.PICs.map((p) => p.userId),
+        PICs: undefined,
+        labels: undefined,
+      });
+    } catch (err) {
+      handlePrismaError(err, 'Invoice', id);
+    }
   }
 
-  receive(id: string, updateInvoiceDto: UpdateInvoiceDto) {
-    return `This action updates a #${id} invoice`;
+  async update(
+    id: string,
+    updateInvoiceDto: UpdateInvoiceDto,
+    user: UserRequest,
+  ): Promise<UpdateInvoiceDto> {
+    try {
+      const { id: userId } = user;
+      const invoice = await this.findOne(id);
+
+      if (!invoice)
+        throw new NotFoundException(`Invoice with ID ${id} not found`);
+
+      const userData = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!userData)
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      const companyData = await this.prisma.company.findUnique({
+        where: { id: userData.companyId! },
+      });
+      if (!companyData)
+        throw new NotFoundException(
+          `Company with ID ${userData.companyId} not found`,
+        );
+
+      // Prevent updating to PURCHASED_BY_CUSTOMER
+      if (updateInvoiceDto.labelStatus === LabelStatus.PURCHASED_BY_CUSTOMER) {
+        throw new UnauthorizedException(`Updating to this status is forbidden`);
+      }
+
+      await this.prisma.invoice.update({
+        where: { id },
+        data: {
+          status: updateInvoiceDto.labelStatus,
+        },
+      });
+
+      await Promise.all(
+        invoice.labelIds.map(async (label) =>
+          this.prisma.label.update({
+            where: { id: label },
+            data: { status: updateInvoiceDto.labelStatus },
+          }),
+        ),
+      );
+
+      const result = this.findOne(id);
+
+      return plainToInstance(UpdateInvoiceDto, result);
+    } catch (err) {
+      handlePrismaError(err, 'Invoice', id);
+    }
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} invoice`;
+  async remove(id: string): Promise<DeleteInvoiceResponseDto> {
+    try {
+      const existingInvoice = await this.findOne(id);
+      if (!existingInvoice)
+        throw new NotFoundException(`Invoice with ID ${id} not found`);
+      const query = await this.prisma.invoice.delete({ where: { id } });
+      return plainToInstance(DeleteInvoiceResponseDto, query);
+    } catch (err) {
+      handlePrismaError(err, 'Invoice', id);
+    }
   }
 }
