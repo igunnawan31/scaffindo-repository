@@ -348,6 +348,15 @@ export class ProductsService {
         }
 
         // Handle CERTIFICATIONS
+        if (
+          !updateProductDto.certifications &&
+          certificateMeta &&
+          certificateMeta.length > 0
+        ) {
+          throw new BadRequestException(
+            `Mismatch: certifications data in DTO but ${certificateMeta.length} metadata provided.`,
+          );
+        }
         if (certificateMeta && certificateMeta.length > 0) {
           // Validate length
           if (
