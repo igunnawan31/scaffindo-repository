@@ -29,6 +29,7 @@ export class AuthService {
       email: user.email,
       role: user.role,
       subRole: user.subRole,
+      companyId: user.companyId,
     };
 
     // Generate refresh token (long-lived)
@@ -46,6 +47,7 @@ export class AuthService {
         email: user.email,
         role: user.role,
         subRole: user.subRole,
+        companyId: user.companyId,
       },
     };
   }
