@@ -8,11 +8,11 @@ import SuccessModal from "../../admincomponents/SuccessPopUpModal"
 import CategoryProducts from "../../admincomponents/CategoryProducts"
 import SearchProducts from "../../admincomponents/SearchProducts"
 import Pagination from "../../admincomponents/Pagination"
-import { Company } from "@/app/type/types"
-import { useCompany } from "@/app/hooks/useCompany"
+import { Certificate } from "@/app/type/types"
+import { useCertificate } from "@/app/hooks/useCertificate"
 
-const CompanyList = () => {
-    const { companies, fetchCompanies, deleteCompany } = useCompany();
+const CertificateList = () => {
+    const { certificates, fetchCertificates, deleteCertificate } = useCertificate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,30 +20,30 @@ const CompanyList = () => {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        fetchCompanies();
-    }, [fetchCompanies]);
+        fetchCertificates();
+    }, [fetchCertificates]);
 
-    const filteredCompanies = companies.filter(
-        (company: Company) =>
-            company.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    const filteredCertificates = certificates.filter(
+        (certificate: Certificate) =>
+            certificate.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    console.log(filteredCompanies.length);
+    console.log(filteredCertificates.length);
 
-    const displayedCompanies = filteredCompanies.slice(
+    const displayedCertificates = filteredCertificates.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteCompany(id);
-            setSuccessMessage("Company berhasil dihapus");
+            await deleteCertificate(id);
+            setSuccessMessage("Certificate berhasil dihapus");
             setShowSuccess(true);
 
-            await fetchCompanies();
+            await fetchCertificates();
         } catch (error: any) {
-            setSuccessMessage(error?.response?.data?.message || "Gagal menghapus company");
+            setSuccessMessage(error?.response?.data?.message || "Gagal menghapus certificate");
             setShowSuccess(true);
         }
     }
@@ -57,38 +57,38 @@ const CompanyList = () => {
             <div className="flex gap-3">
                 <CategoryProducts />
                 <SearchProducts 
-                    placeholder="Search user" 
+                    placeholder="Search certificate" 
                     onSearch={handleSearch}
                 />
             </div>
             <div className="flex items-center justify-end mt-3">
                 <Link
-                    href={'/dashboard/list-company/create'}
+                    href={'/dashboard/list-certificate/create'}
                     className="w-2/12 flex items-center justify-center gap-2 p-2 bg-blue-900 text-white rounded-lg hover:bg-yellow-600 cursor-pointer text-sm"
                 >
                     < IoAddCircle />
-                    Create New Company
+                    Create New Certificate
                 </Link>
             </div>
-            {displayedCompanies.length > 0 ? (
+            {displayedCertificates.length > 0 ? (
                 <div className="space-y-3 mt-3">
-                    {displayedCompanies.map((company) =>
+                    {displayedCertificates.map((certificate) =>
                         <div
-                            key={company.id}
+                            key={certificate.id}
                             className="flex justify-between items-center rounded-lg p-3 shadow-md gap-3"
                         >
                             <div className="flex justify-center flex-col gap-0 items-start">
-                                <p className="font-medium">{company.name}</p>
+                                <p className="font-medium">{certificate.name}</p>
                             </div>
                             <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-2">
                                 <Link
-                                    href={`/dashboard/list-company/${company.id}/update`}
+                                    href={`/dashboard/list-certificate/${certificate.id}/update`}
                                     className="flex items-center gap-2 p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer"
                                 >
                                     <IoCreateOutline size={18} />
                                 </Link>
                                 <button 
-                                    onClick={() => handleDelete(company.id)} 
+                                    onClick={() => handleDelete(certificate.id)} 
                                     className="flex items-center gap-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                                 >
                                     <IoTrashOutline size={18} />
@@ -98,7 +98,7 @@ const CompanyList = () => {
                     )}
                 </div>
             ): (
-                <p className="text-gray-500 text-center">Belum ada company</p>
+                <p className="text-gray-500 text-center">Belum ada certificate</p>
             )}
             <SuccessModal
                 isOpen={showSuccess}
@@ -108,7 +108,7 @@ const CompanyList = () => {
             />
             <div className="mt-4 w-full">
                 <Pagination
-                    totalItems={filteredCompanies.length}
+                    totalItems={filteredCertificates.length}
                     itemsPerPage={itemsPerPage}
                     currentPage={currentPage}
                     onPageChange={(page) => setCurrentPage(page)}
@@ -116,10 +116,10 @@ const CompanyList = () => {
                         setItemsPerPage(items);
                         setCurrentPage(1);
                     }}
-                />              
+                />
             </div>
         </>
     )
 }
 
-export default CompanyList
+export default CertificateList

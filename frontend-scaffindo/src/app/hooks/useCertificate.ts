@@ -22,7 +22,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/certificates?limit=100`, {
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -63,7 +63,7 @@ export function useCertificate() {
             }
 
             const res = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/certificates/${id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/certifications/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -91,7 +91,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/certificates/${id}`, updateData,
+            const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/certifications/${id}`, updateData,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -125,7 +125,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/certificates`, createCertificateDTO,
+            const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/certifications`, createCertificateDTO,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -154,7 +154,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/certificates/${id}`,
+            const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/certifications/${id}`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,

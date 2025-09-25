@@ -18,15 +18,6 @@ type Invoice = {
     qrCode: string;
 };
 
-type Product = {
-    id: number;
-    name: string;
-    description: string;
-    image: string;
-    labels: Label[];
-    invoices: Invoice[];
-};
-
 export type User = {
     id: string;
     name: string;
@@ -51,10 +42,10 @@ export type Company = {
 }
 
 export interface FileMetaDataResponse {
-    fileName: string;
-    url: string;
-    mimeType: string;
+    path: string;
     size: number;
+    filename: string;
+    mimetype: string;
 }
 
 export interface Certificate {
@@ -64,4 +55,23 @@ export interface Certificate {
     details: string;
     document: FileMetaDataResponse[];
     productId: string;
+}
+
+export enum Category {
+    CLOTHING,
+    FOOD_BEVERAGE,
+    ELECTRONIC
+}
+
+export interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+    companyId: string;
+    certifications: Certificate[];
+    image: FileMetaDataResponse[];
+    category: string[];
+    labels: Label[];
+    invoice: Invoice[];
 }
