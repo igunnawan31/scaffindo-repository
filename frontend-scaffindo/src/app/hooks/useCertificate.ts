@@ -79,7 +79,7 @@ export function useCertificate() {
         }
     }, []);
 
-    const updateCertificate = useCallback(async(id: string, updateData: Partial<Certificate>) => {
+    const updateCertificate = useCallback(async(id: string, updateData: Partial<Certificate> | FormData) => {
         try {
             setLoading(true);
             setError(null);
@@ -91,12 +91,17 @@ export function useCertificate() {
                 return;
             }
 
+            const headers: any = {
+                Authorization: `Bearer ${token}`,
+            };
+
+            if (!(updateData instanceof FormData)) {
+                headers["Content-Type"] = "application/json";
+            }
+
             const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/certifications/${id}`, updateData,
                 {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers
                 }
             );
 

@@ -6,42 +6,73 @@ import Link from "next/link"
 import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import { useCompany } from "@/app/hooks/useCompany"
+import { useRouter } from "next/navigation"
+import { useProduct } from "@/app/hooks/useProduct"
+import { useCertificate } from "@/app/hooks/useCertificate"
+import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 
-const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
-const subRoles = ["ADMIN"]
-
-const CreateAdmin = () => {
-    const { fetchCompanies, companies } = useCompany();
-    const { createAdmin, loading, error } = useUser();
+const CreateCertificate = () => {
+    const router = useRouter();
+    const { fetchProducts, products } = useProduct();
+    const { createCertificate } = useCertificate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
-        email: "",
-        password: "",
-        companyId: "",
-        role: "",
-        subRole: "",
+        expired: "",
+        details: "",
+        productId: "",
     });
+    const [certificationDocs, setCertificationDocs] = useState<File | null>(null)
 
     useEffect(() => {
-        fetchCompanies();
-    }, [fetchCompanies]);
+        fetchProducts();
+    }, [fetchProducts]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "certificationDocs") => {
+        if (!e.target.files || !e.target.files[0]) return
+        if (type === "certificationDocs") setCertificationDocs(e.target.files[0])
+    }
+
+    const handleDropdownChange = (field: string, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await createAdmin(formData);
-            setSuccessMessage(`User ${res.name} berhasil dibuat`);
+            const data = new FormData();
+            data.append("name", formData.name)
+            data.append("expired", formData.expired)
+            data.append("details", formData.details)
+            data.append("productId", formData.productId)
+
+            if (certificationDocs) data.append("certificationDocs", certificationDocs)
+            
+            await createCertificate(data)
+
+            setSuccessMessage(`Certificate berhasil dibuat`);
             setShowSuccess(true);
-            setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
+            setFormData({ 
+                name: "",
+                expired: "",
+                details: "",
+                productId: "",
+            });
+            setCertificationDocs(null)
+            setTimeout(() => router.push("/dashboard/list-certificate"), 2000);
         } catch (err) {
-            console.error("Failed to create user:", err);
+            console.error("Failed to create certificate:", err);
+            setSuccessMessage("Gagal membuat certificate")
+            setShowSuccess(true)
         }
     }
 
@@ -50,114 +81,82 @@ const CreateAdmin = () => {
             <h2 className="text-xl font-bold text-blue-900 mb-6">Create User</h2>
             <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
-                    <label htmlFor="name" className="block font-semibold text-blue-900 mb-1">Full Name</label>
+                    <label htmlFor="name" className="block font-semibold text-blue-900 mb-1">Nama</label>
                     <input
                         type="text"
                         id="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="John Doe"
+                        placeholder="ISO 3001"
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block font-semibold text-blue-900 mb-1">Email</label>
+                    <label htmlFor="expired" className="block font-semibold text-blue-900 mb-1">
+                        expired
+                    </label>
                     <input
-                        type="email"
-                        id="email"
-                        value={formData.email}
+                        type="date"
+                        id="expired"
+                        value={formData.expired}
                         onChange={handleChange}
-                        placeholder="example@mail.com"
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        placeholder="23 November 2025"
+                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
                     />
                 </div>
 
-                <div className="">
-                    <label htmlFor="password" className="block font-semibold text-blue-900 mb-1">Password</label>
+                <div>
+                    <label htmlFor="details" className="block font-semibold text-blue-900 mb-1">
+                        Details
+                    </label>
                     <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        value={formData.password}
+                        type="text"
+                        id="details"
+                        value={formData.details}
                         onChange={handleChange}
-                        placeholder="Password"
-                        className={`w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2`}
+                        placeholder="detail certificate..."
+                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
                     />
-                    <span
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute transform translate-y-3 -translate-x-8 text-gray-500 cursor-pointer text-lg select-none"
-                        title={showPassword ? "Hide password" : "Show password"}
-                    >
-                        {showPassword ? 
-                            <Image
-                                src={"/assets/icons/eye-open.svg"}
-                                alt="Login Icon"
-                                width={20}
-                                height={20}
-                                priority
-                            />
-                            : 
-                            <Image
-                                src={"/assets/icons/eye-off.svg"}
-                                alt="Login Icon"
-                                width={20}
-                                height={20}
-                                priority
-                            />
-                        }
-                    </span>
                 </div>
 
                 <div>
-                    <label htmlFor="companyId" className="block font-semibold text-blue-900 mb-1">Company</label>
-                    <select
-                        id="companyId"
-                        value={formData.companyId}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Company --</option>
-                        {companies.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="Product"
+                        options={products.map((c: any) => ({
+                            value: c.id,
+                            label: c.name,
+                        }))}
+                        selected={formData.productId || null}
+                        onChange={(val) => handleDropdownChange("productId", val || "")}
+                        placeholder="Select Product"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
-                    <select
-                        id="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Role --</option>
-                        {roles.map((role) => (
-                            <option key={role} value={role}>{role}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div>
-                    <label htmlFor="subRole" className="block font-semibold text-blue-900 mb-1">Subrole</label>
-                    <select
-                        id="subRole"
-                        value={formData.subRole}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Subrole --</option>
-                        {subRoles.map((s) => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
+                    <label className="block font-semibold text-blue-900 mb-1">Certification Docs</label>
+                    <div className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus-within:ring-2 focus-within:ring-blue-400 flex items-center justify-between">
+                        <span className="truncate text-gray-400">
+                            {certificationDocs ? certificationDocs.name : "No document selected"}
+                        </span>
+                        <input
+                            type="file"
+                            id="certDocUpload"
+                            onChange={(e) => handleFileChange(e, "certificationDocs")}
+                            className="hidden"
+                        />
+                        <label
+                            htmlFor="certDocUpload"
+                            className="ml-3 p-3 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 text-md"
+                        >
+                            {certificationDocs ? "Change" : "Upload"}
+                        </label>
+                    </div>
                 </div>
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/list-admin'}
+                        href={'/dashboard/list-certificate'}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali
@@ -173,11 +172,11 @@ const CreateAdmin = () => {
             <SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
-                title="User Berhasil dibuat"
+                title="Sertifikat Berhasil dibuat"
                 message={successMessage}
             />
         </div>
     )
 }
 
-export default CreateAdmin
+export default CreateCertificate

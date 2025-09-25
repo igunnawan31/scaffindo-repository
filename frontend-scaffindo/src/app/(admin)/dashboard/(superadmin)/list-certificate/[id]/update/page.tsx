@@ -7,52 +7,77 @@ import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 import { useUser } from "@/app/hooks/useUser"
 import { useRouter } from "next/navigation"
+import { useProduct } from "@/app/hooks/useProduct"
+import { useCertificate } from "@/app/hooks/useCertificate"
+import DropdownOneSelect from "../../../superadmincomponents/DropdownOneSelect"
 
-const UpdateAdmin = () => {
+const UpdateCertificate = () => {
     const { id } = useParams<{id: string}>();
-    const { user, fetchUserById, updateUser, loading } = useUser();
+    const { certificate, fetchCertificateById, updateCertificate } = useCertificate();
+    const { product, products, fetchProducts } = useProduct();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
-        email: "",
-        role: "",
-        subRole: "",
+        expired: "",
+        details: "",
+        productId: "",
     });
+    const [certificationDocs, setCertificationDocs] = useState<File | null>(null);
     
     useEffect(() => {
-        if (id) fetchUserById(id);
-    }, [id, fetchUserById]);
+        if (id) fetchCertificateById(id);
+        fetchProducts();
+    }, [id, fetchCertificateById, fetchProducts]);
 
     useEffect(() => {
-        if (user) {
-            setFormData({
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                subRole: user.subRole,
-            });
-        }
-    }, [user]);
+        if (!certificate) return;
+        setFormData({
+            name: certificate.name ?? "",
+            expired: certificate.expired ?? "",
+            details: certificate.details ?? "",
+            productId: certificate.productId ?? "",
+        });
+    }, [certificate]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "certificationDocs") => {
+        if (!e.target.files || !e.target.files[0]) return;
+        if (type === "certificationDocs") setCertificationDocs(e.target.files[0]);
+    };
+
+    const handleDropdownChange = (field: string, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }))
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!id) return;
+
         try {
-            if (!id) return;
-            await updateUser(id, formData);
-            setSuccessMessage("User berhasil diupdate!");
+            const data = new FormData();
+            data.append("name", formData.name);
+            data.append("expired", formData.expired);
+            data.append("details", formData.details);
+            data.append("productId", formData.productId);
+            if (certificationDocs) data.append("certificationDocs", certificationDocs);
+            
+            await updateCertificate(id, data);
+            setSuccessMessage("Certificate berhasil diupdate!");
             setShowSuccess(true);
             setTimeout(() => {
-                router.push('/dashboard/list-admin');
+                router.push('/dashboard/list-certificate');
             }, 2000)
         } catch (err) {
             console.error("Update gagal:", err);
-            setSuccessMessage("Gagal update user");
+            setSuccessMessage("Gagal update certificate");
             setShowSuccess(true);
         }
     };
@@ -76,56 +101,72 @@ const UpdateAdmin = () => {
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block font-semibold text-blue-900 mb-1">
-                        Email
+                    <label htmlFor="expired" className="block font-semibold text-blue-900 mb-1">
+                        expired
                     </label>
                     <input
-                        type="email"
-                        id="email"
-                        value={formData.email}
+                        type="date"
+                        id="expired"
+                        value={formData.expired}
                         onChange={handleChange}
-                        placeholder="user@example.com"
+                        placeholder="23 November 2025"
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">
-                        Role
+                    <label htmlFor="details" className="block font-semibold text-blue-900 mb-1">
+                        Details
                     </label>
-                    <select
-                        id="role"
-                        value={formData.role}
+                    <input
+                        type="text"
+                        id="details"
+                        value={formData.details}
                         onChange={handleChange}
+                        placeholder="300000"
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
-                    >
-                        <option value="">-- Select Role --</option>
-                        <option value="FACTORY">Factory</option>
-                        <option value="DISTRIBUTOR">Distributor</option>
-                        <option value="AGENT">Agent</option>
-                        <option value="RETAIL">Retail</option>
-                    </select>
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="subRole" className="block font-semibold text-blue-900 mb-1">
-                        Sub Role
-                    </label>
-                    <select
-                        id="subRole"
-                        value={formData.subRole}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
-                    >
-                        <option value="">-- Select Sub Role --</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="USER">User</option>
-                    </select>
+                    <DropdownOneSelect
+                        label="Product"
+                        options={products.map((c: any) => ({
+                            value: c.id,
+                            label: c.name,
+                        }))}
+                        selected={formData.productId || null}
+                        onChange={(val) => handleDropdownChange("productId", val || "")}
+                        placeholder="Select Product"
+                    />
+                </div>
+
+                <div>
+                    <label className="block font-semibold text-blue-900 mb-1">Certification Docs</label>
+                    <div className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus-within:ring-2 focus-within:ring-blue-400 flex items-center justify-between">
+                        <span className="truncate text-gray-600">
+                            {certificationDocs
+                                ? certificationDocs.name
+                                : (certificate?.document?.[0]?.path?.split("\\").pop() || "No document selected")}
+                        </span>
+                        <input
+                            type="file"
+                            id="certDocUpload"
+                            onChange={(e) => handleFileChange(e, "certificationDocs")}
+                            className="hidden"
+                        />
+                        <label
+                            htmlFor="certDocUpload"
+                            className="ml-3 p-3 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700 text-md"
+                        >
+                            {certificationDocs ? "Change" : "Upload"}
+                        </label>
+                    </div>
                 </div>
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/list-admin'}
+                        href={'/dashboard/list-certificate'}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali
@@ -134,18 +175,18 @@ const UpdateAdmin = () => {
                         type="submit"
                         className="p-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 cursor-pointer"
                     >
-                        Update User
+                        Update Certificate
                     </button>
                 </div>
             </form>
             <SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
-                title="User Berhasil diupdate"
+                title="Certificate Berhasil diupdate"
                 message={successMessage}
             />
         </div>
     )
 }
 
-export default UpdateAdmin
+export default UpdateCertificate

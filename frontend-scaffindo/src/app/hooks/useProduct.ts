@@ -79,50 +79,44 @@ export function useProduct() {
         }
     }, []);
 
-    const updateProduct = useCallback(
-  async (id: string, updateData: Partial<Product> | FormData) => {
-    try {
-      setLoading(true);
-      setError(null);
+    const updateProduct = useCallback(async (id: string, updateData: Partial<Product> | FormData) => {
+        try {
+            setLoading(true);
+            setError(null);
 
-      const token = localStorage.getItem("access_token");
+            const token = localStorage.getItem("access_token");
 
-      if (!token) {
-        setError("No authentication token found");
-        return;
-      }
+            if (!token) {
+                setError("No authentication token found");
+                return;
+            }
 
-      const headers: any = {
-        Authorization: `Bearer ${token}`,
-      };
+            const headers: any = {
+                Authorization: `Bearer ${token}`,
+            };
 
-      // ❌ jangan set Content-Type manual kalau FormData
-      if (!(updateData instanceof FormData)) {
-        headers["Content-Type"] = "application/json";
-      }
+            if (!(updateData instanceof FormData)) {
+                headers["Content-Type"] = "application/json";
+            }
 
-      const res = await axios.patch(
-        `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
-        updateData,
-        { headers }
-      );
+            const res = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/products/${id}`, updateData,
+                { headers }
+            );
 
-      setProduct(res.data);
-      setProducts((prev) =>
-        prev.map((u) => (u.id === id ? res.data : u))
-      );
+            setProduct(res.data);
+            setProducts((prev) =>
+                prev.map((u) => (u.id === id ? res.data : u))
+            );
 
-      return res.data;
-    } catch (err: any) {
-      console.error("Update product failed:", err.response || err);
-      setError(err.response?.data?.message || "Failed to update product");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  },
-  []
-);
+            return res.data;
+        } catch (err: any) {
+            console.error("Update product failed:", err.response || err);
+            setError(err.response?.data?.message || "Failed to update product");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    },[]);
 
     
     const createProduct = useCallback(async (createProductDTO: any) => {
