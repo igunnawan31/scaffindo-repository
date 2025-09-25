@@ -108,8 +108,6 @@ export default function UpdateProduct() {
             }
 
             if (image) data.append("image", image);
-            if (certificationDocs) data.append("certificationDocs", certificationDocs);
-
             await updateProduct(id, data);
 
             setSuccessMessage("Product berhasil diupdate!");
@@ -227,7 +225,7 @@ export default function UpdateProduct() {
                         </label>
                     </div>
                 </div>
-                
+
                 <div className="flex justify-between">
                     <Link href={"/dashboard/products"} className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500">
                         Kembali
