@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 export class CreateInvoiceDto {
   @ApiProperty()
@@ -24,4 +24,12 @@ export class CreateInvoiceDto {
   @IsInt()
   @Type(() => Number)
   totalLabel: number;
+
+  @IsString()
+  @ApiProperty()
+  title: string; // ini required buat bikin tracking
+
+  @IsString()
+  @ApiProperty()
+  description: string; // ini required buat bikin tracking
 }

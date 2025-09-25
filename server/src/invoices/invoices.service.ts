@@ -7,7 +7,7 @@ import {
 import { CreateInvoiceDto } from './dto/request/create-invoice.dto';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LabelStatus, Prisma } from '@prisma/client'; // Make sure to import enums from Prisma
+import { LabelStatus, Prisma, Role, TrackStatus } from '@prisma/client'; // Make sure to import enums from Prisma
 import { CreateInvoiceResponseDto } from './dto/response/create-response.dto';
 import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 import { plainToInstance } from 'class-transformer';
@@ -27,7 +27,7 @@ export class InvoicesService {
     user: UserRequest,
   ): Promise<CreateInvoiceResponseDto> {
     try {
-      const { totalLabel, productId } = createInvoiceDto;
+      const { totalLabel, productId, title, description } = createInvoiceDto;
       const { id: userId } = user;
 
       if (totalLabel <= 0) {
@@ -99,6 +99,18 @@ export class InvoicesService {
               invoiceId: invoiceId,
             },
           });
+
+          await tx.tracking.create({
+            data: {
+              userId: user.id,
+              role: user.role,
+              title: title,
+              description: description,
+              status: TrackStatus.FACTORY_DONE,
+              labelId: labelId,
+              companyId: user.companyId,
+            },
+          });
         }
 
         // 7. Create InvoicePIC relationships
@@ -131,6 +143,8 @@ export class InvoicesService {
           ...result,
           labelIds: result?.labels.map((l) => l.id),
           PICIds: result?.PICs.map((p) => p.userId),
+          labels: undefined,
+          PICs: undefined,
         });
       });
 
@@ -158,7 +172,10 @@ export class InvoicesService {
           where,
           skip: (page - 1) * limit,
           take: limit,
-          include: { labels: { select: { id: true } } },
+          include: {
+            labels: { select: { id: true } },
+            PICs: { select: { userId: true } },
+          },
           orderBy,
         }),
         this.prisma.invoice.count({ where }),
@@ -169,6 +186,8 @@ export class InvoicesService {
             ...i,
             labelIds: i.labels.map((l) => l.id),
             labels: undefined,
+            PICIds: i.PICs.map((p) => p.userId),
+            PICs: undefined,
           }),
         ),
         meta: {
@@ -223,6 +242,7 @@ export class InvoicesService {
       const userData = await this.prisma.user.findUnique({
         where: { id: userId },
       });
+      console.log('companyId', userData?.companyId);
       if (!userData)
         throw new NotFoundException(`User with ID ${userId} not found`);
       const companyData = await this.prisma.company.findUnique({
@@ -234,29 +254,72 @@ export class InvoicesService {
         );
 
       // Prevent updating to PURCHASED_BY_CUSTOMER
-      if (updateInvoiceDto.labelStatus === LabelStatus.PURCHASED_BY_CUSTOMER) {
+      if (updateInvoiceDto.status === LabelStatus.PURCHASED_BY_CUSTOMER) {
         throw new UnauthorizedException(`Updating to this status is forbidden`);
       }
 
-      await this.prisma.invoice.update({
-        where: { id },
-        data: {
-          status: updateInvoiceDto.labelStatus,
-        },
+      // 1. Validate role + status permission
+      if (
+        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR &&
+          user.role !== Role.DISTRIBUTOR) ||
+        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_AGENT &&
+          user.role !== Role.AGENT) ||
+        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_RETAIL &&
+          user.role !== Role.RETAIL)
+      ) {
+        throw new UnauthorizedException(
+          `${user.role} is forbidden to update status to ${updateInvoiceDto.status}`,
+        );
+      }
+
+      // 2. Only create tracking for these 3 statuses (and we know they're valid now)
+      let status: TrackStatus | undefined;
+      if (
+        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR ||
+        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_AGENT ||
+        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_RETAIL
+      ) {
+        // Safe cast: these values exist in both enums with same name
+        status = updateInvoiceDto.status as TrackStatus;
+      }
+      const updated = await this.prisma.$transaction(async (tx) => {
+        await tx.invoice.update({
+          where: { id },
+          data: {
+            status: updateInvoiceDto.status,
+          },
+        });
+
+        await Promise.all(
+          invoice.labelIds.map(async (label) =>
+            tx.label.update({
+              where: { id: label },
+              data: { status: updateInvoiceDto.status },
+            }),
+          ),
+        );
+
+        if (status) {
+          await Promise.all(
+            invoice.labelIds.map(async (label) =>
+              tx.tracking.create({
+                data: {
+                  userId: user.id,
+                  role: user.role,
+                  title: updateInvoiceDto.title,
+                  description: updateInvoiceDto.description,
+                  status,
+                  labelId: label,
+                  companyId: userData.companyId!,
+                },
+              }),
+            ),
+          );
+        }
+
+        return this.findOne(id);
       });
-
-      await Promise.all(
-        invoice.labelIds.map(async (label) =>
-          this.prisma.label.update({
-            where: { id: label },
-            data: { status: updateInvoiceDto.labelStatus },
-          }),
-        ),
-      );
-
-      const result = this.findOne(id);
-
-      return plainToInstance(UpdateInvoiceDto, result);
+      return plainToInstance(UpdateInvoiceDto, updated);
     } catch (err) {
       handlePrismaError(err, 'Invoice', id);
     }

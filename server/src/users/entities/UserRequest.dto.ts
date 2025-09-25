@@ -6,4 +6,5 @@ export class UserRequest {
   email: string;
   role: Role;
   subRole: SubRole;
+  companyId: string;
 }

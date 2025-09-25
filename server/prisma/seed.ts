@@ -19,7 +19,7 @@ async function main() {
     data: {
       name: 'John Factory',
       email: 'john.factory@acme.com',
-      password: 'hashed_password_123', // In a real app, this should be a hash
+      password: '$2a$10$iRM7e5bXmu7vzmDcHpdx4OeJD/23CeMgt00Pc1EAnkFFE3Z.Pv/bS', // In a real app, this should be a hash
       companyId: company.id,
       role: 'FACTORY',
       subRole: 'ADMIN',

@@ -20,6 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     role: Role;
     subRole: SubRole;
     exp: number;
+    companyId: string;
   }> {
     return {
       id: payload.sub,
@@ -27,6 +28,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       role: payload.role,
       subRole: payload.subRole,
       exp: payload.exp,
+      companyId: payload.companyId,
     };
   }
 }
