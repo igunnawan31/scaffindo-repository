@@ -105,19 +105,60 @@ const agentMenus = [
     },
 ];
 
-const userManages = [
-    {
-        title: "Manage User",
-        items: [
-            {
-                icon: "/assets/icons/user.svg",
-                alt: "Manage User",
-                label: "Manage User",
-                href: "/dashboard/manage-user",
-            }
-        ]
-    }
-]
+const userManages: Record<string, any[]> = {
+    FACTORY: [
+        {
+            title: "Manage User",
+            items: [
+                {
+                    icon: "/assets/icons/user.svg",
+                    alt: "Manage User",
+                    label: "Manage Factory User",
+                    href: "/dashboard/manage-user/FACTORY",
+                },
+            ],
+        },
+    ],
+    DISTRIBUTOR: [
+        {
+            title: "Manage User",
+            items: [
+                {
+                    icon: "/assets/icons/user.svg",
+                    alt: "Manage User",
+                    label: "Manage Distributor User",
+                    href: "/dashboard/manage-user/DISTRIBUTOR",
+                },
+            ],
+        },
+    ],
+    AGENT: [
+        {
+            title: "Manage User",
+            items: [
+                {
+                    icon: "/assets/icons/user.svg",
+                    alt: "Manage User",
+                    label: "Manage Agent User",
+                    href: "/dashboard/manage-user/AGENT",
+                },
+            ],
+        },
+    ],
+    RETAIL: [
+        {
+            title: "Manage User",
+            items: [
+                {
+                    icon: "/assets/icons/user.svg",
+                    alt: "Manage User",
+                    label: "Manage Retail User",
+                    href: "/dashboard/manage-user/RETAIL",
+                },
+            ],
+        },
+    ],
+};
 
 const superAdminMenus = [
     {
@@ -151,7 +192,7 @@ const superAdminMenus = [
     },
 ]
 
-const allMenus = [...menuDashboards, ...userManages, ...factoryMenus, ...distributorMenus, ...agentMenus, ...superAdminMenus];
+const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus, ...agentMenus, ...superAdminMenus];
 
 
 const Menu = () => {
@@ -162,8 +203,6 @@ const Menu = () => {
     const [hasParentId, setHasParentId] = useState<boolean | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
     const [menusToRender, setMenusToRender] = useState<any[]>([]);
     
     useEffect(() => {
@@ -179,17 +218,17 @@ const Menu = () => {
         if (user.role === "FACTORY") {
             menus.push(...factoryMenus);
             if (user.subRole === "ADMIN") 
-                menus.push(...userManages);
+                menus.push(...userManages.FACTORY);
         }
         if (user.role === "DISTRIBUTOR") {
             menus.push(...distributorMenus);
             if (user.subRole === "ADMIN") 
-                menus.push(...userManages);
+                menus.push(...userManages.DISTRIBUTOR);
         }
         if (user.role === "AGENT")  {
             menus.push(...agentMenus);
             if (user.subRole === "ADMIN") 
-                menus.push(...userManages);
+                menus.push(...userManages.AGENT);
         }
 
         setMenusToRender(menus);

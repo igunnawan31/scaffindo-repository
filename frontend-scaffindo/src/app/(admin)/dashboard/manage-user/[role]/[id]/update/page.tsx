@@ -4,7 +4,7 @@ import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
-import SuccessModal from "../../../admincomponents/SuccessPopUpModal"
+import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 
 const UpdateUser = () => {
     const { id } = useParams();

@@ -1,4 +1,4 @@
-import UserLists from "../admincomponents/UsersList"
+import UserLists from "../../admincomponents/UsersList"
 
 const ManageUserPage = () => {
     return (

@@ -15,6 +15,7 @@ const Navbar = () => {
     const handleLogout = () => {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
         
         router.push("/sign-in");
         toast.success("Logout berhasil");

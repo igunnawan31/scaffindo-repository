@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from "react";
+import { IoArrowDownCircle } from "react-icons/io5";
 
 const DropdownOneSelect = ({
     label,
@@ -59,7 +60,7 @@ const DropdownOneSelect = ({
                         ? options.find((o) => o.value === selected)?.label ?? selected
                         : placeholder}
                 </span>
-                <span className="ml-2 text-sm">▾</span>
+                <IoArrowDownCircle />
             </button>
 
             {open && (
@@ -77,13 +78,13 @@ const DropdownOneSelect = ({
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map((opt) => (
                                 <li
-                                key={opt.value}
-                                onClick={() => handleSelect(opt.value)}
-                                className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-100 ${
+                                    key={opt.value}
+                                    onClick={() => handleSelect(opt.value)}
+                                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-blue-100 ${
                                     selected === opt.value ? "bg-blue-50 font-semibold" : ""
                                 }`}
                                 >
-                                {opt.label}
+                                    {opt.label}
                                 </li>
                             ))
                         ) : (

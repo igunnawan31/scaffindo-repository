@@ -1,56 +1,78 @@
-'use client'
+"use client";
 
-import UserDummy from "@/app/data/UserDummy"
-import Link from "next/link"
-import { useState } from "react"
-import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
-import SuccessModal from "./SuccessPopUpModal"
-import CategoryProducts from "./CategoryProducts"
-import SearchProducts from "./SearchProducts"
-import Pagination from "./Pagination"
-import { User } from "@/app/type/types"
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5";
+import SuccessModal from "./SuccessPopUpModal";
+import CategoryProducts from "./CategoryProducts";
+import SearchProducts from "./SearchProducts";
+import Pagination from "./Pagination";
+import { User } from "@/app/type/types";
+import { useParams } from "next/navigation";
+import { useUser } from "@/app/hooks/useUser";
 
 const UserLists = () => {
-    const [users, setUsers] = useState<User[]>(UserDummy)
+    const params = useParams();
+    const role = (params.role as string);
+    const {users, fetchUsers} = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
 
-    const displayedUsers = users.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    useEffect(() => {
+        if (role) fetchUsers(role);
+    }, [role, fetchUsers]);
+
+    const filteredUsers = useMemo(() => {
+        return users.filter(
+            (user) =>
+                user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (user.subRole && user.subRole.toLowerCase().includes(searchQuery.toLowerCase()))
+        );
+    }, [users, searchQuery]);
+
+    const displayedUsers = useMemo(() => {
+        return filteredUsers.slice(
+            (currentPage - 1) * itemsPerPage,
+            currentPage * itemsPerPage
+        );
+    }, [filteredUsers, currentPage, itemsPerPage]);
 
     const handleDelete = () => {
+        setSuccessMessage("User berhasil dihapus.");
         setShowSuccess(true);
-    }
+    };
+
     const handleSearch = (query: string) => {
         setSearchQuery(query);
+        setCurrentPage(1);
     };
 
     return (
         <>
             <div className="flex gap-3">
                 <CategoryProducts />
-                <SearchProducts 
-                    placeholder="Search user" 
+                <SearchProducts
+                    placeholder="Search user"
                     onSearch={handleSearch}
                 />
             </div>
             <div className="flex items-center justify-end mt-3">
                 <Link
-                    href={'/dashboard/manage-user/create'}
+                    href={`/dashboard/manage-user/${role}/create`}
                     className="w-2/12 flex items-center justify-center gap-2 p-2 bg-blue-900 text-white rounded-lg hover:bg-yellow-600 cursor-pointer text-sm"
                 >
-                    < IoAddCircle />
+                    <IoAddCircle />
                     Create New User
                 </Link>
             </div>
             {users.length > 0 ? (
                 <div className="space-y-3 mt-3">
-                    {users.map((user) =>
+                    {users.map((user) => (
                         <div
                             key={user.id}
                             className="flex justify-between items-center rounded-lg p-3 shadow-md gap-3"
@@ -64,12 +86,12 @@ const UserLists = () => {
                             </div>
                             <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-2">
                                 <Link
-                                    href={`/dashboard/manage-user/${user.id}/update`}
+                                    href={`/dashboard/manage-user/${role}/${user.id}/update`}
                                     className="flex items-center gap-2 p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer"
                                 >
                                     <IoCreateOutline size={18} />
                                 </Link>
-                                <button 
+                                <button
                                     onClick={handleDelete}
                                     className="flex items-center gap-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                                 >
@@ -77,9 +99,9 @@ const UserLists = () => {
                                 </button>
                             </div>
                         </div>
-                    )}
+                    ))}
                 </div>
-            ): (
+            ) : (
                 <p className="text-gray-500 text-center">Belum ada user</p>
             )}
             <SuccessModal
@@ -101,7 +123,7 @@ const UserLists = () => {
                 />
             </div>
         </>
-    )
-}
+    );
+};
 
-export default UserLists
+export default UserLists;

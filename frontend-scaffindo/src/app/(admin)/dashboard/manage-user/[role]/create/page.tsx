@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react"
 import SuccessModal from "../../../admincomponents/SuccessPopUpModal"
 import Link from "next/link"
+import { useCompany } from "@/app/hooks/useCompany"
 import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
-import { useCompany } from "@/app/hooks/useCompany"
+import DropdownOneSelect from "../../../(superadmin)/superadmincomponents/DropdownOneSelect"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
-const subRoles = ["ADMIN"]
+const subRoles = ["Admin", "User"]
 
-const CreateAdmin = () => {
+const CreateUser = () => {
     const { fetchCompanies, companies } = useCompany();
     const { createUser, loading, error } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
@@ -26,8 +27,14 @@ const CreateAdmin = () => {
     });
 
     useEffect(() => {
-        fetchCompanies();
-    }, [fetchCompanies]);
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            const loggedInUser = JSON.parse(userStr);
+            if (loggedInUser?.companyId) {
+                setFormData((prev) => ({ ...prev, companyId: loggedInUser.companyId }));
+            }
+        }
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
@@ -74,90 +81,98 @@ const CreateAdmin = () => {
                 </div>
 
                 <div className="">
-                    <label htmlFor="password" className="block font-semibold text-blue-900 mb-1">Password</label>
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder="Password"
-                        className={`w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2`}
-                    />
-                    <span
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute transform translate-y-3 -translate-x-8 text-gray-500 cursor-pointer text-lg select-none"
-                        title={showPassword ? "Hide password" : "Show password"}
-                    >
-                        {showPassword ? 
-                            <Image
-                                src={"/assets/icons/eye-open.svg"}
-                                alt="Login Icon"
-                                width={20}
-                                height={20}
-                                priority
-                            />
-                            : 
-                            <Image
-                                src={"/assets/icons/eye-off.svg"}
-                                alt="Login Icon"
-                                width={20}
-                                height={20}
-                                priority
-                            />
-                        }
-                    </span>
+                    <label htmlFor="password" className="block font-semibold text-blue-900 mb-1">
+                        Password
+                    </label>
+
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            placeholder="Password"
+                            className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+
+                        <span
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer text-lg select-none"
+                            title={showPassword ? "Hide password" : "Show password"}
+                        >
+                            {showPassword ? (
+                                <Image
+                                    src={"/assets/icons/eye-open.svg"}
+                                    alt="Show password"
+                                    width={20}
+                                    height={20}
+                                    priority
+                                />
+                            ) : (
+                                <Image
+                                    src={"/assets/icons/eye-off.svg"}
+                                    alt="Hide password"
+                                    width={20}
+                                    height={20}
+                                    priority
+                                />
+                            )}
+                        </span>
+                    </div>
                 </div>
 
                 <div>
                     <label htmlFor="companyId" className="block font-semibold text-blue-900 mb-1">Company</label>
-                    <select
+                    <input
+                        type="text"
                         id="companyId"
                         value={formData.companyId}
                         onChange={handleChange}
+                        placeholder="John Doe"
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Company --</option>
-                        {companies.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
+                        disabled
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
-                    <select
-                        id="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Role --</option>
-                        {roles.map((role) => (
-                            <option key={role} value={role}>{role}</option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="Role"
+                        options={roles.map((role) => ({
+                            value: role,
+                            label: role,
+                        }))}
+                        selected={formData.role || null}
+                        onChange={(newRole) =>
+                            setFormData((prev) => ({
+                            ...prev,
+                            role: newRole || "",
+                            }))
+                        }
+                        placeholder="Select Role"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="subRole" className="block font-semibold text-blue-900 mb-1">Subrole</label>
-                    <select
-                        id="subRole"
-                        value={formData.subRole}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Subrole --</option>
-                        {subRoles.map((s) => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="subRole"
+                        options={subRoles.map((subRole) => ({
+                            value: subRole,
+                            label: subRole,
+                        }))}
+                        selected={formData.subRole || null}
+                        onChange={(newSubRole) =>
+                            setFormData((prev) => ({
+                            ...prev,
+                            subRole: newSubRole || "",
+                            }))
+                        }
+                        placeholder="Select Sub Role"
+                    />
                 </div>
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/list-admin'}
+                        href={'/dashboard/manage-user'}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali
@@ -180,4 +195,4 @@ const CreateAdmin = () => {
     )
 }
 
-export default CreateAdmin
+export default CreateUser
