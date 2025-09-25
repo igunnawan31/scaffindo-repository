@@ -105,17 +105,17 @@ model Company {
 
 model Tracking {
   id          String      @id @default(cuid())
-  userId      String
-  pic         User        @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId      String?
+  pic         User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   role        Role
   title       String
   description String
   status      TrackStatus
   createdAt   DateTime    @default(now())
-  Label       Label?      @relation(fields: [labelId], references: [id], onDelete: SetNull)
-  labelId     String?
-  companyId   String
-  Company     Company     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  Label       Label      @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  labelId     String
+  companyId   String?
+  Company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
 }
 
 enum LabelStatus {
