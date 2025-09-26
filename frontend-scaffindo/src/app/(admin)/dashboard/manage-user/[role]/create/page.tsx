@@ -7,11 +7,13 @@ import { useCompany } from "@/app/hooks/useCompany"
 import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import DropdownOneSelect from "../../../(superadmin)/superadmincomponents/DropdownOneSelect"
+import { useRouter } from "next/navigation"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
-const subRoles = ["ADMIN", "USER"]
+const subRoles = ["USER"]
 
 const CreateUser = () => {
+    const router = useRouter();
     const { createUser, loading, error } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -29,9 +31,13 @@ const CreateUser = () => {
         const userStr = localStorage.getItem("user");
         if (userStr) {
             const loggedInUser = JSON.parse(userStr);
-            if (loggedInUser?.companyId) {
-                setFormData((prev) => ({ ...prev, companyId: loggedInUser.companyId }));
-            }
+            console.log(loggedInUser)
+
+            setFormData((prev) => ({
+                ...prev,
+                companyId: loggedInUser?.companyId || "",
+                role: loggedInUser?.role || "",
+            }));
         }
     }, []);
 
@@ -46,6 +52,7 @@ const CreateUser = () => {
             setSuccessMessage(`User ${res.name} berhasil dibuat`);
             setShowSuccess(true);
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
+            setTimeout(() => router.push(`/dashboard/manage-user/${formData.role}`), 1200);
         } catch (err) {
             setSuccessMessage("Tidak Berhasil Membuat User");
             setShowSuccess(true);
@@ -130,26 +137,19 @@ const CreateUser = () => {
                         value={formData.companyId}
                         onChange={handleChange}
                         placeholder="John Doe"
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
                         disabled
                     />
                 </div>
 
                 <div>
-                    <DropdownOneSelect
-                        label="Role"
-                        options={roles.map((role) => ({
-                            value: role,
-                            label: role,
-                        }))}
-                        selected={formData.role || null}
-                        onChange={(newRole) =>
-                            setFormData((prev) => ({
-                            ...prev,
-                            role: newRole || "",
-                            }))
-                        }
-                        placeholder="Select Role"
+                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
+                    <input
+                        type="text"
+                        id="role"
+                        value={formData.role}
+                        disabled
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
                     />
                 </div>
 

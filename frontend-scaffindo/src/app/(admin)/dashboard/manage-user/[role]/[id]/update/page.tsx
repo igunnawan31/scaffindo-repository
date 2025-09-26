@@ -48,7 +48,7 @@ const UpdateUser = () => {
             setSuccessMessage("User berhasil diupdate!");
             setShowSuccess(true);
             setTimeout(() => {
-                router.push('/dashboard/list-admin');
+                router.push(`/dashboard/manage-user/${formData.role}`);
             }, 2000)
         } catch (err) {
             console.error("Update gagal:", err);

@@ -12,6 +12,7 @@ import { Company, Product } from "@/app/type/types"
 import { useProduct } from "@/app/hooks/useProduct"
 import Image from "next/image"
 import getImageUrl from "@/app/lib/path"
+import { Category } from "@/app/type/types"
 
 const ProductList = () => {
     const { products, fetchProducts, deleteProduct } = useProduct();
@@ -20,15 +21,18 @@ const ProductList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
 
-    const filteredProducts = products.filter(
-        (product: Product) =>
-            product.name?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredProducts = products.filter((product: Product) => {
+        const matchSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchCategory =
+            !selectedCategory || selectedCategory === "all" || product.category.includes(selectedCategory);
+        return matchSearch && matchCategory;
+    });
 
     console.log(filteredProducts.length);
 
@@ -59,7 +63,28 @@ const ProductList = () => {
     return (
         <>
             <div className="flex gap-3">
-                <CategoryProducts />
+                <CategoryProducts
+                    filters={[
+                        {
+                            type: "category",
+                            label: "Category",
+                            options: [
+                                { label: "All", value: "all" },
+                                ...Object.values(Category)
+                                    .filter((c) => typeof c === "string")
+                                    .map((c) => ({
+                                        label: c,
+                                        value: c,
+                                    })) as { label: string; value: string }[],
+                            ],
+                        },
+                    ]}
+                    onSelect={(type, value) => {
+                        if (type === "category") {
+                            setSelectedCategory(value);
+                        }
+                    }}
+                />
                 <SearchProducts 
                     placeholder="Search product" 
                     onSearch={handleSearch}

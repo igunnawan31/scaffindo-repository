@@ -1,22 +1,28 @@
 import Image from "next/image"
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import dummyProducts from "@/app/data/productsData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dummyDistributors from "@/app/data/distributorData";
+import { useProduct } from "@/app/hooks/useProduct";
+import getImageUrl from "@/app/lib/path";
+import { Product } from "@/app/type/types";
+interface DetailedProductProps {
+    productId: string;
+}
 
-const loggedInUser = {
-    name: "Aldisar Gibran",
-};
-
-const DetailedProduct = () => {
-    const params = useParams();
-    const productId = Number(params.productId);
-    const product = dummyProducts.find((p) => p.id === productId);
+export default function DetailedProduct({ productId }: DetailedProductProps) {
+    const { fetchProductById, product } = useProduct();
     const [formData, setFormData] = useState({
         totalPieces: "",
         distributor: "",
-        penanggungjawab: loggedInUser.name,
+        penanggungjawab: "Aldisar Gibran",
     });
+
+    useEffect(() => {
+        if (productId) {
+            fetchProductById(productId);
+        }
+    }, [productId, fetchProductById])
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -45,10 +51,10 @@ const DetailedProduct = () => {
             <div className="w-full py-5 block md:flex gap-5 rounded-lg overflow-hidden">
                 <div className="md:w-1/2 w-full relative h-[24rem]">
                     <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover rounded-lg"
+                        src={getImageUrl(product.image[product.image.length - 1].path)}
+                        alt={product.image[product.image.length - 1]?.filename ?? "Product image"}
+                        fill
+                        className="object-cover rounded-lg"
                     />
                 </div>
 
@@ -112,5 +118,3 @@ const DetailedProduct = () => {
         </div>
     )
 }
-
-export default DetailedProduct

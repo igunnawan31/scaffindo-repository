@@ -105,6 +105,32 @@ const agentMenus = [
     },
 ];
 
+const retailMenus = [
+    {
+        title: "Menu Retail",
+        items: [
+            {
+                icon: "/assets/icons/notification.svg",
+                alt: "Permintaan Barang",
+                label: "Permintaan Barang",
+                href: "/dashboard/permintaan-barang-retail",
+            },
+            {
+                icon: "/assets/icons/pengecekkan-barang.svg",
+                alt: "Pengecekkan Barang",
+                label: "Pengecekkan Barang",
+                href: "/dashboard/pengecekkan-barang-retail",
+            },
+            {
+                icon: "/assets/icons/shop.svg",
+                alt: "Penjualan Customer",
+                label: "Penjualan Customer",
+                href: "/dashboard/penjualan-customer",
+            },
+        ],
+    },
+];
+
 const userManages: Record<string, any[]> = {
     FACTORY: [
         {
@@ -192,7 +218,7 @@ const superAdminMenus = [
     },
 ]
 
-const allMenus = [...menuDashboards, ...factoryMenus, ...distributorMenus, ...agentMenus, ...superAdminMenus];
+const allMenus = [...menuDashboards, ...agentMenus, ...factoryMenus, ...distributorMenus, ...superAdminMenus, ...retailMenus];
 
 
 const Menu = () => {
@@ -229,6 +255,11 @@ const Menu = () => {
             menus.push(...agentMenus);
             if (user.subRole === "ADMIN") 
                 menus.push(...userManages.AGENT);
+        }
+        if (user.role === "RETAIL")  {
+            menus.push(...retailMenus);
+            if (user.subRole === "ADMIN") 
+                menus.push(...userManages.RETAIL);
         }
 
         setMenusToRender(menus);

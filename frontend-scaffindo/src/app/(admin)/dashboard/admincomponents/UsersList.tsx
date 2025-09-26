@@ -14,26 +14,42 @@ import { useUser } from "@/app/hooks/useUser";
 const UserLists = () => {
     const params = useParams();
     const role = (params.role as string);
-    const {users, fetchUsers} = useUser();
+    const {users, fetchUsers, deleteUser} = useUser();
+    const [companyId, setCompanyId] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
 
+    console.log(role);
+
     useEffect(() => {
         if (role) fetchUsers(role);
     }, [role, fetchUsers]);
 
+    useEffect(() => {
+        const userStr = localStorage.getItem("user");
+        if (userStr) {
+            const loggedInUser = JSON.parse(userStr);
+            if (loggedInUser?.companyId) {
+                setCompanyId(loggedInUser.companyId);
+            }
+        }
+    }, []);
+
     const filteredUsers = useMemo(() => {
         return users.filter(
-            (user) =>
+        (user) =>
+            user.companyId === companyId &&
+            (
                 user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 user.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (user.subRole && user.subRole.toLowerCase().includes(searchQuery.toLowerCase()))
+            )
         );
-    }, [users, searchQuery]);
+    }, [users, searchQuery, companyId]);
 
     const displayedUsers = useMemo(() => {
         return filteredUsers.slice(
@@ -42,10 +58,17 @@ const UserLists = () => {
         );
     }, [filteredUsers, currentPage, itemsPerPage]);
 
-    const handleDelete = () => {
-        setSuccessMessage("User berhasil dihapus.");
-        setShowSuccess(true);
-    };
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteUser(id);
+            setSuccessMessage("User berhasil dihapus");
+            setShowSuccess(true);
+            await fetchUsers(role);
+        } catch (error: any) {
+            setSuccessMessage(error?.response?.data?.message || "Gagal menghapus user");
+            setShowSuccess(true);
+        }
+    }
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
@@ -92,7 +115,7 @@ const UserLists = () => {
                                     <IoCreateOutline size={18} />
                                 </Link>
                                 <button
-                                    onClick={handleDelete}
+                                    onClick={() => handleDelete(user.id)}
                                     className="flex items-center gap-2 p-3 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer"
                                 >
                                     <IoTrashOutline size={18} />
@@ -112,7 +135,7 @@ const UserLists = () => {
             />
             <div className="mt-4 w-full">
                 <Pagination
-                    totalItems={users.length}
+                    totalItems={filteredUsers.length}
                     itemsPerPage={itemsPerPage}
                     currentPage={currentPage}
                     onPageChange={(page) => setCurrentPage(page)}

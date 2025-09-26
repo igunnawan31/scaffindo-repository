@@ -20,6 +20,8 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
         ? products.slice(0, limit)
         : products.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+    console.log(displayedProducts);
+
     return (
         <div className="flex flex-col justify-center items-start gap-3 overflow-hidden py-2 w-full">
             <h2 className="text-md font-bold text-blue-900">{title}</h2>
