@@ -11,9 +11,10 @@ import {
 import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 import * as bcrypt from 'bcryptjs';
 import { CreateUserResponseDto } from './dto/response/create-response.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { UpdateUserResponseDto } from './dto/response/update-response.dto';
 import { DeleteUserResponseDto } from './dto/response/delete-response.dto';
+import { UserRequest } from './entities/UserRequest.dto';
 
 @Injectable()
 export class UsersService {
@@ -31,13 +32,18 @@ export class UsersService {
     }
   }
 
-  async findAll(filters: UserFilterDto): Promise<GetAllUserResponseDto> {
+  async findAll(
+    filters: UserFilterDto,
+    user: UserRequest,
+  ): Promise<GetAllUserResponseDto> {
     const { name, role, companyId, subRole, page = 1, limit = 10 } = filters;
+    const userCompanyId =
+      user.role === Role.SUPERADMIN ? companyId : user.companyId;
     try {
       const where: Prisma.UserWhereInput = {
         role: role ?? undefined,
         subRole: subRole ?? undefined,
-        companyId: companyId ?? undefined,
+        companyId: userCompanyId ?? undefined,
         ...(name && {
           name: {
             contains: name,

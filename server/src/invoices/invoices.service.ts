@@ -7,7 +7,13 @@ import {
 import { CreateInvoiceDto } from './dto/request/create-invoice.dto';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { LabelStatus, Prisma, Role, TrackStatus } from '@prisma/client'; // Make sure to import enums from Prisma
+import {
+  CompanyType,
+  LabelStatus,
+  Prisma,
+  Role,
+  TrackStatus,
+} from '@prisma/client'; // Make sure to import enums from Prisma
 import { CreateInvoiceResponseDto } from './dto/response/create-response.dto';
 import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 import { plainToInstance } from 'class-transformer';
@@ -52,6 +58,15 @@ export class InvoicesService {
           );
         }
 
+        if (
+          user.companyId !== product.companyId &&
+          user.role !== Role.SUPERADMIN
+        ) {
+          throw new UnauthorizedException(
+            `User is not permitted to create invoices of other companies.`,
+          );
+        }
+
         // 2. Sanitize product name for use in label ID
         const cleanProductName = product.name
           .replace(/[^a-zA-Z0-9\s]/g, '') // remove special chars
@@ -82,6 +97,7 @@ export class InvoicesService {
             productId: productId,
             status: defStatus,
             qrCode: {}, // placeholder doang
+            companyId: user.companyId,
           },
         });
 
@@ -103,7 +119,7 @@ export class InvoicesService {
           await tx.tracking.create({
             data: {
               userId: user.id,
-              role: user.role,
+              companyType: CompanyType.FACTORY,
               title: title,
               description: description,
               status: TrackStatus.FACTORY_DONE,
@@ -154,11 +170,17 @@ export class InvoicesService {
     }
   }
 
-  async findAll(filters: InvoiceFilterDto): Promise<GetAllInvoiceResponseDto> {
+  async findAll(
+    filters: InvoiceFilterDto,
+    user: UserRequest,
+  ): Promise<GetAllInvoiceResponseDto> {
     try {
       const { productId, page = 1, limit = 10, sortBy, sortOrder } = filters;
       const where: Prisma.InvoiceWhereInput = {
         productId: productId ?? undefined,
+        Product: {
+          companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+        },
       };
       const orderBy: Prisma.InvoiceOrderByWithRelationInput = {};
       if (sortBy && ['productId'].includes(sortBy)) {
@@ -202,25 +224,34 @@ export class InvoicesService {
     }
   }
 
-  async findOne(id: string): Promise<GetInvoiceResponseDto> {
+  async findOne(id: string, user: UserRequest): Promise<GetInvoiceResponseDto> {
     try {
       const invoice = await this.prisma.invoice.findUnique({
         where: { id },
         include: {
           labels: { select: { id: true } },
-          PICs: { select: { userId: true } },
+          PICs: { include: { User: { select: { companyId: true } } } },
         },
       });
 
       if (!invoice)
         throw new NotFoundException(`Invoice with ID ${id} not found`);
+      console.log(invoice.PICs.map((pic) => pic.User.companyId));
 
+      if (
+        !invoice.PICs.map((pic) => pic.User.companyId).includes(user.companyId)
+      ) {
+        throw new UnauthorizedException(
+          `User is not permitted to see other company's invoice`,
+        );
+      }
       return plainToInstance(GetInvoiceResponseDto, {
         ...invoice,
         labelIds: invoice.labels.map((l) => l.id),
         PICIds: invoice.PICs.map((p) => p.userId),
         PICs: undefined,
         labels: undefined,
+        Product: undefined,
       });
     } catch (err) {
       handlePrismaError(err, 'Invoice', id);
@@ -233,24 +264,30 @@ export class InvoicesService {
     user: UserRequest,
   ): Promise<UpdateInvoiceDto> {
     try {
-      const { id: userId } = user;
-      const invoice = await this.findOne(id);
+      const invoice = await this.findOne(id, user);
 
       if (!invoice)
         throw new NotFoundException(`Invoice with ID ${id} not found`);
 
-      const userData = await this.prisma.user.findUnique({
-        where: { id: userId },
+      // const userData = await this.prisma.user.findUnique({
+      //   where: { id: userId },
+      // });
+      // if (!userData)
+      //   throw new NotFoundException(`User with ID ${userId} not found`);
+      const product = await this.prisma.product.findUnique({
+        where: { id: invoice.productId },
       });
-      console.log('companyId', userData?.companyId);
-      if (!userData)
-        throw new NotFoundException(`User with ID ${userId} not found`);
+      if (user.companyId !== product?.companyId) {
+        throw new UnauthorizedException(
+          `User is not permitted to update other company's invoice`,
+        );
+      }
       const companyData = await this.prisma.company.findUnique({
-        where: { id: userData.companyId! },
+        where: { id: user.companyId },
       });
       if (!companyData)
         throw new NotFoundException(
-          `Company with ID ${userData.companyId} not found`,
+          `Company with ID ${user.companyId} not found`,
         );
 
       // Prevent updating to PURCHASED_BY_CUSTOMER
@@ -283,10 +320,12 @@ export class InvoicesService {
         status = updateInvoiceDto.status as TrackStatus;
       }
       const updated = await this.prisma.$transaction(async (tx) => {
-        await tx.invoice.update({
+        const updateQuery = await tx.invoice.update({
           where: { id },
           data: {
             status: updateInvoiceDto.status,
+            companyId: user.companyId,
+            nextCompanyId: updateInvoiceDto.nextCompanyId,
           },
         });
 
@@ -300,24 +339,30 @@ export class InvoicesService {
         );
 
         if (status) {
+          if (!updateInvoiceDto.title || !updateInvoiceDto.description) {
+            throw new BadRequestException(
+              `Title and description are required to update to ${updateInvoiceDto.status}`,
+            );
+          }
+
           await Promise.all(
             invoice.labelIds.map(async (label) =>
               tx.tracking.create({
                 data: {
                   userId: user.id,
-                  role: user.role,
+                  companyType: companyData.type,
                   title: updateInvoiceDto.title,
                   description: updateInvoiceDto.description,
                   status,
                   labelId: label,
-                  companyId: userData.companyId!,
+                  companyId: user.companyId,
                 },
               }),
             ),
           );
         }
 
-        return this.findOne(id);
+        return updateQuery;
       });
       return plainToInstance(UpdateInvoiceDto, updated);
     } catch (err) {
@@ -325,11 +370,22 @@ export class InvoicesService {
     }
   }
 
-  async remove(id: string): Promise<DeleteInvoiceResponseDto> {
+  async remove(
+    id: string,
+    user: UserRequest,
+  ): Promise<DeleteInvoiceResponseDto> {
     try {
-      const existingInvoice = await this.findOne(id);
+      const existingInvoice = await this.findOne(id, user);
       if (!existingInvoice)
         throw new NotFoundException(`Invoice with ID ${id} not found`);
+      const product = await this.prisma.product.findUnique({
+        where: { id: existingInvoice.productId },
+      });
+      if (user.companyId !== product?.companyId) {
+        throw new UnauthorizedException(
+          `User is not permitted to delete other company's invoice`,
+        );
+      }
       const query = await this.prisma.invoice.delete({ where: { id } });
       return plainToInstance(DeleteInvoiceResponseDto, query);
     } catch (err) {

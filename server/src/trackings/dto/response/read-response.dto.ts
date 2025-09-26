@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
-import { Role, TrackStatus } from '@prisma/client';
+import { CompanyType, TrackStatus } from '@prisma/client';
 import { Expose } from 'class-transformer';
 
 export class GetTrackingResponseDto {
@@ -13,7 +13,7 @@ export class GetTrackingResponseDto {
 
   @ApiResponseProperty()
   @Expose()
-  role: Role;
+  companyType: CompanyType;
 
   @ApiResponseProperty()
   @Expose()

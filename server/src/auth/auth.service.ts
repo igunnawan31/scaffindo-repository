@@ -1,9 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { RegisterDto } from './dto/register.dto';
+import { UpdateUserResponseDto } from 'src/users/dto/response/update-response.dto';
+import { plainToInstance } from 'class-transformer';
+import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 
 @Injectable()
 export class AuthService {
@@ -58,5 +65,24 @@ export class AuthService {
       data: { ...data, password: hashed },
     });
     return this.login(user);
+  }
+
+  async forgot(id: string, dto: string): Promise<UpdateUserResponseDto> {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { id: id },
+      });
+      if (!existingUser) throw new NotFoundException(`User ${id} not found`);
+      const hashed = await bcrypt.hash(dto, 10);
+      const result = await this.prisma.user.update({
+        data: {
+          password: hashed,
+        },
+        where: { id },
+      });
+      return plainToInstance(UpdateUserResponseDto, result);
+    } catch (err) {
+      handlePrismaError(err, 'User', id);
+    }
   }
 }

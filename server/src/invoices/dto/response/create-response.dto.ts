@@ -17,4 +17,12 @@ export class CreateInvoiceResponseDto {
   @ApiResponseProperty()
   @Expose()
   productId: number;
+
+  @ApiResponseProperty()
+  @Expose()
+  currentCompanyId: string;
+
+  @ApiResponseProperty()
+  @Expose()
+  nextCompanyId: string;
 }

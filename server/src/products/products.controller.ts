@@ -10,6 +10,7 @@ import {
   UploadedFiles,
   UseGuards,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/request/create-product.dto';
@@ -31,6 +32,7 @@ import { Role } from '@prisma/client';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UpdateProductResponseDto } from './dto/response/update-response.dto';
 import { DeleteProductResponseDto } from './dto/response/delete-response.dto';
+import { UserRequest } from 'src/users/entities/UserRequest.dto';
 
 @Controller('products')
 @ApiBearerAuth('access-token')
@@ -108,16 +110,21 @@ export class ProductsController {
   }
 
   @Get()
-  @Roles(Role.SUPERADMIN, Role.FACTORY)
   @ApiResponse({ type: GetAllProductResponseDto, status: 200 })
-  findAll(@Query() filters: productFilterDto) {
-    return this.productsService.findAll(filters);
+  findAll(
+    @Query() filters: productFilterDto,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.productsService.findAll(filters, req.user);
   }
 
   @Get(':id')
   @ApiResponse({ type: GetProductResponseDto, status: 200 })
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(+id);
+  findOne(
+    @Param('id') id: string,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.productsService.findOne(+id, req.user);
   }
 
   @Patch(':id')
@@ -173,6 +180,7 @@ export class ProductsController {
   update(
     @Param('id') id: number,
     @Body() updateProductDto: UpdateProductDto,
+    @Req() req: Request & { user: UserRequest },
     @UploadedFiles()
     files: {
       certificationDocs?: Express.Multer.File[];
@@ -204,6 +212,7 @@ export class ProductsController {
     return this.productsService.update(
       id,
       updateProductDto,
+      req.user,
       { certificateMeta: certificateMeta, imageMeta: imageMeta },
       {
         replaceCerts: replaceCerts === 'true',
@@ -212,10 +221,10 @@ export class ProductsController {
     );
   }
 
+  @Roles(Role.SUPERADMIN)
   @Delete(':id')
   @ApiResponse({ type: DeleteProductResponseDto, status: 200 })
-  @Roles(Role.SUPERADMIN)
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: Request & { user: UserRequest }) {
+    return this.productsService.remove(+id, req.user);
   }
 }

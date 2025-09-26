@@ -11,6 +11,7 @@ async function main() {
     data: {
       id: 'cmp_' + uuidv4().substring(0, 8), // Mimicking cuid
       name: 'Acme Manufacturing Inc.',
+      type: 'FACTORY',
     },
   });
 
@@ -71,6 +72,7 @@ async function main() {
       id: invoiceId,
       qrCode: { data: 'INVOICE_QR_CODE_001' }, // Example JSON structure
       productId: product.id,
+      companyId: company.id,
     },
   });
 
@@ -106,7 +108,7 @@ async function main() {
   const tracking = await prisma.tracking.create({
     data: {
       userId: factoryUser.id,
-      role: 'FACTORY',
+      companyType: 'FACTORY',
       title: 'Product Manufactured',
       description:
         'The Premium Widget has been successfully produced and labeled.',

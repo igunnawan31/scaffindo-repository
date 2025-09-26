@@ -15,6 +15,14 @@ export class GetCompanyResponseDto extends CreateCompanyResponseDto {
   @ApiResponseProperty()
   @Expose()
   trackings: string[];
+
+  @Expose()
+  @ApiResponseProperty()
+  currentInvoices: string[];
+
+  @Expose()
+  @ApiResponseProperty()
+  incomingInvoices: string[];
 }
 
 export class GetAllCompanyResponseDto {

@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { CompanyType } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 import { sortOrder } from 'src/types/sortBy.dto';
 
 export class CompanyFilterDto {
@@ -8,6 +9,11 @@ export class CompanyFilterDto {
   @IsString()
   @IsOptional()
   searchTerm?: string;
+
+  @ApiPropertyOptional()
+  @IsEnum(CompanyType)
+  @IsOptional()
+  companyType?: CompanyType;
 
   @ApiPropertyOptional()
   @IsInt()

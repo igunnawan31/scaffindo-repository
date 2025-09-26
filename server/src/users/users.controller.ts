@@ -28,15 +28,18 @@ import {
 } from './dto/response/read-response.dto';
 import { UpdateUserResponseDto } from './dto/response/update-response.dto';
 import { DeleteUserResponseDto } from './dto/response/delete-response.dto';
+import { SubRolesGuard } from 'src/common/guards/subRoles.guard';
+import { SubRoles } from 'src/common/decorators/sub-roles.decorator';
 
 @Controller('users')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard, SubRolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(Role.SUPERADMIN, SubRole.ADMIN)
+  @Roles(Role.SUPERADMIN)
+  @SubRoles(SubRole.ADMIN)
   @ApiResponse({
     type: CreateUserResponseDto,
     status: 201,
@@ -46,13 +49,15 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(Role.SUPERADMIN, SubRole.ADMIN)
   @ApiResponse({
     type: GetAllUserResponseDto,
     status: 200,
   })
-  findAll(@Query() filters: UserFilterDto) {
-    return this.usersService.findAll(filters);
+  findAll(
+    @Query() filters: UserFilterDto,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.usersService.findAll(filters, req.user);
   }
 
   @Get(':id')
@@ -72,22 +77,22 @@ export class UsersController {
     return result;
   }
 
-  @Patch('forgot/:id')
-  @ApiResponse({ type: String, status: 200 })
-  forgotPassword(
-    @Param('id') id: string,
-    @Body() dto: string,
-    @Req() req: Request & { user: UserRequest },
-  ) {
-    if (
-      id !== req.user.id &&
-      (req.user.subRole !== SubRole.ADMIN || req.user.role !== Role.SUPERADMIN)
-    )
-      throw new UnauthorizedException(
-        `User role ${req.user.role} not permitted for this action`,
-      );
-    return this.usersService.forgot(id, dto);
-  }
+  // @Patch('forgot/:id')
+  // @ApiResponse({ type: String, status: 200 })
+  // forgotPassword(
+  //   @Param('id') id: string,
+  //   @Body() dto: string,
+  //   @Req() req: Request & { user: UserRequest },
+  // ) {
+  //   if (
+  //     id !== req.user.id &&
+  //     (req.user.subRole !== SubRole.ADMIN || req.user.role !== Role.SUPERADMIN)
+  //   )
+  //     throw new UnauthorizedException(
+  //       `User role ${req.user.role} not permitted for this action`,
+  //     );
+  //   return this.usersService.forgot(id, dto);
+  // }
 
   @Patch(':id')
   @ApiBody({ type: UpdateUserDto })
@@ -101,6 +106,7 @@ export class UsersController {
     @Req() req: Request & { user: UserRequest },
   ) {
     if (
+      id === req.user.id ||
       req.user.subRole === SubRole.ADMIN ||
       req.user.role === Role.SUPERADMIN
     ) {
@@ -113,7 +119,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(Role.SUPERADMIN, SubRole.ADMIN)
+  @Roles(Role.SUPERADMIN)
+  @SubRoles(SubRole.ADMIN)
   @ApiResponse({
     type: DeleteUserResponseDto,
     status: 200,

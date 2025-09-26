@@ -20,11 +20,12 @@ export class CompaniesService {
   async create(
     createCompanyDto: CreateCompanyDto,
   ): Promise<CreateCompanyResponseDto> {
-    const { name } = createCompanyDto;
+    const { name, companyType: type } = createCompanyDto;
     try {
       const company = await this.prisma.company.create({
         data: {
           name: name,
+          type: type,
         },
       });
 
@@ -35,9 +36,18 @@ export class CompaniesService {
   }
 
   async findAll(filters: CompanyFilterDto): Promise<GetAllCompanyResponseDto> {
-    const { searchTerm, page = 1, limit = 10, sortBy, sortOrder } = filters;
+    const {
+      searchTerm,
+      page = 1,
+      limit = 10,
+      sortBy,
+      sortOrder,
+      companyType,
+    } = filters;
     try {
-      const where: Prisma.CompanyWhereInput = {};
+      const where: Prisma.CompanyWhereInput = {
+        type: companyType ?? undefined,
+      };
 
       // search term filter
       if (
@@ -79,7 +89,13 @@ export class CompaniesService {
         this.prisma.company.count({ where }),
       ]);
       return plainToInstance(GetAllCompanyResponseDto, {
-        data: companies.map((c) => plainToInstance(GetCompanyResponseDto, c)),
+        data: companies.map((c) =>
+          plainToInstance(GetCompanyResponseDto, {
+            ...c,
+            companyType: c.type,
+            type: undefined,
+          }),
+        ),
         meta: {
           page,
           limit,
@@ -110,12 +126,13 @@ export class CompaniesService {
     updateCompanyDto: UpdateCompanyDto,
   ): Promise<UpdateCompanyResponseDto> {
     try {
-      const { name } = updateCompanyDto;
+      const { name, companyType } = updateCompanyDto;
       const existingCompany = await this.findOne(id);
       if (!existingCompany)
         throw new NotFoundException(`Company with ID ${id} not found`);
       const updateData: Prisma.CompanyUpdateInput = {
         name: name ?? undefined,
+        type: companyType ?? undefined,
       };
       const query = await this.prisma.company.update({
         where: { id },

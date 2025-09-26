@@ -41,7 +41,7 @@ model Product {
   name           String
   description    String
   image          Json // Foto Produknya
-  price          Int 
+  price          Int
   companyId      String
   Company        Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   category       ProductCategory[]
@@ -56,7 +56,7 @@ model Certification {
   expired   DateTime
   details   String
   document  Json?
-  Product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
 }
 
@@ -68,7 +68,7 @@ model Label {
   productId   Int
   Invoice     Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   invoiceId   String
-  Penjualan   Penjualan?   @relation(fields: [penjualanId], references: [id], onDelete: SetNull)
+  Penjualan   Penjualan?  @relation(fields: [penjualanId], references: [id], onDelete: SetNull)
   penjualanId String?
   trackings   Tracking[]
   createdAt   DateTime    @default(now())
@@ -83,8 +83,14 @@ model Invoice {
   status    LabelStatus  @default(FACTORY_DONE)
   Product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  companyId String // current owner
+  Company   Company      @relation("CurrentCompany", fields: [companyId], references: [id], onDelete: Cascade)
+
+  nextCompanyId String? // next company
+  nextCompany   Company? @relation("NextCompany", fields: [nextCompanyId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Penjualan {
@@ -96,26 +102,29 @@ model Penjualan {
 }
 
 model Company {
-  id        String     @id @default(cuid())
-  name      String
-  Users     User[]
-  Products  Product[]
-  Trackings Tracking[]
+  id               String      @id @default(cuid())
+  name             String
+  type             CompanyType
+  Users            User[]
+  Products         Product[]
+  Trackings        Tracking[]
+  currentInvoices  Invoice[]   @relation("CurrentCompany")
+  incomingInvoices Invoice[]   @relation("NextCompany")
 }
 
 model Tracking {
   id          String      @id @default(cuid())
   userId      String?
   pic         User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  role        Role
+  companyType CompanyType
   title       String
   description String
   status      TrackStatus
   createdAt   DateTime    @default(now())
-  Label       Label      @relation(fields: [labelId], references: [id], onDelete: Cascade)
+  Label       Label       @relation(fields: [labelId], references: [id], onDelete: Cascade)
   labelId     String
   companyId   String?
-  Company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  Company     Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
 }
 
 enum LabelStatus {
@@ -154,6 +163,14 @@ enum Role {
   DISTRIBUTOR
   AGENT
   RETAIL
+}
+
+enum CompanyType {
+  FACTORY
+  DISTRIBUTOR
+  AGENT
+  RETAIL
+  CONSUMER
 }
 
 enum SubRole {

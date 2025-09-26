@@ -7,7 +7,7 @@ import {
 import { CreateProductDto } from './dto/request/create-product.dto';
 import { FileMetaData } from 'src/types/FileMeta.dto';
 import { CreateProductResponseDto } from './dto/response/create-response.dto';
-import { Prisma, ProductCategory } from '@prisma/client';
+import { Prisma, ProductCategory, Role } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 import { instanceToPlain, plainToInstance } from 'class-transformer';
@@ -22,6 +22,7 @@ import { UpdateProductResponseDto } from './dto/response/update-response.dto';
 import { deleteFileArray } from 'src/utils/fileHelper';
 import { DeleteProductResponseDto } from './dto/response/delete-response.dto';
 import { GetCertificationResponseDto } from 'src/certifications/dto/response/read-response.dto';
+import { UserRequest } from 'src/users/entities/UserRequest.dto';
 
 @Injectable()
 export class ProductsService {
@@ -157,7 +158,10 @@ export class ProductsService {
     return plainToInstance(CreateProductResponseDto, response);
   }
 
-  async findAll(filters: productFilterDto): Promise<GetAllProductResponseDto> {
+  async findAll(
+    filters: productFilterDto,
+    user: UserRequest,
+  ): Promise<GetAllProductResponseDto> {
     try {
       const {
         searchTerm,
@@ -171,7 +175,9 @@ export class ProductsService {
       } = filters;
       const skip = (page - 1) * limit;
 
-      const where: Prisma.ProductWhereInput = {};
+      const where: Prisma.ProductWhereInput = {
+        companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+      };
 
       if (searchTerm) {
         where.OR = [
@@ -249,10 +255,13 @@ export class ProductsService {
   // =============================
   // FIND ONE
   // =============================
-  async findOne(id: number): Promise<GetProductResponseDto> {
+  async findOne(id: number, user: UserRequest): Promise<GetProductResponseDto> {
     try {
       const product = await this.prisma.product.findUnique({
-        where: { id },
+        where: {
+          id: id,
+          companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+        },
         include: {
           labels: true,
           certifications: true,
@@ -277,6 +286,7 @@ export class ProductsService {
   async update(
     id: number,
     updateProductDto: UpdateProductDto,
+    user: UserRequest,
     filesMeta: {
       certificateMeta?: any[];
       imageMeta?: any[];
@@ -300,7 +310,7 @@ export class ProductsService {
       }
 
       // 2. Fetch existing product (for file cleanup)
-      const existingProduct = await this.findOne(id);
+      const existingProduct = await this.findOne(id, user);
       if (!existingProduct) {
         throw new NotFoundException(`Product with ID ${id} not found`);
       }
@@ -479,9 +489,12 @@ export class ProductsService {
     }
   }
 
-  async remove(id: number): Promise<DeleteProductResponseDto> {
+  async remove(
+    id: number,
+    user: UserRequest,
+  ): Promise<DeleteProductResponseDto> {
     try {
-      const product = await this.findOne(id);
+      const product = await this.findOne(id, user);
       if (!product) throw new NotFoundException(`Product ${id} not found`);
       // Delete all associated files with proper typing
       await Promise.all([deleteFileArray(product.image, 'image')]);

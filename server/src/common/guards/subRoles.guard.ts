@@ -5,8 +5,8 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role, SubRole } from '@prisma/client';
+import { SUB_ROLES_KEY } from '../decorators/sub-roles.decorator';
 
 // Define the request type with user attached
 interface RequestWithUser extends Request {
@@ -19,14 +19,14 @@ interface RequestWithUser extends Request {
 }
 
 @Injectable()
-export class RolesGuard implements CanActivate {
+export class SubRolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(ctx: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
-      ctx.getHandler(),
-      ctx.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<SubRole[]>(
+      SUB_ROLES_KEY,
+      [ctx.getHandler(), ctx.getClass()],
+    );
 
     if (!requiredRoles) {
       return true; // no roles required
@@ -39,14 +39,19 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('No user found in request');
     }
 
-    const role = user.role;
-    if (!role) {
+    // Superadmin bypass
+    if (user.role === Role.SUPERADMIN) {
+      return true;
+    }
+
+    const subRole = user.subRole;
+    if (!subRole) {
       throw new ForbiddenException('No role found for user');
     }
 
-    if (!requiredRoles.includes(role)) {
+    if (!requiredRoles.includes(subRole)) {
       throw new ForbiddenException(
-        `User role ${role} not permitted for this action`,
+        `User role ${subRole} not permitted for this action`,
       );
     }
 

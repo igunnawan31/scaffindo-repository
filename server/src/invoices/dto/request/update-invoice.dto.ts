@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateInvoiceDto } from './create-invoice.dto';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { LabelStatus } from '@prisma/client';
 
 export class UpdateInvoiceDto extends PartialType(CreateInvoiceDto) {
@@ -9,11 +9,17 @@ export class UpdateInvoiceDto extends PartialType(CreateInvoiceDto) {
   @IsEnum(LabelStatus)
   status: LabelStatus;
 
-  @IsString()
   @ApiProperty()
+  @IsString()
+  nextCompanyId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiPropertyOptional()
   title: string; // ini required buat bikin tracking
 
   @IsString()
-  @ApiProperty()
+  @IsOptional()
+  @ApiPropertyOptional()
   description: string; // ini required buat bikin tracking
 }

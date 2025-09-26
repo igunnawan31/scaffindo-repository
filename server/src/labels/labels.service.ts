@@ -7,7 +7,13 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { LabelFilterDto } from './dto/request/label-filter.dto';
 import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
-import { LabelStatus, Prisma, Role, TrackStatus } from '@prisma/client';
+import {
+  CompanyType,
+  LabelStatus,
+  Prisma,
+  Role,
+  TrackStatus,
+} from '@prisma/client';
 import { plainToInstance } from 'class-transformer';
 import {
   GetAllLabelResponseDto,
@@ -140,7 +146,7 @@ export class LabelsService {
         await tx.tracking.create({
           data: {
             userId: user.id,
-            role: Role.CONSUMER,
+            companyType: 'CONSUMER',
             title: dto.title,
             description: dto.description,
             status: LabelStatus.PURCHASED_BY_CUSTOMER,
@@ -221,10 +227,24 @@ export class LabelsService {
           },
         });
         if (status) {
+          let type: CompanyType;
+          if (user.role === Role.SUPERADMIN || user.role === Role.CONSUMER) {
+            throw new BadRequestException(
+              `${user.role} doesn't have companyId therefore cannot update invoice to ${updateLabelDto.status}`,
+            );
+          } else {
+            if (user.role === Role.DISTRIBUTOR) {
+              type = CompanyType.DISTRIBUTOR;
+            } else if (user.role === Role.AGENT) {
+              type = CompanyType.AGENT;
+            } else {
+              type = CompanyType.RETAIL;
+            }
+          }
           await tx.tracking.create({
             data: {
               userId: user.id,
-              role: user.role,
+              companyType: type,
               title: updateLabelDto.title,
               description: updateLabelDto.description,
               status,
@@ -247,10 +267,17 @@ export class LabelsService {
     }
   }
 
-  async remove(id: string): Promise<DeleteLabelResponseDto> {
+  async remove(id: string, user: UserRequest): Promise<DeleteLabelResponseDto> {
     try {
       const label = await this.findOne(id);
       if (!label) throw new NotFoundException(`Label with ID ${id} not found`);
+      if (
+        label.currentCompanyId !== user.companyId ||
+        label.nextCompanyId !== user.companyId
+      )
+        throw new UnauthorizedException(
+          `Removing other company's label is forbidden`,
+        );
       const deleteQuery = await this.prisma.label.delete({
         where: { id },
         include: {

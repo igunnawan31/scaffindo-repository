@@ -10,6 +10,7 @@ import {
   Req,
   NotFoundException,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/request/create-company.dto';
@@ -28,6 +29,7 @@ import { UpdateCompanyResponseDto } from './dto/response/update-response.dto';
 import { DeleteCompanyResponseDto } from './dto/response/delete-response.dto';
 import { GetUserResponseDto } from 'src/users/dto/response/read-response.dto';
 import { CompanyFilterDto } from './dto/request/company-filter.dto';
+import { UserRequest } from 'src/users/entities/UserRequest.dto';
 
 @Controller('companies')
 @ApiBearerAuth('access-token')
@@ -51,7 +53,13 @@ export class CompaniesController {
 
   @Get(':id')
   @ApiResponse({ type: GetCompanyResponseDto })
-  findOne(@Param('id') id: string) {
+  findOne(
+    @Param('id') id: string,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    if (id !== req.user.companyId && req.user.role !== Role.SUPERADMIN) {
+      throw new UnauthorizedException(`User is not permitted for this action`);
+    }
     return this.companiesService.findOne(id);
   }
 
@@ -62,7 +70,7 @@ export class CompaniesController {
     @Body() updateCompanyDto: UpdateCompanyDto,
     @Req() req: Request & { user: GetUserResponseDto },
   ) {
-    if (id != req.user.companyId && req.user.role !== 'SUPERADMIN') {
+    if (id != req.user.companyId && req.user.role !== Role.SUPERADMIN) {
       throw new NotFoundException(
         `User role ${req.user.role} not permitted for this action`,
       );

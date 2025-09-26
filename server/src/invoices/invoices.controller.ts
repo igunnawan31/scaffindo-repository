@@ -18,6 +18,9 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { InvoiceFilterDto } from './dto/request/invoice-filter.dto';
 import { UpdateInvoiceDto } from './dto/request/update-invoice.dto';
+import { Role, SubRole } from '@prisma/client';
+import { SubRoles } from 'src/common/decorators/sub-roles.decorator';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('invoices')
 @ApiBearerAuth('access-token')
@@ -26,6 +29,8 @@ export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Post()
+  @Roles(Role.FACTORY)
+  @SubRoles(SubRole.ADMIN, SubRole.USER)
   create(
     @Body() createInvoiceDto: CreateInvoiceDto,
     @Req() req: Request & { user: UserRequest },
@@ -34,13 +39,19 @@ export class InvoicesController {
   }
 
   @Get()
-  findAll(@Query() filters: InvoiceFilterDto) {
-    return this.invoicesService.findAll(filters);
+  findAll(
+    @Query() filters: InvoiceFilterDto,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.invoicesService.findAll(filters, req.user);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.invoicesService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.invoicesService.findOne(id, req.user);
   }
 
   @Patch(':id')
@@ -53,7 +64,7 @@ export class InvoicesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.invoicesService.remove(id);
+  remove(@Param('id') id: string, @Req() req: Request & { user: UserRequest }) {
+    return this.invoicesService.remove(id, req.user);
   }
 }

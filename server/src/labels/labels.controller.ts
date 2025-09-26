@@ -58,7 +58,7 @@ export class LabelsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.labelsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: Request & { user: UserRequest }) {
+    return this.labelsService.remove(id, req.user);
   }
 }

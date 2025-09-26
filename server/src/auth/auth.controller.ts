@@ -1,17 +1,22 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { ApiResponse } from '@nestjs/swagger';
+import { UserRequest } from 'src/users/entities/UserRequest.dto';
+import { Role, SubRole } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
@@ -22,6 +27,23 @@ export class AuthController {
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @Patch('forgot/:id')
+  @ApiResponse({ type: String, status: 200 })
+  forgotPassword(
+    @Param('id') id: string,
+    @Body() dto: string,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    if (
+      id !== req.user.id &&
+      (req.user.subRole !== SubRole.ADMIN || req.user.role !== Role.SUPERADMIN)
+    )
+      throw new UnauthorizedException(
+        `User role ${req.user.role} not permitted for this action`,
+      );
+    return this.authService.forgot(id, dto);
   }
 
   // @Post('refresh')
