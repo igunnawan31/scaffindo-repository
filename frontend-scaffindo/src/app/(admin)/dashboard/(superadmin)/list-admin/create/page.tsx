@@ -6,9 +6,10 @@ import Link from "next/link"
 import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import { useCompany } from "@/app/hooks/useCompany"
+import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
-const subRoles = ["ADMIN"]
+const subRoles = ["ADMIN", "USER"]
 
 const CreateAdmin = () => {
     const { fetchCompanies, companies } = useCompany();
@@ -37,6 +38,7 @@ const CreateAdmin = () => {
         e.preventDefault();
         try {
             const res = await createUser(formData);
+            console.log(formData)
             setSuccessMessage(`User ${res.name} berhasil dibuat`);
             setShowSuccess(true);
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
@@ -109,50 +111,57 @@ const CreateAdmin = () => {
                 </div>
 
                 <div>
-                    <label htmlFor="companyId" className="block font-semibold text-blue-900 mb-1">Company</label>
-                    <select
-                        id="companyId"
-                        value={formData.companyId}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Company --</option>
-                        {companies.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name}
-                            </option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="Company"
+                        options={companies.map((c) => ({
+                            value: c.id,
+                            label: c.name,
+                        }))}
+                        selected={formData.companyId || null}
+                        onChange={(newCompanyId) =>
+                            setFormData((prev) => ({
+                                ...prev,
+                                companyId: newCompanyId || "",
+                            }))
+                        }
+                        placeholder="Select Company"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
-                    <select
-                        id="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Role --</option>
-                        {roles.map((role) => (
-                            <option key={role} value={role}>{role}</option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="Role"
+                        options={roles.map((role) => ({
+                            value: role,
+                            label: role,
+                        }))}
+                        selected={formData.role || null}
+                        onChange={(newRole) =>
+                            setFormData((prev) => ({
+                            ...prev,
+                            role: newRole || "",
+                            }))
+                        }
+                        placeholder="Select Role"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="subRole" className="block font-semibold text-blue-900 mb-1">Subrole</label>
-                    <select
-                        id="subRole"
-                        value={formData.subRole}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                        <option value="">-- Select Subrole --</option>
-                        {subRoles.map((s) => (
-                            <option key={s} value={s}>{s}</option>
-                        ))}
-                    </select>
+                    <DropdownOneSelect
+                        label="subRole"
+                        options={subRoles.map((subRole) => ({
+                            value: subRole,
+                            label: subRole,
+                        }))}
+                        selected={formData.subRole || null}
+                        onChange={(newSubRole) =>
+                            setFormData((prev) => ({
+                            ...prev,
+                            subRole: newSubRole || "",
+                            }))
+                        }
+                        placeholder="Select Sub Role"
+                    />
                 </div>
 
                 <div className="flex justify-between">

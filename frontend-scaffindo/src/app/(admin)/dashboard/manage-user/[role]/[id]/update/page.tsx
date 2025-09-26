@@ -5,39 +5,57 @@ import { useState, useEffect } from "react"
 import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
+import { useUser } from "@/app/hooks/useUser"
+import { useRouter } from "next/navigation"
 
 const UpdateUser = () => {
-    const { id } = useParams();
+    const { id } = useParams<{id: string}>();
+    const { user, fetchUserById, updateUser, loading } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         role: "",
         subRole: "",
-    })
+    });
+    
+    useEffect(() => {
+        if (id) fetchUserById(id);
+    }, [id, fetchUserById]);
 
     useEffect(() => {
-        const user = UserDummy.find((u) => u.id === Number(id))
         if (user) {
-        setFormData({
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            subRole: user.subRole,
-        })
+            setFormData({
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                subRole: user.subRole,
+            });
         }
-    }, [id])
+    }, [user]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        setShowSuccess(true);
-        console.log("Updated user:", { id, ...formData })
-    }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            if (!id) return;
+            await updateUser(id, formData);
+            setSuccessMessage("User berhasil diupdate!");
+            setShowSuccess(true);
+            setTimeout(() => {
+                router.push('/dashboard/list-admin');
+            }, 2000)
+        } catch (err) {
+            console.error("Update gagal:", err);
+            setSuccessMessage("Gagal update user");
+            setShowSuccess(true);
+        }
+    };
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full mx-auto">
@@ -82,8 +100,10 @@ const UpdateUser = () => {
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
                     >
                         <option value="">-- Select Role --</option>
-                        <option value="Factory">Factory</option>
-                        <option value="Distributor">Distributor</option>
+                        <option value="FACTORY">Factory</option>
+                        <option value="DISTRIBUTOR">Distributor</option>
+                        <option value="AGENT">Agent</option>
+                        <option value="RETAIL">Retail</option>
                     </select>
                 </div>
 
@@ -98,21 +118,21 @@ const UpdateUser = () => {
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
                     >
                         <option value="">-- Select Sub Role --</option>
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="USER">User</option>
                     </select>
                 </div>
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/manage-user'}
+                        href={'/dashboard/list-admin'}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali
                     </Link>
                     <button
                         type="submit"
-                        className="p-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600"
+                        className="p-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600 cursor-pointer"
                     >
                         Update User
                     </button>

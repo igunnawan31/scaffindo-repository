@@ -9,10 +9,9 @@ import Image from "next/image"
 import DropdownOneSelect from "../../../(superadmin)/superadmincomponents/DropdownOneSelect"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
-const subRoles = ["Admin", "User"]
+const subRoles = ["ADMIN", "USER"]
 
 const CreateUser = () => {
-    const { fetchCompanies, companies } = useCompany();
     const { createUser, loading, error } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
@@ -48,6 +47,8 @@ const CreateUser = () => {
             setShowSuccess(true);
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
         } catch (err) {
+            setSuccessMessage("Tidak Berhasil Membuat User");
+            setShowSuccess(true);
             console.error("Failed to create user:", err);
         }
     }

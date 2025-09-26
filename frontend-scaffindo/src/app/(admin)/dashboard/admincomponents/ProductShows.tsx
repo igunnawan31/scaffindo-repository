@@ -3,13 +3,8 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import Pagination from "./Pagination";
 import Link from "next/link";
-
-type Product = {
-    id: number;
-    name: string;
-    description: string;
-    image: string;
-};
+import { Product } from "@/app/type/types";
+import getImageUrl from "@/app/lib/path";
 
 type ProductShowsProps = {
     title: string;
@@ -37,8 +32,8 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
                         className="w-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
                     >
                         <Image
-                            src={product.image}
-                            alt={product.name}
+                            src={getImageUrl(product.image[product.image.length - 1].path)}
+                            alt={product.image[product.image.length - 1]?.filename ?? "Product image"}
                             width={400}
                             height={200}
                             className="w-full h-48 object-cover rounded-t-lg"

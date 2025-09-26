@@ -108,7 +108,7 @@ export class ProductsController {
   }
 
   @Get()
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.FACTORY)
   @ApiResponse({ type: GetAllProductResponseDto, status: 200 })
   findAll(@Query() filters: productFilterDto) {
     return this.productsService.findAll(filters);

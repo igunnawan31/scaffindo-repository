@@ -70,9 +70,9 @@ const UserLists = () => {
                     Create New User
                 </Link>
             </div>
-            {users.length > 0 ? (
+            {displayedUsers.length > 0 ? (
                 <div className="space-y-3 mt-3">
-                    {users.map((user) => (
+                    {displayedUsers.map((user) => (
                         <div
                             key={user.id}
                             className="flex justify-between items-center rounded-lg p-3 shadow-md gap-3"
