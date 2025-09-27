@@ -38,7 +38,6 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @Roles(Role.SUPERADMIN)
   @SubRoles(SubRole.ADMIN)
   @ApiResponse({
     type: CreateUserResponseDto,
@@ -119,7 +118,6 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(Role.SUPERADMIN)
   @SubRoles(SubRole.ADMIN)
   @ApiResponse({
     type: DeleteUserResponseDto,

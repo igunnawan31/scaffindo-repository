@@ -56,21 +56,24 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
                     </Link>
                 ))}
             </div>
-
-            {!limit && (
-                <div className="mt-4 w-full">
-                    <Pagination
-                        totalItems={products.length}
-                        itemsPerPage={itemsPerPage}
-                        currentPage={currentPage}
-                        onPageChange={(page) => setCurrentPage(page)}
-                        onItemsPerPageChange={(items) => {
-                            setItemsPerPage(items);
-                            setCurrentPage(1);
-                        }}
-                    />
-                </div>
-            )}
+                {displayedProducts.length > 0 ? (
+                    !limit && (
+                        <div className="mt-4 w-full">
+                            <Pagination
+                                totalItems={products.length}
+                                itemsPerPage={itemsPerPage}
+                                currentPage={currentPage}
+                                onPageChange={(page) => setCurrentPage(page)}
+                                onItemsPerPageChange={(items) => {
+                                    setItemsPerPage(items);
+                                    setCurrentPage(1);
+                                }}
+                            />
+                        </div>
+                    )
+                ) : (
+                    <p className="text-center text-gray-500 py-6">Tidak ada produk untuk ditampilkan.</p>
+                )}
         </div>
     );
 };

@@ -98,6 +98,7 @@ export class InvoicesService {
             status: defStatus,
             qrCode: {}, // placeholder doang
             companyId: user.companyId,
+            nextCompanyId: createInvoiceDto.nextCompanyId,
           },
         });
 

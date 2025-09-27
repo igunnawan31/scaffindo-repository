@@ -7,24 +7,81 @@ import ScanInvoiceModal from "./ScanInvoiceModal";
 import ScanProduct from "@/app/scan-product/scanproductcomponents/ScanProductModal";
 import ScanProductAdmin from "./ScanProductAdmin";
 import InvoiceActionModal from "./InvoiceActionModal";
+import { useInvoice } from "@/app/hooks/useInvoices";
+import QRCode from "qrcode";
+import { useLabels } from "@/app/hooks/useLabels";
+import SuccessModal from "./SuccessPopUpModal";
+import { useRouter } from "next/navigation";
 
 type Props = { 
-    invoiceId: string
+    invoiceId: string;
     showButton?: boolean;
     acceptButton?: boolean;
+    statusUpdate?: string;
     onButtonClick?: (invoiceId: string) => void;
 }
 
-const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}: Props) => {
+const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, onButtonClick}: Props) => {
+    const router = useRouter();
+    const { fetchInvoiceById, updateInvoice , invoice } = useInvoice();
+    const { fetchLabels, labels} = useLabels();
     const [openModal, setOpenModal] = useState(false);
     const [scannedCode, setScannedCode] = useState<string | null>(null);
     const [modalInvoice, setModalInvoice] = useState<string | null>(null);
-    
-    const product = invoiceProducts.find((p) =>
-        p.invoices.some((inv) => inv.id === invoiceId)
-    );
-    const invoice = product?.invoices.find((inv) => inv.id === invoiceId);
-    if (!product || !invoice) {
+    const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [formData, setFormData] = useState({
+        title: "",
+        status: "",
+        description: "",
+    });
+
+    useEffect(() => {
+        if (invoiceId) {
+            fetchInvoiceById(invoiceId);
+        }
+    }, [invoiceId]);
+
+    useEffect(() => {
+        if (invoice?.id) {
+            QRCode.toDataURL(invoice.id).then(setQrDataUrl);
+            fetchLabels();
+        }
+    }, [invoice]);
+
+    const getLabelStatus = (labelId: string) => {
+        const label = labels?.find((l: any) => l.id === labelId);
+        return label?.status || "Unknown";
+    };
+
+    const handleUpdate = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!scannedCode) return;
+
+        try {
+            const res = await updateInvoice(scannedCode, {
+                status: statusUpdate,
+                nextCompanyId: invoice?.nextCompanyId,
+                title: formData.title,
+                description: formData.description
+            });
+
+            setSuccessMessage(`Invoice ${scannedCode} updated successfully!`);
+            setShowSuccess(true);
+            setScannedCode(null);
+            setFormData({ title: "", status: "", description: "" });
+            setTimeout(() => {
+                router.push('/dashboard/pengecekkan-barang');
+            }, 2000)
+        } catch (err) {
+            setSuccessMessage("Gagal membuat invoice");
+            setShowSuccess(true);
+        }
+    };
+
+    if (!invoice) {
         return (
             <div className="p-6">
                 <h2 className="text-red-500 font-bold">Invoice not found</h2>
@@ -32,27 +89,50 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
         );
     }
 
-    const invoiceLabels = product.labels.filter((label) =>
-        invoice.labels.includes(label.id)
-    );
-
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full">
             <div className="w-full py-5 block md:flex gap-5 rounded-lg overflow-hidden">
                 <div className="md:w-1/2 w-full relative h-[24rem]">
                     <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover rounded-lg"
+                        src={qrDataUrl || "/placeholder.png"}
+                        alt="QR Code"
+                        width={300}
+                        height={300} 
+                        unoptimized 
+                        className="mx-auto"
                     />
                 </div>
 
                 <div className="md:w-1/2 w-full mt-5 md:mt-0 flex flex-col justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-blue-900">{invoice.id}</h1>
-                        <p className="text-gray-600">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.description}</p>
+                        <p className="text-gray-600">{invoice.status}</p>
+                        {scannedCode && (
+                            <div className="mt-3 p-3 border border-green-600 rounded-lg bg-green-50 text-green-700">
+                                <p>Scanned Code: {scannedCode}</p>
+
+                                <input
+                                    className="mt-2 w-full p-2 border rounded"
+                                    placeholder="Title (e.g. Barang tiba)"
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                />
+
+                                <textarea
+                                    className="mt-2 w-full p-2 border rounded"
+                                    placeholder="Description"
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                />
+
+                                <button
+                                    className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    onClick={handleUpdate}
+                                >
+                                    Submit Update
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div className="mt-5">
                         {acceptButton && (
@@ -80,36 +160,31 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
                 </div>
             )}
 
-            {scannedCode && (
-                <div className="mt-3 p-3 border border-green-600 rounded-lg bg-green-50 text-green-700">
-                    Scanned Code: {scannedCode}
-                </div>
-            )}
-
             <div className="mt-5">
                 <h3 className="font-semibold text-lg mb-3">List Products</h3>
                 <div className="space-y-3">
-                    {invoiceLabels.map((label) => (
-                        <div
-                            key={label.id}
-                            className="flex flex-col sm:flex-row justify-between items-center border rounded-lg p-3 shadow-sm gap-3 sm:gap-0"
-                        >
-                            <div className="flex gap-4 items-center justify-center sm:flex-col sm:gap-0 sm:items-start sm:justify-start">
-                                <p className="font-medium">{product.name}</p>
-                                <p className="text-sm text-gray-500">
-                                QR: {label.qrCode}
-                                </p>
-                            </div>
-                            {showButton && (
-                                <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-5">
-                                    <span>Butuh Pengecekkan</span>
-                                    <button className="block px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 cursor-pointer">
-                                        Scan Product
-                                    </button>
+                    {invoice.labelIds?.map((labelId, index) => {
+                        const id = typeof labelId === "string" ? labelId : labelId?.id;
+                        const status = getLabelStatus(id);
+
+                        return (
+                            <div
+                                key={id || index}
+                                className="flex flex-col sm:flex-row justify-between items-center border rounded-lg p-3 shadow-sm gap-3 sm:gap-0"
+                            >
+                                <div className="flex gap-4 items-center justify-center sm:flex-col sm:gap-0 sm:items-start sm:justify-start">
+                                    <p className="font-medium">{invoice.title || "Product"}</p>
+                                    <p className="text-sm text-gray-500">Label ID: {id}</p>
                                 </div>
-                            )}
-                        </div>
-                    ))}
+
+                                {showButton && (
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-center md:gap-5">
+                                        <span>{status}</span>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
             <InvoiceActionModal
@@ -127,8 +202,19 @@ const DetailedInvoices = ({ invoiceId, showButton, acceptButton, onButtonClick}:
                 onCancel={() => setModalInvoice(null)}
             />
             <ScanInvoiceModal isOpen={openModal} onClose={() => setOpenModal(false)}>
-                <ScanProductAdmin onProductCode={(code) => console.log(code)} />
+                <ScanProductAdmin onProductCode={(code) => {
+                    setScannedCode(code);
+                    setOpenModal(false);
+                }} />
             </ScanInvoiceModal>
+            <SuccessModal
+                isOpen={showSuccess}
+                onClose={() => {
+                    setShowSuccess(false);
+                }}
+                title="Invoice Updated"
+                message={successMessage}
+            />
         </div>
     )
 }

@@ -2,7 +2,7 @@
 
 import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
 import SuccessModal from "../../admincomponents/SuccessPopUpModal"
 import CategoryProducts from "../../admincomponents/CategoryProducts"
@@ -17,17 +17,48 @@ const AdminList = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         fetchUsersAdmin();
     }, [fetchUsersAdmin]);
 
-    const filteredUsers = users.filter(
-        (user: User) =>
-            user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const roleUserFilters = [
+        {
+            type: "role",
+            label: "User Role",
+            options: [
+                { label: "All", value: "all" },
+                { label: "Distributor", value: "DISTRIBUTOR" },
+                { label: "Retail", value: "RETAIL" },
+                { label: "Agent", value: "AGENT" },
+                { label: "Factory", value: "FACTORY" },
+            ],
+        },
+    ];
+
+    const handleFilterSelect = (type: string, value: string | null) => {
+        if (type === "role") {
+            setSelectedCategory(value);
+            setCurrentPage(1);
+        }
+    };
+
+    const filteredUsers = useMemo(() => {
+        return users.filter((user: User) => {
+            const matchSearch = 
+                user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                user.email?.toLowerCase().includes(searchQuery.toLowerCase())
+
+            const matchCategory =
+                !selectedCategory ||
+                selectedCategory === "all" ||
+                user.role === selectedCategory;
+
+            return matchSearch && matchCategory;
+        });
+    }, [users, searchQuery, selectedCategory]);
 
     const displayedUsers = filteredUsers.slice(
         (currentPage - 1) * itemsPerPage,
@@ -53,7 +84,7 @@ const AdminList = () => {
     return (
         <>
             <div className="flex gap-3">
-                <CategoryProducts />
+                <CategoryProducts filters={roleUserFilters} onSelect={handleFilterSelect} />
                 <SearchProducts 
                     placeholder="Search user" 
                     onSearch={handleSearch}
@@ -108,18 +139,20 @@ const AdminList = () => {
                 title="Delete Sukses"
                 message={successMessage}
             />
-            <div className="mt-4 w-full">
-                <Pagination
-                    totalItems={filteredUsers.length}
-                    itemsPerPage={itemsPerPage}
-                    currentPage={currentPage}
-                    onPageChange={(page) => setCurrentPage(page)}
-                    onItemsPerPageChange={(items) => {
-                        setItemsPerPage(items);
-                        setCurrentPage(1);
-                    }}
-                />
-            </div>
+            {filteredUsers.length > 0 && (
+                <div className="mt-4 w-full">
+                    <Pagination
+                        totalItems={filteredUsers.length}
+                        itemsPerPage={itemsPerPage}
+                        currentPage={currentPage}
+                        onPageChange={(page) => setCurrentPage(page)}
+                        onItemsPerPageChange={(items) => {
+                            setItemsPerPage(items);
+                            setCurrentPage(1);
+                        }}
+                    />
+                </div>
+            )}
         </>
     )
 }

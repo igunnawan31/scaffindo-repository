@@ -4,20 +4,6 @@ type TrackingStatus = {
     updatedAt: string;
 };
 
-type Label = {
-    id: string;
-    productId: number;
-    qrCode: string;
-    tracking: TrackingStatus[];
-};
-
-type Invoice = {
-    id: string;
-    productId: number;
-    labels: string[];
-    qrCode: string;
-};
-
 export type User = {
     id: string;
     name: string;
@@ -37,9 +23,17 @@ export type UserResponse = {
     };
 }
 
+export enum CompanyType {
+    FACTORY = "FACTORY",
+    DISTRIBUTOR = "DISTRIBUTOR",
+    AGENT = "AGENT",
+    RETAIL = "RETAIL"
+}
+
 export type Company = {
     id: string;
     name: string;
+    companyType: CompanyType;
 }
 
 export interface FileMetaDataResponse {
@@ -64,6 +58,32 @@ export enum Category {
     ELECTRONIC
 }
 
+export enum LabelStatus {
+    FACTORY_DONE = 'FACTORY_DONE',
+    WAITING_DISTRIBUTOR = 'WAITING_DISTRIBUTOR',
+    DISTRIBUTOR_ACCEPTED = 'DISTRIBUTOR_ACCEPTED',
+    DISTRIBUTOR_PICKED_UP = 'DISTRIBUTOR_PICKED_UP',
+    ARRIVED_AT_DISTRIBUTOR = 'ARRIVED_AT_DISTRIBUTOR',
+    AGENT_ACCEPTED = 'AGENT_ACCEPTED',
+    DISTRIBUTOR_TO_AGENT = 'DISTRIBUTOR_TO_AGENT',
+    ARRIVED_AT_AGENT = 'ARRIVED_AT_AGENT',
+    RETAIL_ACCEPTED = 'RETAIL_ACCEPTED',
+    AGENT_TO_RETAIL = 'AGENT_TO_RETAIL',
+    ARRIVED_AT_RETAIL = 'ARRIVED_AT_RETAIL',
+    PURCHASED_BY_CUSTOMER = 'PURCHASED_BY_CUSTOMER'
+}
+
+export type Label = {
+    id: string;
+    status: LabelStatus;
+    productId: string;
+    invoiceId: string;
+    penjualanId: string;
+    trackingIds: string[];
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Product {
     id: string;
     name: string;
@@ -75,4 +95,22 @@ export interface Product {
     category: string[];
     labels: Label[];
     invoice: Invoice[];
+}
+
+export interface CreateInvoiceDto {
+    productId: number;
+    nextCompanyId: string;
+    totalLabel: number;
+    title: string;
+    description: string;
+}
+
+export interface Invoice extends CreateInvoiceDto {
+    id: string;
+    status: string;
+    labelIds: Label[];
+    companyId: string;
+    createdAt: string;
+    updatedAt: string;
+    createdBy?: string;
 }

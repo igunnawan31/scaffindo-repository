@@ -19,6 +19,9 @@ export class CreateInvoiceDto {
   //   return value;
   // })
   // PICIds: string[];
+  @ApiProperty()
+  @IsString()
+  nextCompanyId: string;
 
   @ApiProperty()
   @IsInt()

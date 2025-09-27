@@ -7,6 +7,7 @@ import axios from "axios";
 export function useCompany() {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [company, setCompany] = useState<Company | null>(null);
+    const [distributors, setDistributors] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -174,13 +175,56 @@ export function useCompany() {
         }
     }, []);
 
+    const fetchDistributors = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                console.warn("⚠️ No token found in localStorage");
+                setDistributors([]);
+                return;
+            }
+
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/companies?companyType=DISTRIBUTOR&limit=100`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            let companyData: Company[] = [];
+            
+            if (Array.isArray(res.data)) {
+                console.log("res.data berhasil")
+                companyData = res.data;
+            } else if (res.data && Array.isArray(res.data.data)) {
+                console.log("res.data.data berhasil")
+                companyData = res.data.data;
+            } else if (Array.isArray(res.data?.companies)) {
+                console.log("res.data.companies berhasil")
+                companyData = res.data.companies;
+            }
+
+            setDistributors(companyData);
+            localStorage.setItem("companies", JSON.stringify(companyData));
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to fetch companies");
+            setDistributors([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         companies,
         company,
+        distributors,
         loading,
         error,
         fetchCompanies,
         fetchCompanyById,
+        fetchDistributors,
         updateCompany,
         createCompany,
         deleteCompany

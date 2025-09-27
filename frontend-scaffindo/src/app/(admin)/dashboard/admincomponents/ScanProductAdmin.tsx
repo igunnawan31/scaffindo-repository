@@ -18,51 +18,58 @@ const ScanProductAdmin: React.FC<Props> = ({ onProductCode, disabled = false }) 
     const isScanningRef = useRef(false);
 
     useEffect(() => {
-        if (disabled) return;
+    if (disabled) return;
 
-        const initScanner = async () => {
-            if (mode !== "camera") {
-                if (isScanningRef.current) {
-                await scannerRef.current?.stop().catch(() => {});
+    const initScanner = async () => {
+        if (mode !== "camera") {
+            if (isScanningRef.current) {
+                try {
+                    await scannerRef.current?.stop();
+                } catch {}
                 isScanningRef.current = false;
-                }
-                return;
             }
+            return;
+        }
 
-            if (!scannerRef.current) {
-                scannerRef.current = new Html5Qrcode("reader");
-            }
+        if (!scannerRef.current) {
+            scannerRef.current = new Html5Qrcode("reader");
+        }
 
-            const readerElement = document.getElementById("reader");
-            let qrboxConfig = { width: 300, height: 300 };
+        if (isScanningRef.current) return; // ✅ prevent duplicate start
 
-            if (readerElement) {
-                const rect = readerElement.getBoundingClientRect();
-                const size = Math.min(rect.width, rect.height);
-                qrboxConfig = { width: size * 1.5, height: size * 1.5 };
-            }
+        const readerElement = document.getElementById("reader");
+        let qrboxConfig = { width: 300, height: 300 };
 
+        if (readerElement) {
+            const rect = readerElement.getBoundingClientRect();
+            const size = Math.min(rect.width, rect.height);
+            qrboxConfig = { width: size * 1.5, height: size * 1.5 };
+        }
+
+        try {
             await scannerRef.current.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: qrboxConfig },
                 (decodedText) => {
-                onProductCode(decodedText);
-                scannerRef.current?.stop().then(() => (isScanningRef.current = false));
+                    onProductCode(decodedText);
+                    scannerRef.current?.stop().then(() => (isScanningRef.current = false));
                 },
                 (err) => console.warn("QR error:", err)
             );
-
             isScanningRef.current = true;
-        };
+        } catch (e) {
+            console.warn("Scanner start failed:", e);
+        }
+    };
 
-        initScanner();
+    initScanner();
 
-        return () => {
+    return () => {
         if (isScanningRef.current) {
             scannerRef.current?.stop().then(() => (isScanningRef.current = false));
         }
-        };
-    }, [mode, onProductCode, disabled]);
+    };
+}, [mode, onProductCode, disabled]);
 
     return (
         <div className="mt-10 flex flex-col lg:flex-row gap-6">

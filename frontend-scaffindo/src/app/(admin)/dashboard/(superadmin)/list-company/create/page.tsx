@@ -7,23 +7,25 @@ import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCompany } from "@/app/hooks/useCompany"
-
-const roles = ["Factory", "Distributor", "Customer"]
-const subRoles = ["Admin", "User"]
+import { CompanyType } from "@/app/type/types"
+import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 
 const CreateCompany = () => {
     const router = useRouter();
     const { createCompany, loading, error } = useCompany();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
+        companyType: "" as CompanyType | "",
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({ ...formData, [e.target.id]: e.target.value })
-    }
+    const handleFieldChange = (field: string, value: string) => {
+        setFormData((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,7 +33,7 @@ const CreateCompany = () => {
             const res = await createCompany(formData);
             setSuccessMessage(`Company ${res.name} berhasil dibuat`);
             setShowSuccess(true);
-            setFormData({ name: "" });
+            setFormData({ name: "", companyType: ""});
             setTimeout(() => {
                 router.push('/dashboard/list-company');
             }, 2000)
@@ -50,9 +52,22 @@ const CreateCompany = () => {
                         type="text"
                         id="name"
                         value={formData.name}
-                        onChange={handleChange}
+                        onChange={(e) => handleFieldChange("name", e.target.value)}
                         placeholder="PT. Sucofindo"
                         className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                </div>
+                
+                <div>
+                    <DropdownOneSelect
+                        label="Company Type"
+                        options={Object.values(CompanyType).map((ct) => ({
+                            value: ct,
+                            label: ct,
+                        }))}
+                        selected={formData.companyType || null}
+                        onChange={(val) => handleFieldChange("companyType", val || "")}
+                        placeholder="Select Company Type"
                     />
                 </div>
 

@@ -55,7 +55,6 @@ const CertificateList = () => {
     return (
         <>
             <div className="flex gap-3">
-                <CategoryProducts />
                 <SearchProducts 
                     placeholder="Search certificate" 
                     onSearch={handleSearch}

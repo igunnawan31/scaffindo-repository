@@ -146,18 +146,20 @@ const ProductList = () => {
                 title="Delete Sukses"
                 message={successMessage}
             />
-            <div className="mt-4 w-full">
-                <Pagination
-                    totalItems={filteredProducts.length}
-                    itemsPerPage={itemsPerPage}
-                    currentPage={currentPage}
-                    onPageChange={(page) => setCurrentPage(page)}
-                    onItemsPerPageChange={(items) => {
-                        setItemsPerPage(items);
-                        setCurrentPage(1);
-                    }}
-                />
-            </div>
+            {filteredProducts.length > 0 && (
+                <div className="mt-4 w-full">
+                    <Pagination
+                        totalItems={filteredProducts.length}
+                        itemsPerPage={itemsPerPage}
+                        currentPage={currentPage}
+                        onPageChange={(page) => setCurrentPage(page)}
+                        onItemsPerPageChange={(items) => {
+                            setItemsPerPage(items);
+                            setCurrentPage(1);
+                        }}
+                    />
+                </div>
+            )}
         </>
     )
 }
