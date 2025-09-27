@@ -6,7 +6,7 @@ interface Props {
 }
 
 const ScanProduct:React.FC<Props> = ({onProductCode}) => {
-    const [mode, setMode] = useState<"camera" | "upload" | "code">("camera");
+    const [mode, setMode] = useState<"camera" | "code">("camera");
     const [productCode, setProductCode] = useState<string>("");
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const isScanningRef = useRef(false);
@@ -15,12 +15,8 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
         const initScanner = async () => {
             if (mode !== "camera") {
                 if (isScanningRef.current) {
-                    try {
-                        await scannerRef.current?.stop();
-                        isScanningRef.current = false;
-                    } catch (err) {
-                        console.warn("Failed to stop scanner:", err);
-                    }
+                await scannerRef.current?.stop().catch(() => {});
+                isScanningRef.current = false;
                 }
                 return;
             }
@@ -29,36 +25,35 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
                 scannerRef.current = new Html5Qrcode("reader");
             }
 
-            try {
-                await scannerRef.current.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (decodedText) => {
-                    onProductCode(decodedText);
-                    if (isScanningRef.current) {
-                        scannerRef.current
-                        ?.stop()
-                        .then(() => (isScanningRef.current = false))
-                        .catch(() => {});
-                    }
-                    },
-                    (err) => console.warn("QR error:", err)
-                );
-                isScanningRef.current = true;
-            } catch (err) {
-                console.error("Unable to start scanning", err);
+            const readerElement = document.getElementById("reader");
+            let qrboxConfig = { width: 300, height: 300 };
+
+            if (readerElement) {
+                const rect = readerElement.getBoundingClientRect();
+                const size = Math.min(rect.width, rect.height);
+                const clampedSize = Math.max(200, Math.min(size, 350));
+                qrboxConfig = { width: clampedSize, height: clampedSize };
             }
+
+            await scannerRef.current.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: qrboxConfig },
+                (decodedText) => {
+                onProductCode(decodedText);
+                scannerRef.current?.stop().then(() => (isScanningRef.current = false));
+                },
+                (err) => console.warn("QR error:", err)
+            );
+
+            isScanningRef.current = true;
         };
 
         initScanner();
 
         return () => {
-            if (isScanningRef.current) {
-            scannerRef.current
-                ?.stop()
-                .then(() => (isScanningRef.current = false))
-                .catch(() => {});
-            }
+        if (isScanningRef.current) {
+            scannerRef.current?.stop().then(() => (isScanningRef.current = false));
+        }
         };
     }, [mode, onProductCode]);
 
@@ -66,27 +61,18 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
         <div className='mt-10 flex flex-col lg:flex-row gap-6'>
             <div className='lg:w-1/2 w-full order-1'>
                 {mode === "camera" ? (
-                    <div className='w-full h-[40rem] bg-black flex items-center justify-center text-white'>
-                        <div id="reader" className="w-full h-[40rem]"></div>
-                    </div>
-                ) : mode === "upload" ? (
-                    <div className="w-full h-[40rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400">
-                        <p className="text-gray-500 mb-2">Upload Product Image</p>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="cursor-pointer"
-                        />
+                    <div className='w-full h-[24rem] lg:h-[40rem] bg-black flex items-center justify-center text-white overflow-hidden'>
+                        <div id="reader" className="w-full h-[24rem] lg:h-[40rem]"></div>
                     </div>
                 ) : (
-                    <div className="w-full h-[40rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
+                    <div className="w-full h-[24rem] lg:h-[40rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
                         <p className="text-gray-500 mb-4">Enter Product Code</p>
                         <input
                             type="text"
                             value={productCode}
                             onChange={(e) => setProductCode(e.target.value)}
                             placeholder="e.g. KaosPrinting-1"
-                            className="w-full max-w-sm px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900"
+                            className="w-full max-w-sm px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900 text-black"
                         />
                         <button
                             onClick={() => onProductCode(productCode)}
@@ -97,10 +83,10 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
                     </div>
                 )}
             </div>
-             <div className="lg:w-1/2 w-full order-2 border-2 border-blue-900 border-dashed p-5 rounded-lg">
+             <div className="lg:w-1/2 w-full order-2 border-2 border-blue-900 border-dashed p-5 rounded-lg mb-6 lg:mb-0">
                 <div className="flex items-center gap-4 mb-6">
                     <div className="bg-gray-200 rounded-lg p-5 flex gap-2">
-                        {["camera", "upload", "code"].map((m) => (
+                        {["camera", "code"].map((m) => (
                         <span
                             key={m}
                             className={`cursor-pointer px-4 py-2 rounded-lg ${
@@ -120,17 +106,12 @@ const ScanProduct:React.FC<Props> = ({onProductCode}) => {
                 </div>
                 <div>
                     {mode === "camera" && (
-                        <p className="text-gray-700">
+                        <p className="text-black">
                             Use your device camera to scan the product.
                         </p>
                     )}
-                    {mode === "upload" && (
-                        <p className="text-gray-700">
-                            Upload an image of the product to scan.
-                        </p>
-                    )}
                     {mode === "code" && (
-                        <p className="text-gray-700">
+                        <p className="text-black">
                             Enter the product code manually.
                         </p>
                     )}

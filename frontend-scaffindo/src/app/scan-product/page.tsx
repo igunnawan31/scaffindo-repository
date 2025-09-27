@@ -14,7 +14,7 @@ export default function ScanProduct() {
             <NavbarComponentsHome />
             <section
                 id="ScanProduct"
-                className="relative pt-32 bg-cover bg-center"
+                className="relative pt-32 bg-cover bg-center bg-white"
             >
                 <div className="relative z-10 h-full px-4 lg:px-8">
                     <div className="container mx-auto max-w-11/12">
@@ -24,7 +24,7 @@ export default function ScanProduct() {
                 </div>
             </section>
             {productCode && (
-                <section id="InformationProduct" className="relative bg-cover bg-center pt-12">
+                <section id="InformationProduct" className="relative bg-cover bg-center pt-12 bg-white">
                     <div className="relative z-10 h-full px-4 lg:px-8">
                         <div className="container mx-auto max-w-11/12">
                             <JourneyProduct productCode={productCode} />
