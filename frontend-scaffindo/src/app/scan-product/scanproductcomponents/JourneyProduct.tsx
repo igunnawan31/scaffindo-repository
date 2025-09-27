@@ -51,7 +51,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
     const productJourney = label.journey || [];
 
     return (
-        <div className="w-full p-6 bg-gray-200 rounded-lg mb-12">
+        <div className="w-full p-6 bg-gray-200 rounded-lg pb-12">
             <div className="text-center mb-8">
                 <h2 className="text-blue-900 text-2xl font-bold flex items-center justify-center gap-2">
                     {label.id}
@@ -64,7 +64,44 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                 </span>
             </div>
 
-            <div className="relative grid grid-cols-9 gap-y-12">
+            {/* Mobile Layout (below md) */}
+            <div className="md:hidden relative">
+                <div className="absolute left-8 top-0 w-1 h-full bg-yellow-500"></div>
+                {productJourney.map((journey, index) => (
+                    <motion.div 
+                        key={journey.id}
+                        className="flex mb-12 last:mb-0"
+                        initial='hidden'
+                        whileInView={'visible'}
+                        viewport={{ once: true, amount: 0.3 }}
+                        variants={leftVariants}
+                    >
+                        <div className="flex-shrink-0 w-16 flex flex-col items-center">
+                            <div className="w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full relative z-10">
+                                {journey.icon}
+                            </div>
+                        </div>
+                        <div className="ml-4 flex-1">
+                            <div className="bg-white shadow-md rounded-lg p-5">
+                                <h3 className="font-semibold text-lg">{journey.title}</h3>
+                                <p className="text-sm text-gray-500">{journey.date}</p>
+                                <ul className="mt-3 text-gray-700 text-sm space-y-1">
+                                    {journey.details.map((d, i) => (
+                                        <li key={i}>• {d}</li>
+                                    ))}
+                                </ul>
+                                <div className="mt-3 text-xs text-blue-900 bg-blue-100 p-2 rounded">
+                                    <IoCheckmarkCircle className="w-4 h-4 inline mr-1" />
+                                    Verified | Blockchain Record
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* Desktop Layout (md and above) */}
+            <div className="hidden md:relative md:grid md:grid-cols-9 md:gap-y-12">
                 <div className="absolute left-1/2 top-0 w-1 -translate-x-1/2 h-full bg-yellow-500"></div>
                 {productJourney.map((journey, index) => {
                     const isLeft = index % 2 === 0;
@@ -121,7 +158,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                                         </ul>
                                         <div className="mt-3 text-xs text-blue-900 bg-blue-100 p-2 rounded">
                                             <IoCheckmarkCircle className="w-4 h-4 inline mr-1" />
-                                            Verified | Blockchain record
+                                            Verified | Blockchain Record
                                         </div>
                                     </div>
                                 </motion.div>
@@ -132,6 +169,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                     );
                 })}
             </div>
+
             <div className="flex items-center justify-center pt-10"> 
                 <Link
                     href={`/scan-product/${product?.id ?? ""}`}
@@ -152,28 +190,6 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                         width={20}
                         height={20}
                         alt="Qr Code Blue"
-                        className="ml-3 hidden group-hover:block"
-                    />
-                </Link>
-                <Link 
-                    href={`/scan-product/${product?.id ?? ""}`}
-                    className="group p-5 bg-white border-2 border-white text-blue-900 
-                        hover:bg-blue-900 hover:border-white hover:text-white
-                        rounded-lg font-semibold mx-3 flex items-center"
-                >
-                    Know More About Us
-                    <Image
-                        src="/assets/icons/info-blue.svg"
-                        width={20}
-                        height={20}
-                        alt="Info Blue"
-                        className="ml-3 block group-hover:hidden"
-                    />
-                    <Image
-                        src="/assets/icons/info-white.svg"
-                        width={20}
-                        height={20}
-                        alt="Info White"
                         className="ml-3 hidden group-hover:block"
                     />
                 </Link>
