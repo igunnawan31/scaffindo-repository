@@ -190,11 +190,11 @@ export class LabelsService {
       });
       // 1. Validate role + status permission
       if (
-        (updateLabelDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR &&
+        (updateLabelDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED &&
           user.role !== Role.DISTRIBUTOR) ||
-        (updateLabelDto.status === LabelStatus.ARRIVED_AT_AGENT &&
+        (updateLabelDto.status === LabelStatus.AGENT_ACCEPTED &&
           user.role !== Role.AGENT) ||
-        (updateLabelDto.status === LabelStatus.ARRIVED_AT_RETAIL &&
+        (updateLabelDto.status === LabelStatus.RETAIL_ACCEPTED &&
           user.role !== Role.RETAIL)
       ) {
         throw new UnauthorizedException(
@@ -205,9 +205,9 @@ export class LabelsService {
       // 2. Only create tracking for these 3 statuses (and we know they're valid now)
       let status: TrackStatus | undefined;
       if (
-        updateLabelDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR ||
-        updateLabelDto.status === LabelStatus.ARRIVED_AT_AGENT ||
-        updateLabelDto.status === LabelStatus.ARRIVED_AT_RETAIL
+        updateLabelDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED ||
+        updateLabelDto.status === LabelStatus.AGENT_ACCEPTED ||
+        updateLabelDto.status === LabelStatus.RETAIL_ACCEPTED
       ) {
         // Safe cast: these values exist in both enums with same name
         status = updateLabelDto.status as TrackStatus;

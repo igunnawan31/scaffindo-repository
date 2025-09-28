@@ -179,9 +179,18 @@ export class InvoicesService {
       const { productId, page = 1, limit = 10, sortBy, sortOrder } = filters;
       const where: Prisma.InvoiceWhereInput = {
         productId: productId ?? undefined,
-        Product: {
-          companyId: user.role === Role.SUPERADMIN ? undefined : user.role === Role.DISTRIBUTOR ? undefined : user.role === Role.AGENT ? undefined : user.role === Role.RETAIL ? undefined : user.companyId,
-        },
+        // Product: {
+        //   companyId:
+        //     user.role === Role.SUPERADMIN
+        //       ? undefined
+        //       : user.role === Role.DISTRIBUTOR
+        //         ? undefined
+        //         : user.role === Role.AGENT
+        //           ? undefined
+        //           : user.role === Role.RETAIL
+        //             ? undefined
+        //             : user.companyId,
+        // },
       };
       const orderBy: Prisma.InvoiceOrderByWithRelationInput = {};
       if (sortBy && ['productId'].includes(sortBy)) {
@@ -238,7 +247,7 @@ export class InvoicesService {
       if (!invoice)
         throw new NotFoundException(`Invoice with ID ${id} not found`);
       // console.log(invoice.PICs.map((pic) => pic.User.companyId));
-      
+
       return plainToInstance(GetInvoiceResponseDto, {
         ...invoice,
         labelIds: invoice.labels.map((l) => l.id),
@@ -294,11 +303,11 @@ export class InvoicesService {
 
       // 1. Validate role + status permission
       if (
-        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR &&
+        (updateInvoiceDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED &&
           user.role !== Role.DISTRIBUTOR) ||
-        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_AGENT &&
+        (updateInvoiceDto.status === LabelStatus.AGENT_ACCEPTED &&
           user.role !== Role.AGENT) ||
-        (updateInvoiceDto.status === LabelStatus.ARRIVED_AT_RETAIL &&
+        (updateInvoiceDto.status === LabelStatus.RETAIL_ACCEPTED &&
           user.role !== Role.RETAIL)
       ) {
         throw new UnauthorizedException(
@@ -309,9 +318,9 @@ export class InvoicesService {
       // 2. Only create tracking for these 3 statuses (and we know they're valid now)
       let status: TrackStatus | undefined;
       if (
-        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_DISTRIBUTOR ||
-        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_AGENT ||
-        updateInvoiceDto.status === LabelStatus.ARRIVED_AT_RETAIL
+        updateInvoiceDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED ||
+        updateInvoiceDto.status === LabelStatus.AGENT_ACCEPTED ||
+        updateInvoiceDto.status === LabelStatus.RETAIL_ACCEPTED
       ) {
         // Safe cast: these values exist in both enums with same name
         status = updateInvoiceDto.status as TrackStatus;

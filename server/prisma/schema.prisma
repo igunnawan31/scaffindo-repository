@@ -131,22 +131,24 @@ enum LabelStatus {
   FACTORY_DONE // produk selesai
   WAITING_DISTRIBUTOR // menunggu distributor
   DISTRIBUTOR_ACCEPTED // distributor accept tapi belum diambil
-  DISTRIBUTOR_PICKED_UP // distributor bawa udah diambil
-  ARRIVED_AT_DISTRIBUTOR // barang nyampe milih agent
+  // DISTRIBUTOR_PICKED_UP // distributor bawa udah diambil
+  //ARRIVED_AT_DISTRIBUTOR // barang nyampe milih agent
+  WAITING_AGENT
   AGENT_ACCEPTED // agent accept belum diambil
-  DISTRIBUTOR_TO_AGENT // barang dikirim ke agent
-  ARRIVED_AT_AGENT // barang sampe di agent milih retail
+  // DISTRIBUTOR_TO_AGENT // barang dikirim ke agent
+  // ARRIVED_AT_AGENT // barang sampe di agent milih retail
+  WAITING_RETAIL
   RETAIL_ACCEPTED // retail accept belum diambil
-  AGENT_TO_RETAIL // barang dikirim ke retail
+  // AGENT_TO_RETAIL // barang dikirim ke retail
   ARRIVED_AT_RETAIL // barang sampe di retail
   PURCHASED_BY_CUSTOMER // barang dibeli customer (scan retail)
 }
 
 enum TrackStatus {
   FACTORY_DONE
-  ARRIVED_AT_DISTRIBUTOR
-  ARRIVED_AT_AGENT
-  ARRIVED_AT_RETAIL
+  DISTRIBUTOR_ACCEPTED
+  AGENT_ACCEPTED
+  RETAIL_ACCEPTED
   PURCHASED_BY_CUSTOMER
 }
 
