@@ -116,6 +116,18 @@ const retailMenus = [
                 href: "/dashboard/pengecekkan-barang-retail",
             },
             {
+                icon: "/assets/icons/certificate.svg",
+                alt: "List Invoice",
+                label: "List Invoice",
+                href: "/dashboard/list-invoices",
+            },
+            {
+                icon: "/assets/icons/product.svg",
+                alt: "List Barang",
+                label: "List Barang",
+                href: "/dashboard/list-barang",
+            },
+            {
                 icon: "/assets/icons/shop.svg",
                 alt: "Penjualan Customer",
                 label: "Penjualan Customer",

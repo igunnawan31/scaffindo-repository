@@ -1,10 +1,8 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import invoiceProducts from "@/app/data/invoiceProducts";
 import Image from "next/image";
 import ScanInvoiceModal from "./ScanInvoiceModal";
-import ScanProduct from "@/app/scan-product/scanproductcomponents/ScanProductModal";
 import ScanProductAdmin from "./ScanProductAdmin";
 import InvoiceActionModal from "./InvoiceActionModal";
 import { useInvoice } from "@/app/hooks/useInvoices";
@@ -21,7 +19,7 @@ type Props = {
     acceptButton?: boolean;
     statusUpdate?: string;
     backHomeLink?: string;
-    companyType?: "AGENT" | "RETAIL" | "DISTRIBUTOR";
+    companyType?: "AGENT" | "RETAIL" | "CUSTOMER";
 }
 
 const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, backHomeLink, companyType }: Props) => {
@@ -74,7 +72,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
         try {
             const res = await updateInvoice(scannedCode, {
                 status: statusUpdate,
-                nextCompanyId: invoice?.nextCompanyId,
+                nextCompanyId: companyType === "CUSTOMER" ? null : invoice?.nextCompanyId,
                 title: formData.title,
                 description: formData.description
             });
@@ -99,7 +97,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
         try {
             await updateInvoice(invoiceCode, {
                 status: statusUpdate,
-                nextCompanyId: formData.nextCompanyId,
+                nextCompanyId: companyType === "CUSTOMER" ? null : formData.nextCompanyId,
                 title: formData.title,
                 description: formData.description
             });
@@ -188,21 +186,23 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                                     />
                                 </div>
 
-                                <DropdownOneSelect
-                                    label="Company"
-                                    options={(companyType === "AGENT" ? agents : companyType === "RETAIL" ? retails : []).map((c) => ({
-                                        value: c.id,
-                                        label: c.name,
-                                    }))}
-                                    selected={formData.nextCompanyId || null}
-                                    onChange={(newCompanyId) =>
-                                        setFormData((prev) => ({
-                                            ...prev,
-                                            nextCompanyId: newCompanyId || "",
-                                        }))
-                                    }
-                                    placeholder={`Select ${companyType || "Company"}`}
-                                />
+                                {companyType !== "CUSTOMER" && (
+                                    <DropdownOneSelect
+                                        label="Company"
+                                        options={(companyType === "AGENT" ? agents : companyType === "RETAIL" ? retails : []).map((c) => ({
+                                            value: c.id,
+                                            label: c.name,
+                                        }))}
+                                        selected={formData.nextCompanyId || null}
+                                        onChange={(newCompanyId) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                nextCompanyId: newCompanyId || "",
+                                            }))
+                                        }
+                                        placeholder={`Select ${companyType || "Company"}`}
+                                    />
+                                )}
                                 <div>
                                     <label htmlFor="Description" className="block font-semibold text-blue-900 mb-1">Description</label>
                                     <textarea

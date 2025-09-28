@@ -1,9 +1,3 @@
-type TrackingStatus = {
-    role: "pabrik" | "distributor" | "agent" | "retailer" | "consument";
-    status: string;
-    updatedAt: string;
-};
-
 export type User = {
     id: string;
     name: string;
@@ -62,13 +56,10 @@ export enum LabelStatus {
     FACTORY_DONE = 'FACTORY_DONE',
     WAITING_DISTRIBUTOR = 'WAITING_DISTRIBUTOR',
     DISTRIBUTOR_ACCEPTED = 'DISTRIBUTOR_ACCEPTED',
-    DISTRIBUTOR_PICKED_UP = 'DISTRIBUTOR_PICKED_UP',
-    ARRIVED_AT_DISTRIBUTOR = 'ARRIVED_AT_DISTRIBUTOR',
+    WAITING_AGENT = 'WAITING_AGENT',
     AGENT_ACCEPTED = 'AGENT_ACCEPTED',
-    DISTRIBUTOR_TO_AGENT = 'DISTRIBUTOR_TO_AGENT',
-    ARRIVED_AT_AGENT = 'ARRIVED_AT_AGENT',
+    WAITING_RETAIL = 'WAITING_RETAIL',
     RETAIL_ACCEPTED = 'RETAIL_ACCEPTED',
-    AGENT_TO_RETAIL = 'AGENT_TO_RETAIL',
     ARRIVED_AT_RETAIL = 'ARRIVED_AT_RETAIL',
     PURCHASED_BY_CUSTOMER = 'PURCHASED_BY_CUSTOMER'
 }
@@ -79,7 +70,7 @@ export type Label = {
     productId: string;
     invoiceId: string;
     penjualanId: string;
-    trackingIds: string[];
+    trackings: string[];
     createdAt: string;
     updatedAt: string;
 }
@@ -99,7 +90,7 @@ export interface Product {
 
 export interface CreateInvoiceDto {
     productId: number;
-    nextCompanyId: string;
+    nextCompanyId?: string | null
     totalLabel: number;
     title: string;
     description: string;
@@ -114,3 +105,23 @@ export interface Invoice extends CreateInvoiceDto {
     updatedAt: string;
     createdBy?: string;
 }
+
+export enum TrackStatus {
+    FACTORY_DONE = 'FACTORY_DONE',
+    DISTRIBUTOR_ACCEPTED = 'DISTRIBUTOR_ACCEPTED',
+    AGENT_ACCEPTED = 'AGENT_ACCEPTED',
+    RETAIL_ACCEPTED = 'RETAIL_ACCEPTED',
+    PURCHASED_BY_CUSTOMER = 'PURCHASED_BY_CUSTOMER'
+}
+
+export interface Tracking {
+    id: string;
+    userId: string;
+    companyType: CompanyType;
+    title: string;
+    description: string;
+    status: TrackStatus;
+    createdAt: string;
+    labelId: string;
+    companyId: string;
+} 
