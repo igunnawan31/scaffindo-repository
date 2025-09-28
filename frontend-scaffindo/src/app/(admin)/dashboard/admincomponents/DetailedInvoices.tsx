@@ -12,19 +12,22 @@ import QRCode from "qrcode";
 import { useLabels } from "@/app/hooks/useLabels";
 import SuccessModal from "./SuccessPopUpModal";
 import { useRouter } from "next/navigation";
+import { useCompany } from "@/app/hooks/useCompany";
+import DropdownOneSelect from "../(superadmin)/superadmincomponents/DropdownOneSelect";
 
 type Props = { 
     invoiceId: string;
     showButton?: boolean;
     acceptButton?: boolean;
     statusUpdate?: string;
-    onButtonClick?: (invoiceId: string) => void;
+    backHomeLink?: string;
 }
 
-const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, onButtonClick}: Props) => {
+const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, backHomeLink }: Props) => {
     const router = useRouter();
     const { fetchInvoiceById, updateInvoice , invoice } = useInvoice();
     const { fetchLabels, labels} = useLabels();
+    const { fetchAgents, agents}= useCompany()
     const [openModal, setOpenModal] = useState(false);
     const [scannedCode, setScannedCode] = useState<string | null>(null);
     const [modalInvoice, setModalInvoice] = useState<string | null>(null);
@@ -33,6 +36,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, o
     const [successMessage, setSuccessMessage] = useState("");
     const [formData, setFormData] = useState({
         title: "",
+        nextCompanyId: "",
         status: "",
         description: "",
     });
@@ -41,7 +45,8 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, o
         if (invoiceId) {
             fetchInvoiceById(invoiceId);
         }
-    }, [invoiceId]);
+        fetchAgents();
+    }, [invoiceId, fetchAgents]);
 
     useEffect(() => {
         if (invoice?.id) {
@@ -71,11 +76,36 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, o
             setSuccessMessage(`Invoice ${scannedCode} updated successfully!`);
             setShowSuccess(true);
             setScannedCode(null);
-            setFormData({ title: "", status: "", description: "" });
+            setFormData({ title: "", status: "", description: "", nextCompanyId: ""});
             setTimeout(() => {
                 router.push('/dashboard/pengecekkan-barang');
             }, 2000)
         } catch (err) {
+            setSuccessMessage("Gagal membuat invoice");
+            setShowSuccess(true);
+        }
+    };
+
+    const handleTerimaBarang = async (invoiceCode: string) => {
+        if (!invoiceCode) return;
+
+        try {
+            await updateInvoice(invoiceCode, {
+                status: statusUpdate,
+                nextCompanyId: formData.nextCompanyId,
+                title: formData.title,
+                description: formData.description
+            });
+
+            setSuccessMessage(`Invoice ${invoiceCode} updated successfully!`);
+            setShowSuccess(true);
+            setScannedCode(null);
+            setFormData({ title: "", status: "", description: "", nextCompanyId: "" });
+            setTimeout(() => {
+                router.push(`/dashboard/pengecekkan-barang-${backHomeLink}`);
+            }, 2000);
+        } catch (err) {
+            console.error("handleTerimaBarang error:", err);
             setSuccessMessage("Gagal membuat invoice");
             setShowSuccess(true);
         }
@@ -136,17 +166,49 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, o
                     </div>
                     <div className="mt-5">
                         {acceptButton && (
-                            <button
-                                className="w-full py-5 bg-yellow-500 text-white rounded-lg flex items-center justify-center hover:bg-yellow-600 cursor-pointer"
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    if (onButtonClick) {
-                                        setModalInvoice(invoice.id);
+                            <div className="mt-3 p-3 flex flex-col gap-4 border rounded-lg bg-gray-100">
+                                <div>
+                                    <label htmlFor="Title" className="block font-semibold text-blue-900 mb-1">Title</label>
+                                    <input
+                                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        placeholder="Title (e.g. Barang tiba)"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    />
+                                </div>
+
+                                <DropdownOneSelect
+                                    label="Company"
+                                    options={agents.map((c) => ({
+                                        value: c.id,
+                                        label: c.name,
+                                    }))}
+                                    selected={formData.nextCompanyId || null}
+                                    onChange={(newCompanyId) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            nextCompanyId: newCompanyId || "",
+                                        }))
                                     }
-                                }}
-                            >
-                                Terima Barang
-                            </button>
+                                    placeholder="Select Company"
+                                />
+                                <div>
+                                    <label htmlFor="Description" className="block font-semibold text-blue-900 mb-1">Description</label>
+                                    <textarea
+                                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        placeholder="Description"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    />
+                                </div>
+
+                                <button
+                                    className="w-full py-5 bg-yellow-500 text-white rounded-lg flex items-center justify-center hover:bg-yellow-600 cursor-pointer"
+                                    onClick={() => handleTerimaBarang(invoiceId)}
+                                >
+                                    Terima Barang
+                                </button>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -187,16 +249,17 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, o
                     })}
                 </div>
             </div>
-            <InvoiceActionModal
+           <InvoiceActionModal
                 isOpen={!!modalInvoice}
                 title="Konfirmasi Permintaan"
                 message={`Apakah Anda yakin untuk menerima invoice ${modalInvoice}?`}
                 confirmText="Terima"
                 cancelText="Batal"
-                onConfirm={() => {
-                    if (modalInvoice && onButtonClick) {
-                        onButtonClick(modalInvoice);
-                    }
+                onConfirm={async () => {
+                    if (!modalInvoice) return;
+
+                    setScannedCode(modalInvoice);
+                    await handleTerimaBarang(new Event("submit") as any);
                     setModalInvoice(null);
                 }}
                 onCancel={() => setModalInvoice(null)}
