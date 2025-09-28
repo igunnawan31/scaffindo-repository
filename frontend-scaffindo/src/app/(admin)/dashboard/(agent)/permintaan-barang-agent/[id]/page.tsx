@@ -13,9 +13,9 @@ export default function InvoiceDetailPage() {
             <DetailedInvoices
                 invoiceId={id}
                 acceptButton={true}
-                statusUpdate="DISTRIBUTOR_ACCEPTED"
-                backHomeLink="distributor"
-                companyType="AGENT"
+                statusUpdate="AGENT_ACCEPTED"
+                backHomeLink="agent"
+                companyType="RETAIL"
             />
         </div>
     );

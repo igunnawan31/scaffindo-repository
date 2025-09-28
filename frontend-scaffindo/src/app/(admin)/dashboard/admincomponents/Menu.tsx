@@ -95,12 +95,6 @@ const agentMenus = [
                 label: "Pengiriman Barang",
                 href: "/dashboard/pengiriman-barang-agent",
             },
-            {
-                icon: "/assets/icons/shop.svg",
-                alt: "Penjualan Customer",
-                label: "Penjualan Customer",
-                href: "/dashboard/penjualan-customer",
-            },
         ],
     },
 ];

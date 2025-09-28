@@ -20,30 +20,6 @@ const PermintaanBarangDistributor = () => {
         fetchInvoices();
     }, []);
 
-    const statusFilters = [
-        {
-            type: "status",
-            label: "Status Pengiriman",
-            options: [
-                { label: "Waiting Distributor", value: "WAITING_DISTRIBUTOR" },
-                { label: "Accepted", value: "DISTRIBUTOR_ACCEPTED" },
-                { label: "Picked Up", value: "DISTRIBUTOR_PICKED_UP" },
-                { label: "Arrived", value: "ARRIVED_AT_DISTRIBUTOR" },
-                { label: "All", value: "all" },
-            ],
-        },
-    ];
-
-    const handleFilterSelect = (type: string, value: string | null) => {
-        if (type === "status") {
-            setSelectedCategory(value);
-        }
-    };
-    
-    const handleAcceptInvoice = () => {
-        console.log("Diaccept");
-    }
-
     useEffect(() => {
         const userStr = localStorage.getItem("user");
         if (userStr) {
@@ -63,17 +39,11 @@ const PermintaanBarangDistributor = () => {
         ];
         return invoices.filter((p: Invoice) => {
             const matchCompany = p.nextCompanyId === companyId;
-            console.log(p.nextCompanyId)
-            console.log(p.companyId)
-            const matchStatus = allowedStatuses.includes(p.status);;
             const matchSearch =
                 p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.description.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchCategory = !selectedCategory 
-                || selectedCategory === "all" 
-                || p.status === selectedCategory;
 
-            return matchCompany && matchStatus && matchSearch && matchCategory;
+            return matchCompany && matchSearch;
         });
     }, [invoices, companyId, searchQuery, selectedCategory]);
 
@@ -81,14 +51,13 @@ const PermintaanBarangDistributor = () => {
     return (
         <>
             <div className="flex gap-3">
-                <CategoryProducts filters={statusFilters} onSelect={handleFilterSelect} />
                 <SearchProducts 
                     placeholder="Search your products" 
                     onSearch={handleSearch}
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage link="permintaan-barang-distributor" showButton={true} buttonText="Accept" onButtonClick={ handleAcceptInvoice } invoice={filteredInvoices}/>
+                <InvoiceShowsPage link="permintaan-barang-distributor" invoice={filteredInvoices}/>
             </div>
         </>
     )

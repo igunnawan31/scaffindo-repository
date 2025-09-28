@@ -21,13 +21,14 @@ type Props = {
     acceptButton?: boolean;
     statusUpdate?: string;
     backHomeLink?: string;
+    companyType?: "AGENT" | "RETAIL" | "DISTRIBUTOR";
 }
 
-const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, backHomeLink }: Props) => {
+const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, backHomeLink, companyType }: Props) => {
     const router = useRouter();
     const { fetchInvoiceById, updateInvoice , invoice } = useInvoice();
     const { fetchLabels, labels} = useLabels();
-    const { fetchAgents, agents}= useCompany()
+    const { fetchAgents, agents, fetchRetails, retails}= useCompany()
     const [openModal, setOpenModal] = useState(false);
     const [scannedCode, setScannedCode] = useState<string | null>(null);
     const [modalInvoice, setModalInvoice] = useState<string | null>(null);
@@ -45,8 +46,13 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
         if (invoiceId) {
             fetchInvoiceById(invoiceId);
         }
-        fetchAgents();
-    }, [invoiceId, fetchAgents]);
+        if(companyType === "AGENT") {
+            fetchAgents();
+        }
+        if(companyType === "RETAIL") {
+            fetchRetails();
+        }
+    }, [invoiceId, fetchAgents, fetchRetails]);
 
     useEffect(() => {
         if (invoice?.id) {
@@ -184,7 +190,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
 
                                 <DropdownOneSelect
                                     label="Company"
-                                    options={agents.map((c) => ({
+                                    options={(companyType === "AGENT" ? agents : companyType === "RETAIL" ? retails : []).map((c) => ({
                                         value: c.id,
                                         label: c.name,
                                     }))}
@@ -195,7 +201,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                                             nextCompanyId: newCompanyId || "",
                                         }))
                                     }
-                                    placeholder="Select Company"
+                                    placeholder={`Select ${companyType || "Company"}`}
                                 />
                                 <div>
                                     <label htmlFor="Description" className="block font-semibold text-blue-900 mb-1">Description</label>

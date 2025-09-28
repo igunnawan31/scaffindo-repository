@@ -9,6 +9,7 @@ export function useCompany() {
     const [company, setCompany] = useState<Company | null>(null);
     const [distributors, setDistributors] = useState<Company[]>([]);
     const [agents, setAgents] = useState<Company[]>([]);
+    const [retails, setRetails] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -258,17 +259,57 @@ export function useCompany() {
         }
     }, []);
 
+    const fetchRetails = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                console.warn("⚠️ No token found in localStorage");
+                setRetails([]);
+                return;
+            }
+
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/companies?companyType=RETAIL&limit=100`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            let companyData: Company[] = [];
+            
+            if (Array.isArray(res.data)) {
+                companyData = res.data;
+            } else if (res.data && Array.isArray(res.data.data)) {
+                companyData = res.data.data;
+            } else if (Array.isArray(res.data?.companies)) {
+                companyData = res.data.companies;
+            }
+
+            setRetails(companyData);
+            localStorage.setItem("companies", JSON.stringify(companyData));
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to fetch companies");
+            setRetails([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return {
         companies,
         company,
         distributors,
         agents,
+        retails,
         loading,
         error,
         fetchCompanies,
         fetchCompanyById,
         fetchDistributors,
         fetchAgents,
+        fetchRetails,
         updateCompany,
         createCompany,
         deleteCompany
