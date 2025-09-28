@@ -72,6 +72,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 title: formData.title,
                 description: formData.description
             });
+            console.log(res)
 
             setSuccessMessage(`Invoice ${scannedCode} updated successfully!`);
             setShowSuccess(true);
@@ -138,25 +139,29 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                         <h1 className="text-2xl font-bold text-blue-900">{invoice.id}</h1>
                         <p className="text-gray-600">{invoice.status}</p>
                         {scannedCode && (
-                            <div className="mt-3 p-3 border border-green-600 rounded-lg bg-green-50 text-green-700">
+                            <div className="mt-3 p-3 flex flex-col gap-4 border rounded-lg bg-gray-100">
                                 <p>Scanned Code: {scannedCode}</p>
-
-                                <input
-                                    className="mt-2 w-full p-2 border rounded"
-                                    placeholder="Title (e.g. Barang tiba)"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                />
-
-                                <textarea
-                                    className="mt-2 w-full p-2 border rounded"
-                                    placeholder="Description"
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                />
+                                <div>
+                                    <label htmlFor="Title" className="block font-semibold text-blue-900 mb-1">Title</label>
+                                    <input
+                                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        placeholder="Title (e.g. Barang tiba)"
+                                        value={formData.title}
+                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="Description" className="block font-semibold text-blue-900 mb-1">Description</label>
+                                    <textarea
+                                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                        placeholder="Description"
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    />
+                                </div>
 
                                 <button
-                                    className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                    className="w-full py-5 bg-yellow-500 text-white rounded-lg flex items-center justify-center hover:bg-yellow-600 cursor-pointer"
                                     onClick={handleUpdate}
                                 >
                                     Submit Update
@@ -258,8 +263,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 onConfirm={async () => {
                     if (!modalInvoice) return;
 
-                    setScannedCode(modalInvoice);
-                    await handleTerimaBarang(new Event("submit") as any);
+                    await handleTerimaBarang(modalInvoice);  // ✅ Kirim string invoice code
                     setModalInvoice(null);
                 }}
                 onCancel={() => setModalInvoice(null)}

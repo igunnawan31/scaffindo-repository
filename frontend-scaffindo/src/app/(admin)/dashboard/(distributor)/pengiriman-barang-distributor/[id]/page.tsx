@@ -1,3 +1,5 @@
+'use client'
+
 import { useParams } from "next/navigation";
 import DetailedInvoices from "../../../admincomponents/DetailedInvoices";
 

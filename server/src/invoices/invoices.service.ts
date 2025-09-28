@@ -280,14 +280,14 @@ export class InvoicesService {
       const product = await this.prisma.product.findUnique({
         where: { id: invoice.productId },
       });
-      if (
-        user.companyId !== product?.companyId &&
-        user.companyId !== invoice.nextCompanyId
-      ) {
-        throw new UnauthorizedException(
-          `User is not permitted to update other company's invoice`,
-        );
-      }
+      // if (
+      //   user.companyId !== product?.companyId &&
+      //   user.companyId !== invoice.nextCompanyId
+      // ) {
+      //   throw new UnauthorizedException(
+      //     `User is not permitted to update other company's invoice`,
+      //   );
+      // }
       const companyData = await this.prisma.company.findUnique({
         where: { id: user.companyId },
       });
