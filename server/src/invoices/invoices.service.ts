@@ -180,7 +180,7 @@ export class InvoicesService {
       const where: Prisma.InvoiceWhereInput = {
         productId: productId ?? undefined,
         Product: {
-          companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+          companyId: user.role === Role.SUPERADMIN ? undefined : user.role === Role.DISTRIBUTOR ? undefined : user.role === Role.AGENT ? undefined : user.role === Role.RETAIL ? undefined : user.companyId,
         },
       };
       const orderBy: Prisma.InvoiceOrderByWithRelationInput = {};
@@ -237,15 +237,8 @@ export class InvoicesService {
 
       if (!invoice)
         throw new NotFoundException(`Invoice with ID ${id} not found`);
-      console.log(invoice.PICs.map((pic) => pic.User.companyId));
-
-      if (
-        !invoice.PICs.map((pic) => pic.User.companyId).includes(user.companyId)
-      ) {
-        throw new UnauthorizedException(
-          `User is not permitted to see other company's invoice`,
-        );
-      }
+      // console.log(invoice.PICs.map((pic) => pic.User.companyId));
+      
       return plainToInstance(GetInvoiceResponseDto, {
         ...invoice,
         labelIds: invoice.labels.map((l) => l.id),

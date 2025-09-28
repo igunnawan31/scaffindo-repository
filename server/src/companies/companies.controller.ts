@@ -45,7 +45,7 @@ export class CompaniesController {
   }
 
   @Get()
-  @Roles(Role.SUPERADMIN, Role.FACTORY)
+  @Roles(Role.SUPERADMIN, Role.FACTORY, Role.DISTRIBUTOR, Role.AGENT)
   @ApiResponse({ type: GetAllCompanyResponseDto })
   findAll(@Query() filters: CompanyFilterDto) {
     return this.companiesService.findAll(filters);

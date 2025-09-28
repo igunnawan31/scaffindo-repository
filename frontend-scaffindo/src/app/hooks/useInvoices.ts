@@ -138,8 +138,8 @@ export function useInvoice() {
 
             return res.data;
         } catch (err: any) {
-            console.error("Update product failed:", err.response || err);
-            setError(err.response?.data?.message || "Failed to update product");
+            console.error("Update invoice failed:", err.response || err);
+            setError(err.response?.data?.message || "Failed to invoice product");
             throw err;
         } finally {
             setLoading(false);

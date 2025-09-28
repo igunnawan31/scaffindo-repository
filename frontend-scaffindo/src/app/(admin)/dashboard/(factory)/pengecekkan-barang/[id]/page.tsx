@@ -10,7 +10,11 @@ export default function InvoiceDetailPage() {
 
     return (
         <div className="flex gap-3 w-full">
-            <DetailedInvoices invoiceId={id} showButton={true} statusUpdate="WAITING_DISTRIBUTOR" />
+            <DetailedInvoices 
+                invoiceId={id} 
+                showButton={true} 
+                statusUpdate="WAITING_DISTRIBUTOR" 
+            />
         </div>
     );
 }

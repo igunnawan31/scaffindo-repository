@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import DetailedInvoices from "../../../admincomponents/DetailedInvoices";
 
-export default function InvoiceDetailPage({params} : {params: Promise<{invoiceId: string}>}) {
+export default function InvoiceDetailPage() {
     const { id } = useParams<{ id: string }>();
 
     if (!id) return <div>Loading...</div>

@@ -10,7 +10,7 @@ import { useInvoice } from "@/app/hooks/useInvoices";
 import { Invoice } from "@/app/type/types";
 
 const PengecekkanBarang = () => {
-    const {fetchInvoices, invoices} = useInvoice()
+    const {fetchInvoices, invoices} = useInvoice();
     const [searchQuery, setSearchQuery] = useState("");
     const [companyId, setCompanyId] = useState<string | null>(null);
     const handleSearch = (query: string) => {
