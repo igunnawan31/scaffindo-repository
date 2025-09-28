@@ -1,7 +1,6 @@
 'use client'
 
 import { useParams } from "next/navigation";
-import DetailedInvoices from "../../../admincomponents/DetailedInvoices";
 import DetailedLabels from "../../../admincomponents/DetailedLabels";
 
 export default function LabelDetailPage() {
