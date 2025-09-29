@@ -53,8 +53,8 @@ export class LabelsService {
         productId: productId ?? undefined,
         penjualanId: penjualanId ?? undefined,
         invoiceId: invoiceId ?? undefined,
-        createdAt: minCreatedDate ?? undefined,
-        updatedAt: minUpdatedDate ?? undefined,
+        createdAt: { gte: minCreatedDate ?? undefined },
+        updatedAt: { gte: minUpdatedDate ?? undefined },
       };
       const orderBy: Prisma.LabelOrderByWithRelationInput = {};
       if (sortBy && ['status', 'createdAt', 'updatedAt'].includes(sortBy)) {
