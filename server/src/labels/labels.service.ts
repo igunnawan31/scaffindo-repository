@@ -24,6 +24,7 @@ import { UpdateLabelResponseDto } from './dto/response/update-response.dto';
 import { DeleteLabelResponseDto } from './dto/response/delete-response.dto';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { BuyDto } from './dto/request/buy.dto';
+import { BulkBuyDto } from './dto/request/bulkBuy.dto';
 
 @Injectable()
 export class LabelsService {
@@ -116,6 +117,90 @@ export class LabelsService {
     }
   }
 
+  async bulkBuy(
+    dto: BulkBuyDto,
+    user: UserRequest,
+  ): Promise<UpdateLabelResponseDto[]> {
+    const { labelIds, title, description, paymentMethod } = dto;
+
+    if (!labelIds || labelIds.length === 0) {
+      throw new BadRequestException('At least one label ID is required');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const labels = await tx.label.findMany({
+        where: { id: { in: labelIds } },
+        include: { Product: true },
+      });
+
+      if (labels.length !== labelIds.length) {
+        const foundIds = new Set(labels.map((l) => l.id));
+        const missing = labelIds.filter((id) => !foundIds.has(id));
+        throw new NotFoundException(`Labels not found: ${missing.join(', ')}`);
+      }
+
+      for (const label of labels) {
+        if (label.status !== LabelStatus.ARRIVED_AT_RETAIL) {
+          throw new BadRequestException(
+            `Label ${label.id} is not ready for purchase`,
+          );
+        }
+      }
+
+      const totalHarga = labels.reduce(
+        (sum, label) => sum + label.Product.price,
+        0,
+      );
+
+      const penjualan = await tx.penjualan.create({
+        data: {
+          totalHarga,
+          paymentMethod,
+        },
+      });
+
+      const results: UpdateLabelResponseDto[] = [];
+
+      for (const label of labels) {
+        const updatedLabel = await tx.label.update({
+          where: { id: label.id },
+          data: {
+            status: LabelStatus.PURCHASED_BY_CUSTOMER,
+            penjualanId: penjualan.id,
+          },
+          include: {
+            Product: true,
+            trackings: { select: { id: true } },
+          },
+        });
+
+        await tx.tracking.create({
+          data: {
+            userId: user.id,
+            companyType: CompanyType.CONSUMER,
+            title,
+            description,
+            status: TrackStatus.PURCHASED_BY_CUSTOMER,
+            labelId: label.id,
+            companyId: user.companyId,
+          },
+        });
+
+        results.push(
+          plainToInstance(UpdateLabelResponseDto, {
+            ...updatedLabel,
+            productId: updatedLabel.productId,
+            invoiceId: updatedLabel.invoiceId,
+            penjualanId: updatedLabel.penjualanId,
+            trackings: updatedLabel.trackings.map((t) => t.id),
+          }),
+        );
+      }
+
+      return results;
+    });
+  }
+
   async buy(
     id: string,
     dto: BuyDto,
@@ -129,6 +214,11 @@ export class LabelsService {
           `This status is not meant to be sent through this API. Use '/:id' instead`,
         );
       }
+      if (label.status !== LabelStatus.ARRIVED_AT_RETAIL) {
+        throw new BadRequestException(
+          `Label ${label.id} is not ready for purchase`,
+        );
+      }
       const updated = await this.prisma.$transaction(async (tx) => {
         const updateData: Prisma.LabelUpdateInput = {
           status: dto.status,
@@ -137,10 +227,22 @@ export class LabelsService {
           where: { id },
           data: updateData,
           include: {
-            // Product: { select: { id: true } },
+            Product: true,
             // Penjualan: { select: { id: true } },
             // Invoice: { select: { id: true } },
             trackings: { select: { id: true } },
+          },
+        });
+        const penjualan = await tx.penjualan.create({
+          data: {
+            totalHarga: update.Product.price,
+            paymentMethod: dto.paymentMethod,
+          },
+        });
+        await tx.label.update({
+          where: { id },
+          data: {
+            penjualanId: penjualan.id,
           },
         });
         await tx.tracking.create({
@@ -188,7 +290,6 @@ export class LabelsService {
         where: { id },
         select: { companyId: true },
       });
-      // 1. Validate role + status permission
       if (
         (updateLabelDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED &&
           user.role !== Role.DISTRIBUTOR) ||
@@ -202,14 +303,12 @@ export class LabelsService {
         );
       }
 
-      // 2. Only create tracking for these 3 statuses (and we know they're valid now)
       let status: TrackStatus | undefined;
       if (
         updateLabelDto.status === LabelStatus.DISTRIBUTOR_ACCEPTED ||
         updateLabelDto.status === LabelStatus.AGENT_ACCEPTED ||
         updateLabelDto.status === LabelStatus.RETAIL_ACCEPTED
       ) {
-        // Safe cast: these values exist in both enums with same name
         status = updateLabelDto.status as TrackStatus;
       }
       const updated = await this.prisma.$transaction(async (tx) => {
@@ -271,9 +370,14 @@ export class LabelsService {
     try {
       const label = await this.findOne(id);
       if (!label) throw new NotFoundException(`Label with ID ${id} not found`);
+      const invoice = await this.prisma.invoice.findUnique({
+        where: { id: label.invoiceId },
+      });
+      if (!invoice)
+        throw new NotFoundException(`Label with ID ${id} not found`);
       if (
-        label.currentCompanyId !== user.companyId ||
-        label.nextCompanyId !== user.companyId
+        invoice.companyId !== user.companyId ||
+        invoice.nextCompanyId !== user.companyId
       )
         throw new UnauthorizedException(
           `Removing other company's label is forbidden`,

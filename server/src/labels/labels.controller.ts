@@ -17,6 +17,7 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { BuyDto } from './dto/request/buy.dto';
+import { BulkBuyDto } from './dto/request/bulkBuy.dto';
 
 @Controller('labels')
 @ApiBearerAuth('access-token')
@@ -37,6 +38,15 @@ export class LabelsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.labelsService.findOne(id);
+  }
+
+  @Patch('buy/bulk')
+  bulkBuy(
+    @Param('id') id: string,
+    @Body() dto: BulkBuyDto,
+    @Req() req: Request & { user: UserRequest },
+  ) {
+    return this.labelsService.buy(id, dto, req.user);
   }
 
   @Patch('buy/:id')

@@ -1,9 +1,9 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { CreateInvoiceResponseDto } from 'src/invoices/dto/response/create-response.dto';
 import { meta } from 'src/types/meta.dto';
+import { CreateLabelResponseDto } from './create-response.dto';
 
-export class GetLabelResponseDto extends CreateInvoiceResponseDto {}
+export class GetLabelResponseDto extends CreateLabelResponseDto {}
 
 export class GetAllLabelResponseDto {
   @ApiResponseProperty({ type: [GetLabelResponseDto] })

@@ -12,6 +12,7 @@ import { TrackingsModule } from './trackings/trackings.module';
 import { AuthModule } from './auth/auth.module';
 import { FilesModule } from './files/files.module';
 import { CompaniesModule } from './companies/companies.module';
+import { PenjualanModule } from './penjualan/penjualan.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { CompaniesModule } from './companies/companies.module';
     AuthModule,
     FilesModule,
     CompaniesModule,
+    PenjualanModule,
   ],
   controllers: [AppController],
   providers: [

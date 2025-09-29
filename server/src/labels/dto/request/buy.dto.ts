@@ -1,6 +1,7 @@
-import { IsString } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 import { CreateLabelDto } from './create-label.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { PaymentMethod } from '@prisma/client';
 
 export class BuyDto extends CreateLabelDto {
   @IsString()
@@ -10,4 +11,8 @@ export class BuyDto extends CreateLabelDto {
   @IsString()
   @ApiProperty()
   description: string; // ini required buat tracking
+
+  @IsEnum(PaymentMethod)
+  @ApiProperty()
+  paymentMethod: PaymentMethod;
 }
