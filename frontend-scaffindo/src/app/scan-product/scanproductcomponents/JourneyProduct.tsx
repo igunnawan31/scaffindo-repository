@@ -1,6 +1,5 @@
 'use client'
 
-import journeyData from "@/app/data/journeyData"
 import { IoCheckmarkCircle } from "react-icons/io5"
 import { motion, Variants } from 'framer-motion'
 import Link from "next/link";
@@ -8,6 +7,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import invoiceProducts from "@/app/data/invoiceProducts";
 import React, { useEffect, useState } from "react";
+import { useTrackings } from "@/app/hooks/useTrackings";
 
 const leftVariants: Variants = {
     hidden: { opacity: 0, x: -50 },
@@ -20,41 +20,41 @@ const rightVariants: Variants = {
 };
 
 interface Props {
-    productCode: string;
+    labelId: string;
 }
 
-const JourneyProduct: React.FC<Props> = ({productCode}) => {
-    const product = invoiceProducts.find((p) =>
-        p.labels.some(
-        (label) =>
-            label.id.toLowerCase() === productCode.toLowerCase() ||
-            label.qrCode.toLowerCase() === productCode.toLowerCase()
-        )
-    );
+const JourneyProduct: React.FC<Props> = ({labelId}) => {
+    const { fetchTrackingById } = useTrackings();
+    const [trackingData, setTrackingData] = useState<any[]>([]);
 
-    const label = product?.labels.find(
-        (label) =>
-        label.id.toLowerCase() === productCode.toLowerCase() ||
-        label.qrCode.toLowerCase() === productCode.toLowerCase()
-    );
+    useEffect(() => {
+        if (labelId) {
+            fetchTrackingById(labelId).then((data) => {
+                if (Array.isArray(data)) {
+                    const sorted = [...data].sort(
+                        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                    );
+                    setTrackingData(sorted);
+                }
+            });
+        }
+    }, [labelId]);
 
-    if (!product || !label) {
+    if (trackingData.length === 0) {
         return (
-        <div className="p-6">
-            <h1 className="text-xl font-bold text-red-500">
-                Produk tidak ditemukan untuk kode "{productCode}"
-            </h1>
-        </div>
+            <div className="p-6">
+                <h1 className="text-xl font-bold text-red-500">
+                    Data tracking tidak ditemukan untuk kode "{labelId}"
+                </h1>
+            </div>
         );
     }
-
-    const productJourney = label.journey || [];
 
     return (
         <div className="w-full p-6 bg-gray-200 rounded-lg pb-12">
             <div className="text-center mb-8">
                 <h2 className="text-blue-900 text-2xl font-bold flex items-center justify-center gap-2">
-                    {label.id}
+                    {labelId}
                 </h2>
                 <p className="text-gray-500">
                     Dilacak secara transparan menggunakan teknologi blockchain
@@ -64,12 +64,11 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                 </span>
             </div>
 
-            {/* Mobile Layout (below md) */}
             <div className="md:hidden relative">
                 <div className="absolute left-8 top-0 w-1 h-full bg-yellow-500"></div>
-                {productJourney.map((journey, index) => (
+                {trackingData.map((track) => (
                     <motion.div 
-                        key={journey.id}
+                        key={track.id}
                         className="flex mb-12 last:mb-0"
                         initial='hidden'
                         whileInView={'visible'}
@@ -78,17 +77,15 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                     >
                         <div className="flex-shrink-0 w-16 flex flex-col items-center">
                             <div className="w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full relative z-10">
-                                {journey.icon}
+                                {/* {journey.icon} */}
                             </div>
                         </div>
                         <div className="ml-4 flex-1">
                             <div className="bg-white shadow-md rounded-lg p-5">
-                                <h3 className="font-semibold text-lg">{journey.title}</h3>
-                                <p className="text-sm text-gray-500">{journey.date}</p>
+                                <h3 className="font-semibold text-lg">{track.title}</h3>
+                                <p className="text-sm text-gray-500">{new Date(track.createdAt).toLocaleString()}</p>
                                 <ul className="mt-3 text-gray-700 text-sm space-y-1">
-                                    {journey.details.map((d, i) => (
-                                        <li key={i}>• {d}</li>
-                                    ))}
+                                    {track.description}
                                 </ul>
                                 <div className="mt-3 text-xs text-blue-900 bg-blue-100 p-2 rounded">
                                     <IoCheckmarkCircle className="w-4 h-4 inline mr-1" />
@@ -103,11 +100,11 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
             {/* Desktop Layout (md and above) */}
             <div className="hidden md:relative md:grid md:grid-cols-9 md:gap-y-12">
                 <div className="absolute left-1/2 top-0 w-1 -translate-x-1/2 h-full bg-yellow-500"></div>
-                {productJourney.map((journey, index) => {
+                {trackingData.map((track, index) => {
                     const isLeft = index % 2 === 0;
 
                     return (
-                        <div key={journey.id} className="contents">
+                        <div key={track.id} className="contents">
                             {isLeft ? (
                                 <motion.div 
                                     className="col-span-4 pr-6"
@@ -117,12 +114,10 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                                     variants={leftVariants}
                                 >
                                     <div className="bg-white shadow-md rounded-lg p-5">
-                                        <h3 className="font-semibold text-lg">{journey.title}</h3>
-                                        <p className="text-sm text-gray-500">{journey.date}</p>
+                                        <h3 className="font-semibold text-lg">{track.title}</h3>
+                                        <p className="text-sm text-gray-500">{new Date(track.createdAt).toLocaleString()}</p>
                                         <ul className="mt-3 text-gray-700 text-sm space-y-1">
-                                            {journey.details.map((d, i) => (
-                                                <li key={i}>• {d}</li>
-                                            ))}
+                                            {track.description}
                                         </ul>
                                         <div className="mt-3 text-xs text-blue-900 bg-blue-100 p-2 rounded">
                                             <IoCheckmarkCircle className="w-4 h-4 inline mr-1" />
@@ -136,7 +131,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
 
                             <div className="col-span-1 flex flex-col items-center">
                                 <div className="w-8 h-8 flex items-center justify-center bg-white border-2 border-gray-300 rounded-full relative z-10">
-                                    {journey.icon}
+                                    {/* {journey.icon} */}
                                 </div>
                             </div>
 
@@ -149,12 +144,10 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
                                     variants={rightVariants}
                                 >
                                     <div className="bg-white shadow-md rounded-lg p-5">
-                                        <h3 className="font-semibold text-lg">{journey.title}</h3>
-                                        <p className="text-sm text-gray-500">{journey.date}</p>
+                                        <h3 className="font-semibold text-lg">{track.title}</h3>
+                                        <p className="text-sm text-gray-500">{new Date(track.createdAt).toLocaleString()}</p>
                                         <ul className="mt-3 text-gray-700 text-sm space-y-1">
-                                            {journey.details.map((d, i) => (
-                                                <li key={i}>• {d}</li>
-                                            ))}
+                                            {track.description}
                                         </ul>
                                         <div className="mt-3 text-xs text-blue-900 bg-blue-100 p-2 rounded">
                                             <IoCheckmarkCircle className="w-4 h-4 inline mr-1" />
@@ -172,7 +165,7 @@ const JourneyProduct: React.FC<Props> = ({productCode}) => {
 
             <div className="flex items-center justify-center pt-10"> 
                 <Link
-                    href={`/scan-product/${product?.id ?? ""}`}
+                    href={`/scan-product/${labelId ?? ""}`}
                     className="group p-5 bg-blue-900 border-2 border-blue-900 text-white 
                         hover:bg-white hover:border-blue-900 hover:text-blue-900
                         rounded-lg font-semibold mx-3 flex items-center"

@@ -8,7 +8,7 @@ import Webcam from "react-webcam";
 import JourneyProduct from './scanproductcomponents/JourneyProduct'
 
 export default function ScanProduct() {
-    const [productCode, setProductCode] = useState<string | null>(null);
+    const [labelId, setLabelId] = useState<string | null>(null);
     return (
         <>
             <NavbarComponentsHome />
@@ -19,15 +19,15 @@ export default function ScanProduct() {
                 <div className="relative z-10 h-full px-4 lg:px-8">
                     <div className="container mx-auto max-w-11/12">
                         <Header />
-                        <ScanProductModal onProductCode={setProductCode} />
+                        <ScanProductModal onLabelCode={setLabelId} />
                     </div>
                 </div>
             </section>
-            {productCode && (
+            {labelId && (
                 <section id="InformationProduct" className="relative bg-cover bg-center pt-12 bg-white">
                     <div className="relative z-10 h-full px-4 lg:px-8">
                         <div className="container mx-auto max-w-11/12">
-                            <JourneyProduct productCode={productCode} />
+                            <JourneyProduct labelId={labelId} />
                         </div>
                     </div>
                 </section>
