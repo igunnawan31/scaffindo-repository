@@ -42,11 +42,10 @@ export class LabelsController {
 
   @Patch('buy/bulk')
   bulkBuy(
-    @Param('id') id: string,
     @Body() dto: BulkBuyDto,
     @Req() req: Request & { user: UserRequest },
   ) {
-    return this.labelsService.buy(id, dto, req.user);
+    return this.labelsService.bulkBuy(dto, req.user);
   }
 
   @Patch('buy/:id')
