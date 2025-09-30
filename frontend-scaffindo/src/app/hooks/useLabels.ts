@@ -6,6 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export function useLabels() {
     const [labels, setLabels] = useState<Label[]>([]);
+    const [penjualan, setPenjualan] = useState<Label[]>([]);
     const [label, setLabel] = useState<Label | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -45,6 +46,43 @@ export function useLabels() {
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to fetch labels");
             setLabels([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchLabelsPenjualan = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                console.warn("⚠️ No token found in localStorage");
+                setPenjualan([]);
+                return;
+            }
+
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?status=ARRIVED_AT_RETAIL&limit=1000`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            let penjualanData: Label[] = [];
+            
+            if (Array.isArray(res.data)) {
+                penjualanData = res.data;
+            } else if (res.data && Array.isArray(res.data.data)) {
+                penjualanData = res.data.data;
+            } else if (Array.isArray(res.data?.certificates)) {
+                penjualanData = res.data.certificates;
+            }
+
+            setPenjualan(penjualanData);
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to fetch labels");
+            setPenjualan([]);
         } finally {
             setLoading(false);
         }
@@ -117,12 +155,59 @@ export function useLabels() {
         }
     },[]);
 
+    const bulkBuy = useCallback(async (id: string, payload: { 
+        title: string; 
+        description: string; 
+        paymentMethod: string; 
+        labelIds: string[]; 
+    }) => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem("access_token");
+
+            if (!token) {
+                setError("No authentication token found");
+                return;
+            }
+
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            };
+
+            const formattedPayload = {
+                ...payload,
+                labelIds: JSON.stringify(payload.labelIds),
+            };
+
+            const res = await axios.patch(
+                `${process.env.NEXT_PUBLIC_API_URL}/labels/buy/bulk/${id}`,
+                formattedPayload,
+                { headers }
+            );
+
+            return res.data;
+            
+        } catch (err: any) {
+            console.error("Bulk buy failed:", err.response || err);
+            setError(err.response?.data?.message || "Failed to perform bulk buy");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     return { 
-        fetchLabels, 
+        fetchLabels,
+        fetchLabelsPenjualan,
         fetchLabelById, 
         updateLabel,
+        bulkBuy,
         labels, 
-        label, 
+        label,
+        penjualan,
         loading, 
         error 
     };

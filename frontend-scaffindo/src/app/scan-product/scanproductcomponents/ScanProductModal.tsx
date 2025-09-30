@@ -8,26 +8,36 @@ interface Props {
 const ScanProduct:React.FC<Props> = ({onLabelCode}) => {
     const [mode, setMode] = useState<"camera" | "code">("camera");
     const [labelId, setLabelId] = useState<string>("");
-
+    const isTransitioningRef = useRef(false);
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const isScanningRef = useRef(false);
 
     useEffect(() => {
+        if (scannerRef.current) return;
         scannerRef.current = new Html5Qrcode("reader");
 
         return () => {
-            if (isScanningRef.current) {
-                scannerRef.current?.stop().finally(() => {
-                    isScanningRef.current = false;
-                });
-            }
-            scannerRef.current?.clear();
+            const cleanupScanner = async () => {
+                try {
+                    if (isScanningRef.current) {
+                        await scannerRef.current?.stop();
+                        isScanningRef.current = false;
+                    }
+                    await scannerRef.current?.clear();
+                } catch (err) {
+                    console.warn("Cleanup error:", err);
+                }
+            };
+
+            cleanupScanner();
         };
     }, []);
 
     useEffect(() => {
         const toggleScanner = async () => {
-            if (!scannerRef.current) return;
+            if (!scannerRef.current || isTransitioningRef.current) return;
+
+            isTransitioningRef.current = true;
 
             if (mode === "camera") {
                 if (isScanningRef.current) {
@@ -59,6 +69,7 @@ const ScanProduct:React.FC<Props> = ({onLabelCode}) => {
                     isScanningRef.current = false;
                 }
             }
+            isTransitioningRef.current = false;
         };
 
         toggleScanner();
