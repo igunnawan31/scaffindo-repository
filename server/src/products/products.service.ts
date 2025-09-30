@@ -260,7 +260,7 @@ export class ProductsService {
       const product = await this.prisma.product.findUnique({
         where: {
           id: id,
-          companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+          companyId: user.role === Role.SUPERADMIN || Role.RETAIL ? undefined : user.companyId,
         },
         include: {
           labels: true,

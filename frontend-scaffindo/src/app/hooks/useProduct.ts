@@ -59,7 +59,7 @@ export function useProduct() {
             
             if (!token) {
                 setError("No authentication token found");
-                return;
+                return null;
             }
 
             const res = await axios.get(
@@ -71,9 +71,11 @@ export function useProduct() {
                 }
             );
             setProduct(res.data);
+            return res.data
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to fetch product by ID");
             setProduct(null);
+            return null;
         } finally {
             setLoading(false);
         }

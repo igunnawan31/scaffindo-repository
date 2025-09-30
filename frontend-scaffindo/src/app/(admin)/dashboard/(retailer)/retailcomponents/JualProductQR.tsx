@@ -1,106 +1,204 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScanProductAdmin from "../../admincomponents/ScanProductAdmin";
 import ScanInvoiceModal from "../../admincomponents/ScanInvoiceModal";
-import invoiceProducts from "@/app/data/invoiceProducts";
 import SuccessModal from "../../admincomponents/SuccessPopUpModal";
+import { useLabels } from "@/app/hooks/useLabels";
+import { useProduct } from "@/app/hooks/useProduct";
+import axios from "axios";
 
-type Product = {
-  code: string;
-  name: string;
-  qty: number;
-  price: number;
+type SelectedProduct = {
+    code: string;
+    name: string;
+    qty: number;
+    price: number;
 };
 
 const JualProductQR = () => {
-    const [products, setProducts] = useState<Product[]>([]);
+    const { fetchLabelsPenjualan, penjualan } = useLabels();
+    const { fetchProductById, product } = useProduct(); 
+
+    const [cart, setCart] = useState<SelectedProduct[]>([]);
     const [openScanner, setOpenScanner] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const getProductByQr = (code: string) => {
-        for (const product of invoiceProducts) {
-            const label = product.labels.find(
-                (l) => l.qrCode === code || l.id === code
-            );
-            if (label) {
-                return {
-                    code: label.id,
-                    name: product.name,
-                    price: product.harga,
-                };
-            }
-        }
-        return null;
-    };
+    useEffect(() => {
+        fetchLabelsPenjualan();
+    }, [fetchLabelsPenjualan]);
 
-    const handleProductScan = (qr: string) => {
-        const found = getProductByQr(qr);
-        if (!found) {
-            alert(`Produk dengan kode ${qr} tidak ditemukan!`);
+    const handleProductScan = async (qr: string) => {
+        const label = penjualan.find((l) => l.id === qr);
+        if (!label) {
+            alert(`Label dengan kode ${qr} tidak ditemukan atau belum bisa dijual.`);
             return;
         }
 
-        setProducts((prev) => {
-            const existing = prev.find((p) => p.code === qr);
+        const productData = await fetchProductById(label.productId);
+
+        if (!productData) {
+            alert("Produk terkait label ini tidak ditemukan!");
+            return;
+        }
+
+        setCart((prev) => {
+            const existing = prev.find((p) => p.code === label.id);
             if (existing) {
                 return prev.map((p) =>
-                p.code === qr ? { ...p, qty: p.qty + 1 } : p
+                    p.code === label.id ? { ...p, qty: p.qty + 1 } : p
                 );
             }
-            return [...prev, { ...found, qty: 1 }];
+            return [
+                ...prev,
+                {
+                    code: label.id,
+                    name: productData.name,
+                    price: Number(productData.price),
+                    qty: 1,
+                },
+            ];
         });
+
         setOpenScanner(false);
     };
 
     const handleRemove = (code: string) => {
-        setProducts((prev) => prev.filter((p) => p.code !== code));
+        setCart((prev) => prev.filter((p) => p.code !== code));
     };
 
-    const handleCheckout = () => {
-        const total = products.reduce((acc, p) => acc + p.qty * p.price, 0);
+    // Bulk buy function implementation
+    const bulkBuy = async (payload: {
+        title: string;
+        description: string;
+        paymentMethod: string;
+        labelIds: string[];
+    }) => {
+        try {
+            setLoading(true);
+            setError(null);
 
-        setSuccessMessage(
-            `Checkout berhasil! Total: Rp ${total.toLocaleString("id-ID")}`
-        );
-        setShowSuccess(true);
-        setProducts([]);
+            const token = localStorage.getItem("access_token");
+
+            if (!token) {
+                setError("No authentication token found");
+                return;
+            }
+
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            };
+
+            const formattedPayload = {
+                ...payload,
+                labelIds: JSON.stringify(payload.labelIds),
+            };
+
+            // Using the first label ID as the main ID for the bulk operation
+            // You might want to adjust this based on your API requirements
+            const firstLabelId = payload.labelIds[0];
+            
+            const res = await axios.patch(
+                `${process.env.NEXT_PUBLIC_API_URL}/labels/buy/bulk/${firstLabelId}`,
+                formattedPayload,
+                { headers }
+            );
+
+            return res.data;
+            
+        } catch (err: any) {
+            console.error("Bulk buy failed:", err.response || err);
+            setError(err.response?.data?.message || "Failed to perform bulk buy");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const totalHarga = products.reduce((acc, p) => acc + p.qty * p.price, 0);
+    const handleCheckout = async () => {
+        if (cart.length === 0) {
+            alert("Keranjang kosong!");
+            return;
+        }
+
+        try {
+            setLoading(true);
+            
+            // Prepare payload for bulk buy
+            const labelIds = cart.map(item => item.code);
+            const totalAmount = cart.reduce((acc, p) => acc + p.qty * p.price, 0);
+            
+            const payload = {
+                title: `Bulk Purchase - ${new Date().toLocaleString()}`,
+                description: `Pembelian ${cart.length} produk dengan total Rp ${totalAmount.toLocaleString("id-ID")}`,
+                paymentMethod: "CASH", // You can make this dynamic based on user selection
+                labelIds: labelIds
+            };
+
+            // Execute bulk buy
+            const result = await bulkBuy(payload);
+            
+            // Show success message
+            setSuccessMessage(`Checkout berhasil! Total: Rp ${totalAmount.toLocaleString("id-ID")}`);
+            setShowSuccess(true);
+            setCart([]);
+            
+            // Refresh the labels data
+            fetchLabelsPenjualan();
+            
+        } catch (err) {
+            console.error("Checkout failed:", err);
+            alert("Checkout gagal. Silakan coba lagi.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const totalHarga = cart.reduce((acc, p) => acc + p.qty * p.price, 0);
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Penjualan dengan QR Code</h2>
 
+            {/* Error Display */}
+            {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {error}
+                </div>
+            )}
+
             <button
                 onClick={() => setOpenScanner(true)}
-                className="w-full py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 mb-4"
+                disabled={loading}
+                className="w-full py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 mb-4 disabled:bg-gray-400"
             >
-                + Scan Produk
+                {loading ? "Loading..." : "+ Scan Produk"}
             </button>
 
-            {products.length > 0 ? (
+            {cart.length > 0 ? (
                 <div className="space-y-3">
-                    {products.map((p) => (
+                    {cart.map((p) => (
                         <div
                             key={p.code}
                             className="flex justify-between items-center border p-3 rounded-lg shadow-sm"
                         >
-                        <div>
-                            <p className="font-medium">{p.name}</p>
-                            <p className="text-xs text-gray-400">Kode: {p.code}</p>
-                            <p className="text-sm text-gray-500">
-                                Qty: {p.qty} × Rp {p.price.toLocaleString("id-ID")}
-                            </p>
-                            <p className="text-sm text-green-700 font-semibold">
-                                Subtotal: Rp {(p.qty * p.price).toLocaleString("id-ID")}
-                            </p>
-                        </div>
+                            <div>
+                                <p className="font-medium">{p.name}</p>
+                                <p className="text-xs text-gray-400">Kode: {p.code}</p>
+                                <p className="text-sm text-gray-500">
+                                    Qty: {p.qty} × Rp {p.price.toLocaleString("id-ID")}
+                                </p>
+                                <p className="text-sm text-green-700 font-semibold">
+                                    Subtotal: Rp {(p.qty * p.price).toLocaleString("id-ID")}
+                                </p>
+                            </div>
                             <button
                                 onClick={() => handleRemove(p.code)}
-                                className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-400"
+                                disabled={loading}
+                                className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-400 disabled:bg-gray-400"
                             >
                                 Hapus
                             </button>
@@ -114,9 +212,10 @@ const JualProductQR = () => {
 
                     <button
                         onClick={handleCheckout}
-                        className="w-full py-3 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-500"
+                        disabled={loading || cart.length === 0}
+                        className="w-full py-3 mt-4 bg-green-600 text-white rounded-lg hover:bg-green-500 disabled:bg-gray-400"
                     >
-                        Checkout
+                        {loading ? "Processing..." : "Checkout"}
                     </button>
                 </div>
             ) : (
