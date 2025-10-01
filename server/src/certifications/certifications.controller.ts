@@ -86,17 +86,16 @@ export class CertificationsController {
     return this.certificationsService.findAll(filters);
   }
 
+  @Get('product-certs/:id')
+  @ApiResponse({ type: [GetCertificationResponseDto] })
+  findProductCerts(@Param('id') id: string) {
+    return this.certificationsService.findCertificates(+id);
+  }
   @Get(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetCertificationResponseDto })
   findOne(@Param('id') id: string) {
     return this.certificationsService.findOne(id);
-  }
-
-  @Get('product-certs/:id')
-  @ApiResponse({ type: [GetCertificationResponseDto] })
-  findProductCerts(@Param('id') id: string) {
-    return this.certificationsService.findCertificates(+id);
   }
 
   @Patch(':id')
