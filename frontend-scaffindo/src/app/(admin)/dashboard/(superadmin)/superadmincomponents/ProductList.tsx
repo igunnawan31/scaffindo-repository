@@ -11,7 +11,7 @@ import Pagination from "../../admincomponents/Pagination"
 import { Company, Product } from "@/app/type/types"
 import { useProduct } from "@/app/hooks/useProduct"
 import Image from "next/image"
-import getImageUrl from "@/app/lib/path"
+import { getImageUrl } from "@/app/lib/path"
 import { Category } from "@/app/type/types"
 
 const ProductList = () => {

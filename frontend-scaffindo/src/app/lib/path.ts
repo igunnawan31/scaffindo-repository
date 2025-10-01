@@ -1,5 +1,7 @@
-const getImageUrl = (filePath: string) => {
+export const getImageUrl = (filePath: string) => {
     return `${process.env.NEXT_PUBLIC_API_URL}/files?path=${filePath}`;
 };
 
-export default getImageUrl
+export const getPDFUrl = (filePath: string) => {
+    return `${process.env.NEXT_PUBLIC_API_URL}/files?path=${filePath}`;
+};
