@@ -32,19 +32,22 @@ const JourneyProduct: React.FC<Props> = ({labelId}) => {
     useEffect(() => {
         if (!labelId) return;
 
-        fetchTrackingById(labelId).then((data) => {
-            if (Array.isArray(data)) {
-                const sorted = [...data].sort(
+        const fetchData = async () => {
+            const tracking = await fetchTrackingById(labelId);
+            if (Array.isArray(tracking)) {
+                const sorted = [...tracking].sort(
                     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
                 );
                 setTrackingData(sorted);
             }
-        });
 
-        if (labelId) fetchLabelById(labelId);
+            const labelData = await fetchLabelById(labelId);
+            if (labelData) setLabel(labelData);
+        };
+
+        fetchData();
     }, [labelId, fetchTrackingById, fetchLabelById]);
 
-    console.log(label)
     if (trackingData.length === 0) {
         return (
             <div className="p-6">

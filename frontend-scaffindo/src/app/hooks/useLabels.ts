@@ -91,21 +91,8 @@ export function useLabels() {
         try { 
             setLoading(true);
             setError(null);
-            const token = localStorage.getItem("access_token");
-            
-            if (!token) {
-                setError("No authentication token found");
-                return null;
-            }
 
-            const res = await axiosInstance.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/labels/${id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/labels/${id}`);
             setLabel(res.data);
             return res.data;
         } catch (err: any) {
