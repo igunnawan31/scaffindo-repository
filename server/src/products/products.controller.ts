@@ -19,7 +19,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
-import { ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CreateProductResponseDto } from './dto/response/create-response.dto';
 import {
   GetAllProductResponseDto,
@@ -35,12 +35,11 @@ import { DeleteProductResponseDto } from './dto/response/delete-response.dto';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 
 @Controller('products')
-@ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.SUPERADMIN)
   @ApiResponse({
     type: CreateProductResponseDto,
@@ -119,6 +118,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetProductResponseDto, status: 200 })
   findOne(
     @Param('id') id: string,
@@ -128,6 +128,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: UpdateProductResponseDto, status: 200 })
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -221,8 +222,9 @@ export class ProductsController {
     );
   }
 
-  @Roles(Role.SUPERADMIN)
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.SUPERADMIN)
   @ApiResponse({ type: DeleteProductResponseDto, status: 200 })
   remove(@Param('id') id: string, @Req() req: Request & { user: UserRequest }) {
     return this.productsService.remove(+id, req.user);

@@ -14,14 +14,11 @@ import { UpdateLabelDto } from './dto/request/update-label.dto';
 import { LabelFilterDto } from './dto/request/label-filter.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { UserRequest } from 'src/users/entities/UserRequest.dto';
 import { BuyDto } from './dto/request/buy.dto';
 import { BulkBuyDto } from './dto/request/bulkBuy.dto';
 
 @Controller('labels')
-@ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class LabelsController {
   constructor(private readonly labelsService: LabelsService) {}
 
@@ -31,6 +28,7 @@ export class LabelsController {
   // }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   findAll(@Query() filters: LabelFilterDto) {
     return this.labelsService.findAll(filters);
   }
@@ -41,6 +39,7 @@ export class LabelsController {
   }
 
   @Patch('buy/bulk')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   bulkBuy(
     @Body() dto: BulkBuyDto,
     @Req() req: Request & { user: UserRequest },
@@ -49,6 +48,7 @@ export class LabelsController {
   }
 
   @Patch('buy/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   buy(
     @Param('id') id: string,
     @Body() dto: BuyDto,
@@ -58,6 +58,7 @@ export class LabelsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   update(
     @Param('id') id: string,
     @Body() updateLabelDto: UpdateLabelDto,
@@ -67,6 +68,7 @@ export class LabelsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   remove(@Param('id') id: string, @Req() req: Request & { user: UserRequest }) {
     return this.labelsService.remove(id, req.user);
   }
