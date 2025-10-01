@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Certificate, Product } from "../type/types";
 import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 
 export function useProduct() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,7 +23,7 @@ export function useProduct() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/products?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/products?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -51,6 +52,43 @@ export function useProduct() {
         }
     }, []);
 
+    const fetchProductByLabelId = useCallback(async (labelId: string) => {
+        try {
+            setLoading(true);
+            setError(null);
+            const token = localStorage.getItem("access_token");
+            
+            if (!token) {
+                setError("No authentication token found");
+                return null;
+            }
+
+            const res = await axiosInstance.get(
+                `${process.env.NEXT_PUBLIC_API_URL}/products`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const product = res.data.data.find((p: any) => p.labels.includes(labelId));
+
+            if (!product) return null;
+
+            return {
+                productName: product.name,
+                harga: product.price,
+            };
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to fetch product by Label ID");
+            setProduct(null);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const fetchProductById = useCallback(async (id: string) => {
         try { 
             setLoading(true);
@@ -62,7 +100,7 @@ export function useProduct() {
                 return null;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/products/${id}`,
                 {
                     headers: {
@@ -187,6 +225,7 @@ export function useProduct() {
         loading,
         error,
         fetchProducts,
+        fetchProductByLabelId,
         fetchProductById,
         updateProduct,
         createProduct,

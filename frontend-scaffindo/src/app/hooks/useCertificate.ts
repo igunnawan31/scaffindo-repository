@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Certificate,} from "../type/types";
 import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 
 export function useCertificate() {
     const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -22,7 +23,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -62,7 +63,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/certifications/${id}`,
                 {
                     headers: {

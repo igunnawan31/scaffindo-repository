@@ -1,8 +1,7 @@
 import { useState, useCallback } from "react";
 import { Label } from "../type/types";
 import axios from "axios";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+import axiosInstance from "../lib/axiosInstance";
 
 export function useLabels() {
     const [labels, setLabels] = useState<Label[]>([]);
@@ -23,7 +22,7 @@ export function useLabels() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -63,7 +62,7 @@ export function useLabels() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?status=ARRIVED_AT_RETAIL&limit=1000`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?status=ARRIVED_AT_RETAIL&limit=1000`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -96,10 +95,10 @@ export function useLabels() {
             
             if (!token) {
                 setError("No authentication token found");
-                return;
+                return null;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/labels/${id}`,
                 {
                     headers: {
@@ -108,9 +107,11 @@ export function useLabels() {
                 }
             );
             setLabel(res.data);
+            return res.data;
         } catch (err: any) {
             setError(err.response?.data?.message || "Failed to fetch label by ID");
             setLabel(null);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -155,11 +156,12 @@ export function useLabels() {
         }
     },[]);
 
-    const bulkBuy = useCallback(async (id: string, payload: { 
+    const bulkBuy = useCallback(async (payload: { 
         title: string; 
         description: string; 
         paymentMethod: string; 
-        labelIds: string[]; 
+        labelIds: string[];
+        status: string;
     }) => {
         try {
             setLoading(true);
@@ -179,11 +181,11 @@ export function useLabels() {
 
             const formattedPayload = {
                 ...payload,
-                labelIds: JSON.stringify(payload.labelIds),
+                labelIds: payload.labelIds, 
             };
 
             const res = await axios.patch(
-                `${process.env.NEXT_PUBLIC_API_URL}/labels/buy/bulk/${id}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/labels/buy/bulk`,
                 formattedPayload,
                 { headers }
             );

@@ -125,3 +125,17 @@ export interface Tracking {
     labelId: string;
     companyId: string;
 } 
+
+
+export type PaymentMethod = {
+    QRIS: 'QRIS',
+    TRANSFER: 'TRANSFER',
+    CASH: 'CASH'
+}
+export interface Penjualan {
+    id: string;
+    labelIds: string[];
+    totalHarga: number;
+    paymentMethod: string;
+    createdAt: string;
+}

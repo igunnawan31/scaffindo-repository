@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Invoice } from "../type/types";
 import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -51,7 +52,7 @@ export function useInvoice() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/invoices?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/invoices?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -90,7 +91,7 @@ export function useInvoice() {
                 return;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/invoices/${id}`,
                 {
                     headers: {

@@ -1,38 +1,76 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Toaster, toast } from "react-hot-toast";
+import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
-interface AuthProviderProps {
-    children: React.ReactNode;
+interface AuthContextType {
+  user: any | null;
+  authReady: boolean;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, password: string) => Promise<any | null>;
+  logout: () => void;
+  getToken: () => string | null;
 }
 
-const PUBLIC_PATHS = ["/sign-in", "/register"];
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export default function AuthProvider({ children }: AuthProviderProps) {
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
-    const pathname = usePathname();
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<any | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("access_token");
+  // Load user from localStorage when app starts
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+    setAuthReady(true);
+  }, []);
 
-        if (!token && !PUBLIC_PATHS.includes(pathname)) {
-            toast.error("You must login first");
-            router.push("/sign-in");
-        } else {
-            setLoading(false);
-        }
-    }, [pathname, router]);
+  const login = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <p>Checking authentication...</p>
-            </div>
-        );
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        email,
+        password,
+      });
+
+      const userData = res.data.user;
+      localStorage.setItem("access_token", res.data.access_token);
+      localStorage.setItem("refresh_token", res.data.refresh_token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      setUser(userData);
+      return userData;
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed");
+      return null;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return <>{children}</>;
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
+    setUser(null);
+  };
+
+  const getToken = () => localStorage.getItem("access_token");
+
+  return (
+    <AuthContext.Provider value={{ user, authReady, loading, error, login, logout, getToken }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  return context;
 }

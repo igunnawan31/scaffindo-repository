@@ -16,13 +16,15 @@ type SelectedProduct = {
 };
 
 const JualProductQR = () => {
-    const { fetchLabelsPenjualan, penjualan } = useLabels();
+    const { fetchLabelsPenjualan, penjualan, bulkBuy } = useLabels();
     const { fetchProductById, product } = useProduct(); 
-
     const [cart, setCart] = useState<SelectedProduct[]>([]);
     const [openScanner, setOpenScanner] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [paymentMethod, setPaymentMethod] = useState("CASH");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -69,55 +71,6 @@ const JualProductQR = () => {
         setCart((prev) => prev.filter((p) => p.code !== code));
     };
 
-    // Bulk buy function implementation
-    const bulkBuy = async (payload: {
-        title: string;
-        description: string;
-        paymentMethod: string;
-        labelIds: string[];
-    }) => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const token = localStorage.getItem("access_token");
-
-            if (!token) {
-                setError("No authentication token found");
-                return;
-            }
-
-            const headers = {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            };
-
-            const formattedPayload = {
-                ...payload,
-                labelIds: JSON.stringify(payload.labelIds),
-            };
-
-            // Using the first label ID as the main ID for the bulk operation
-            // You might want to adjust this based on your API requirements
-            const firstLabelId = payload.labelIds[0];
-            
-            const res = await axios.patch(
-                `${process.env.NEXT_PUBLIC_API_URL}/labels/buy/bulk/${firstLabelId}`,
-                formattedPayload,
-                { headers }
-            );
-
-            return res.data;
-            
-        } catch (err: any) {
-            console.error("Bulk buy failed:", err.response || err);
-            setError(err.response?.data?.message || "Failed to perform bulk buy");
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleCheckout = async () => {
         if (cart.length === 0) {
             alert("Keranjang kosong!");
@@ -126,29 +79,24 @@ const JualProductQR = () => {
 
         try {
             setLoading(true);
-            
-            // Prepare payload for bulk buy
             const labelIds = cart.map(item => item.code);
             const totalAmount = cart.reduce((acc, p) => acc + p.qty * p.price, 0);
             
             const payload = {
                 title: `Bulk Purchase - ${new Date().toLocaleString()}`,
                 description: `Pembelian ${cart.length} produk dengan total Rp ${totalAmount.toLocaleString("id-ID")}`,
-                paymentMethod: "CASH", // You can make this dynamic based on user selection
-                labelIds: labelIds
+                paymentMethod: "CASH",
+                labelIds: labelIds,
+                status: "PURCHASED_BY_CUSTOMER"
             };
 
-            // Execute bulk buy
             const result = await bulkBuy(payload);
-            
-            // Show success message
+            console.log(result);
             setSuccessMessage(`Checkout berhasil! Total: Rp ${totalAmount.toLocaleString("id-ID")}`);
             setShowSuccess(true);
             setCart([]);
             
-            // Refresh the labels data
             fetchLabelsPenjualan();
-            
         } catch (err) {
             console.error("Checkout failed:", err);
             alert("Checkout gagal. Silakan coba lagi.");
@@ -163,7 +111,6 @@ const JualProductQR = () => {
         <div className="p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-bold mb-4">Penjualan dengan QR Code</h2>
 
-            {/* Error Display */}
             {error && (
                 <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                     {error}
@@ -208,6 +155,36 @@ const JualProductQR = () => {
                     <div className="flex justify-between items-center border-t pt-3 mt-3 font-bold text-lg">
                         <span>Total</span>
                         <span>Rp {totalHarga.toLocaleString("id-ID")}</span>
+                    </div>
+
+
+                    <div className="space-y-2 mt-4 border p-3 rounded-lg">
+                        <label className="block text-sm font-medium">Judul Transaksi</label>
+                        <input
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Contoh: Pembelian Harian / Transaksi #123"
+                            className="w-full border p-2 rounded"
+                        />
+
+                        <label className="block text-sm font-medium">Deskripsi</label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Catatan opsional..."
+                            className="w-full border p-2 rounded"
+                        />
+
+                        <label className="block text-sm font-medium">Metode Pembayaran</label>
+                        <select
+                            value={paymentMethod}
+                            onChange={(e) => setPaymentMethod(e.target.value)}
+                            className="w-full border p-2 rounded"
+                        >
+                            <option value="CASH">Cash</option>
+                            <option value="QRIS">QRIS</option>
+                            <option value="TRANSFER">Transfer Bank</option>
+                        </select>
                     </div>
 
                     <button

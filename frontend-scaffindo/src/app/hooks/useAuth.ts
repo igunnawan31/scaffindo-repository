@@ -1,10 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 export function useAuth() {
+    const [user, setUser] = useState<any | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            setUser(JSON.parse(storedUser));
+        }
+    }, []);
 
     const login = async (email: string, password: string) => {
         try {
@@ -64,5 +72,5 @@ export function useAuth() {
 
     const getToken = () => localStorage.getItem("access_token");
 
-    return { login, register, logout, getToken, loading, error };
+    return { user, login, register, logout, getToken, loading, error };
 }

@@ -7,7 +7,7 @@ export class PenjualanFilterDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  minCreatedDate: string;
+  minCreatedDate?: string;
 
   @ApiPropertyOptional()
   @IsInt()

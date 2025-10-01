@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { User } from "../type/types";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
+import axiosInstance from "../lib/axiosInstance";
 
 export function useUser() {
     const searchParams = useSearchParams();
@@ -25,7 +26,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN&limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -66,7 +67,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users?role=${role}&limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?role=${role}&limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -111,7 +112,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/users/${id}`,
                 {
                     headers: {

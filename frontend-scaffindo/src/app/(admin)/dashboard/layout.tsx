@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Menu from "./admincomponents/Menu";
 import Navbar from "./admincomponents/Navbar";
-import AuthProvider from "@/app/(admin)/dashboard/admincomponents/AuthProvider";
+import { AuthProvider } from "@/app/(admin)/dashboard/admincomponents/AuthProvider";
 
 export default function AdminRootLayout({
     children,

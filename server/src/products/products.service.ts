@@ -176,7 +176,7 @@ export class ProductsService {
       const skip = (page - 1) * limit;
 
       const where: Prisma.ProductWhereInput = {
-        companyId: user.role === Role.SUPERADMIN ? undefined : user.companyId,
+        companyId: user.role === Role.SUPERADMIN || Role.RETAIL ? undefined : user.companyId,
       };
 
       if (searchTerm) {

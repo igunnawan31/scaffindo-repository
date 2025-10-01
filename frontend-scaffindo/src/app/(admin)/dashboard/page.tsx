@@ -1,22 +1,46 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import SuperAdminDashboard from "./admincomponents/SuperAdminDashboard";
 
-const AdminDashboard = () => {
-    const router = useRouter();
+export default function Dashboard() {
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-            router.push("/sign-in");
-        }
-    }, [router]);
-    return (
-        <div className="px-8 text-blue-900 mb-32 w-full">
+        const userJson = localStorage.getItem("user");
+        if (userJson) setUser(JSON.parse(userJson));
+    }, []);
 
-        </div>
-    )
+    if (!user) return <p>Loading...</p>;
+
+    switch (user.role) {
+        case "SUPERADMIN":
+            return <SuperAdminDashboard />;
+        case "FACTORY":
+            return <FactoryDashboard subRole={user.subRole} />;
+        case "DISTRIBUTOR":
+            return <DistributorDashboard subRole={user.subRole} />;
+        case "AGENT":
+            return <AgentDashboard subRole={user.subRole} />;
+        case "RETAIL":
+            return <RetailDashboard subRole={user.subRole} />;
+        default:
+            return <p>Role not recognized</p>;
+    }
 }
 
-export default AdminDashboard
+function FactoryDashboard({ subRole }: { subRole: string }) {
+    return <div>🏭 Factory Dashboard ({subRole})</div>;
+}
+
+function DistributorDashboard({ subRole }: { subRole: string }) {
+    return <div>🚚 Distributor Dashboard ({subRole})</div>;
+}
+
+function AgentDashboard({ subRole }: { subRole: string }) {
+    return <div>🤝 Agent Dashboard ({subRole})</div>;
+}
+
+function RetailDashboard({ subRole }: { subRole: string }) {
+    return <div>🛒 Retail Dashboard ({subRole})</div>;
+}

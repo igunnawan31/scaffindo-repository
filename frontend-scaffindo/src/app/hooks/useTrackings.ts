@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Tracking } from "../type/types";
 import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 
 export function useTrackings() {
     const [tracking, setTracking] = useState<Tracking | null>(null);
@@ -18,7 +19,7 @@ export function useTrackings() {
                 return;
             }
 
-            const res = await axios.get(
+            const res = await axiosInstance.get(
                 `${process.env.NEXT_PUBLIC_API_URL}/trackings/${labelId}`,
                 {
                     headers: {

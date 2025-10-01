@@ -12,9 +12,7 @@ import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 @Injectable()
 export class PenjualanService {
   constructor(private readonly prisma: PrismaService) {}
-  async findAll(
-    filters: PenjualanFilterDto,
-  ): Promise<GetAllPenjualanResponseDto> {
+  async findAll(filters: PenjualanFilterDto = {} as PenjualanFilterDto): Promise<GetAllPenjualanResponseDto> {
     try {
       const {
         minCreatedDate,
@@ -23,9 +21,10 @@ export class PenjualanService {
         page = 1,
         limit = 10,
       } = filters;
-      const where: Prisma.PenjualanWhereInput = {
-        createdAt: { gte: new Date(minCreatedDate) },
-      };
+      const where: Prisma.PenjualanWhereInput = {};
+      if (minCreatedDate) {
+        where.createdAt = { gte: new Date(minCreatedDate) };
+      }
       const orderBy: Prisma.PenjualanOrderByWithRelationInput = {};
       if (sortBy && ['createdAt', 'totalHarga'].includes(sortBy)) {
         orderBy[sortBy] = sortOrder === 'desc' ? 'desc' : 'asc';
