@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { useEffect, useState } from "react";
 import { useProduct } from "@/app/hooks/useProduct";
-import getImageUrl from "@/app/lib/path";
+import { getImageUrl } from "@/app/lib/path";
 import { useInvoice } from "@/app/hooks/useInvoices";
 import { useCompany } from "@/app/hooks/useCompany";
 import DropdownOneSelect from "../(superadmin)/superadmincomponents/DropdownOneSelect";

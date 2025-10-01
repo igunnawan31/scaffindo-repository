@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Pagination from "./Pagination";
 import Link from "next/link";
 import { Product } from "@/app/type/types";
-import getImageUrl from "@/app/lib/path";
+import {getImageUrl} from "@/app/lib/path";
 
 type ProductShowsProps = {
     title: string;
