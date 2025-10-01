@@ -23,7 +23,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { extname } from 'path';
-import { ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CreateCertificationResponseDto } from './dto/response/create-response.dto';
 import {
   GetAllCertificationResponseDto,
