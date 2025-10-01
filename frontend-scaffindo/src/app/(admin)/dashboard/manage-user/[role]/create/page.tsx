@@ -3,20 +3,21 @@
 import { useEffect, useState } from "react"
 import SuccessModal from "../../../admincomponents/SuccessPopUpModal"
 import Link from "next/link"
-import { useCompany } from "@/app/hooks/useCompany"
 import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import DropdownOneSelect from "../../../(superadmin)/superadmincomponents/DropdownOneSelect"
 import { useRouter } from "next/navigation"
+import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
 
-const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
 const subRoles = ["USER"]
 
 const CreateUser = () => {
     const router = useRouter();
-    const { createUser, loading, error } = useUser();
+    const { createUser } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -54,9 +55,8 @@ const CreateUser = () => {
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
             setTimeout(() => router.push(`/dashboard/manage-user/${formData.role}`), 1200);
         } catch (err) {
-            setSuccessMessage("Tidak Berhasil Membuat User");
-            setShowSuccess(true);
-            console.error("Failed to create user:", err);
+            setErrorMessage("Tidak Berhasil Membuat User");
+            setShowError(true);
         }
     }
 
@@ -191,6 +191,12 @@ const CreateUser = () => {
                 onClose={() => setShowSuccess(false)}
                 title="User Berhasil dibuat"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="User Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     )

@@ -9,6 +9,7 @@ import DropdownMultipleSelect from "../../superadmincomponents/DropdownMultipleS
 import { useCompany } from "@/app/hooks/useCompany"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 import { useRouter } from "next/navigation"
+import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
 
 const CATEGORY_OPTIONS = ["CLOTHING", "FOOD_BEVERAGE", "ELECTRONIC"] as const
 
@@ -30,9 +31,11 @@ const CreateProduct = () => {
     const router = useRouter();
     const { createProduct } = useProduct();
     const { companies, fetchCompanies} = useCompany();
-    const { certificates: certOptions = [], fetchCertificates } = useCertificate()
-    const [showSuccess, setShowSuccess] = useState(false)
-    const [successMessage, setSuccessMessage] = useState("")
+    const { certificates: certOptions = [], fetchCertificates } = useCertificate();
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState<FormState>({
         name: "",
         description: "",
@@ -99,9 +102,8 @@ const CreateProduct = () => {
             setImage(null)
             setTimeout(() => router.push("/dashboard/list-product"), 1200);
         } catch (err) {
-            console.error("Failed to create product:", err)
-            setSuccessMessage("Gagal membuat product")
-            setShowSuccess(true)
+            setErrorMessage("Tidak Berhasil Membuat Product");
+            setShowError(true);
         }
     }
 
@@ -218,8 +220,14 @@ const CreateProduct = () => {
             <SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
-                title="Create Status"
+                title="Create Product berhasil"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Product Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     )

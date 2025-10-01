@@ -1,9 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { IoCheckmarkCircle } from "react-icons/io5"; 
+import { IoCloseCircle } from "react-icons/io5"; 
 
-type SuccessModalProps = {
+type ErrorPopUpModalProps = {
     isOpen: boolean;
     onClose: () => void;
     title?: string;
@@ -11,13 +11,13 @@ type SuccessModalProps = {
     showButton?: boolean;
 };
 
-const SuccessModal = ({
+const ErrorPopUpModal = ({
     isOpen,
     onClose,
     title = "Berhasil!",
     message = "Aksi telah berhasil dilakukan.",
     showButton = true,
-}: SuccessModalProps) => {
+}: ErrorPopUpModalProps) => {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -34,7 +34,7 @@ const SuccessModal = ({
                         exit={{ scale: 0.8, opacity: 0 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <IoCheckmarkCircle className="w-16 h-16 text-yellow-600 mx-auto mb-4" />
+                        <IoCloseCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
                         <h2 className="text-xl font-bold mb-2">{title}</h2>
                         <p className="text-gray-600">{message}</p>
 
@@ -53,4 +53,4 @@ const SuccessModal = ({
     );
 };
 
-export default SuccessModal;
+export default ErrorPopUpModal;

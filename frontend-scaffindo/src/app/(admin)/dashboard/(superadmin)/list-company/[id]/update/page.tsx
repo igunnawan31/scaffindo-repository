@@ -6,12 +6,15 @@ import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 import { useRouter } from "next/navigation"
 import { useCompany } from "@/app/hooks/useCompany"
+import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal"
 
 const UpdateCompany = () => {
     const { id } = useParams<{id: string}>();
     const { company, fetchCompanyById, updateCompany, loading } = useCompany();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -44,9 +47,8 @@ const UpdateCompany = () => {
                 router.push('/dashboard/list-company');
             }, 2000)
         } catch (err) {
-            console.error("Update gagal:", err);
-            setSuccessMessage("Gagal update company");
-            setShowSuccess(true);
+            setErrorMessage("Gagal Update Company");
+            setShowError(true);
         }
     };
 
@@ -87,6 +89,12 @@ const UpdateCompany = () => {
                 onClose={() => setShowSuccess(false)}
                 title="Company Berhasil diupdate"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Company Gagal diupdate"
+                message={errorMessage}
             />
         </div>
     )

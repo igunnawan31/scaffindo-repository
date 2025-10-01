@@ -9,12 +9,15 @@ import { useRouter } from "next/navigation"
 import { useCompany } from "@/app/hooks/useCompany"
 import { CompanyType } from "@/app/type/types"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
+import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
 
 const CreateCompany = () => {
     const router = useRouter();
     const { createCompany, loading, error } = useCompany();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState({
         name: "",
         companyType: "" as CompanyType | "",
@@ -38,7 +41,8 @@ const CreateCompany = () => {
                 router.push('/dashboard/list-company');
             }, 2000)
         } catch (err) {
-            console.error("Failed to create company:", err);
+            setErrorMessage("Tidak Berhasil Membuat Company");
+            setShowError(true);
         }
     }
 
@@ -89,8 +93,15 @@ const CreateCompany = () => {
             <SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
-                title="User Berhasil dibuat"
+                title="Company Berhasil dibuat"
                 message={successMessage}
+            />
+
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Company Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     )

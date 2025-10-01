@@ -7,12 +7,15 @@ import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 import { useUser } from "@/app/hooks/useUser"
 import { useRouter } from "next/navigation"
+import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal"
 
 const UpdateUser = () => {
     const { id } = useParams<{id: string}>();
     const { user, fetchUserById, updateUser, loading } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -51,9 +54,8 @@ const UpdateUser = () => {
                 router.push(`/dashboard/manage-user/${formData.role}`);
             }, 2000)
         } catch (err) {
-            console.error("Update gagal:", err);
-            setSuccessMessage("Gagal update user");
-            setShowSuccess(true);
+            setErrorMessage("Tidak Berhasil Membuat User");
+            setShowError(true);
         }
     };
 
@@ -143,6 +145,12 @@ const UpdateUser = () => {
                 onClose={() => setShowSuccess(false)}
                 title="User Berhasil diupdate"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="User Gagal diupdate"
+                message={errorMessage}
             />
         </div>
     )

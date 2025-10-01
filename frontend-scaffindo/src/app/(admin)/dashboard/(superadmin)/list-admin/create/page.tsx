@@ -7,6 +7,7 @@ import { useUser } from "@/app/hooks/useUser"
 import Image from "next/image"
 import { useCompany } from "@/app/hooks/useCompany"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
+import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
 const subRoles = ["ADMIN", "USER"]
@@ -16,6 +17,8 @@ const CreateAdmin = () => {
     const { createUser, loading, error } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -38,12 +41,12 @@ const CreateAdmin = () => {
         e.preventDefault();
         try {
             const res = await createUser(formData);
-            console.log(formData)
             setSuccessMessage(`User ${res.name} berhasil dibuat`);
             setShowSuccess(true);
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
         } catch (err) {
-            console.error("Failed to create user:", err);
+            setErrorMessage("Tidak Berhasil Membuat User");
+            setShowError(true);
         }
     }
 
@@ -184,6 +187,12 @@ const CreateAdmin = () => {
                 onClose={() => setShowSuccess(false)}
                 title="User Berhasil dibuat"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="User Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     )

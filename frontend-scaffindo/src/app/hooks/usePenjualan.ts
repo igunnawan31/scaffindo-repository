@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Penjualan } from "../type/types";
 import axios from "axios";
+import axiosInstance from "../lib/axiosInstance";
 
 export function usePenjualan() {
     const [histories, setHistories] = useState<Penjualan[]>([]);
@@ -20,7 +21,7 @@ export function usePenjualan() {
                 return;
             }
 
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/penjualan?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/penjualan?limit=100`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

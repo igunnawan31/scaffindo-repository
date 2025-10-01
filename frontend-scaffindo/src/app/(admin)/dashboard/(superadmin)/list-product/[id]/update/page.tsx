@@ -9,6 +9,7 @@ import { useCertificate } from "@/app/hooks/useCertificate";
 import DropdownMultipleSelect from "../../../superadmincomponents/DropdownMultipleSelect";
 import Image from "next/image";
 import getImageUrl from "@/app/lib/path";
+import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal";
 const CATEGORY_OPTIONS = ["CLOTHING", "FOOD_BEVERAGE", "ELECTRONIC"] as const;
 
 type CertificateOption = {
@@ -32,6 +33,8 @@ export default function UpdateProduct() {
     const { certificates: certOptions = [], fetchCertificates } = useCertificate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [formData, setFormData] = useState<FormState>({
         name: "",
@@ -115,8 +118,8 @@ export default function UpdateProduct() {
             setTimeout(() => router.push("/dashboard/list-product"), 1200);
         } catch (err) {
             console.error(err);
-            setSuccessMessage("Gagal update product");
-            setShowSuccess(true);
+            setErrorMessage("Gagal update product");
+            setShowError(true);
         }
     };
 
@@ -239,8 +242,15 @@ export default function UpdateProduct() {
             <SuccessModal 
                 isOpen={showSuccess} 
                 onClose={() => setShowSuccess(false)} 
-                title="Update Status" 
+                title="Update product berhasil" 
                 message={successMessage} 
+            />
+
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Update product gagal"
+                message={errorMessage}
             />
         </div>
     );

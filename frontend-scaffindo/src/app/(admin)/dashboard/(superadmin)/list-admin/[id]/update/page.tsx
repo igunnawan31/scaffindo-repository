@@ -2,17 +2,19 @@
 
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
-import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
 import { useUser } from "@/app/hooks/useUser"
 import { useRouter } from "next/navigation"
+import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal"
 
 const UpdateAdmin = () => {
     const { id } = useParams<{id: string}>();
     const { user, fetchUserById, updateUser, loading } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -51,9 +53,8 @@ const UpdateAdmin = () => {
                 router.push('/dashboard/list-admin');
             }, 2000)
         } catch (err) {
-            console.error("Update gagal:", err);
-            setSuccessMessage("Gagal update user");
-            setShowSuccess(true);
+            setErrorMessage("Gagal update User");
+            setShowError(true);
         }
     };
 
@@ -143,6 +144,12 @@ const UpdateAdmin = () => {
                 onClose={() => setShowSuccess(false)}
                 title="User Berhasil diupdate"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="User Gagal diupdate"
+                message={errorMessage}
             />
         </div>
     )

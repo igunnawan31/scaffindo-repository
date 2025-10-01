@@ -2,21 +2,22 @@
 
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
-import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import SuccessModal from "@/app/(admin)/dashboard/admincomponents/SuccessPopUpModal"
-import { useUser } from "@/app/hooks/useUser"
 import { useRouter } from "next/navigation"
 import { useProduct } from "@/app/hooks/useProduct"
 import { useCertificate } from "@/app/hooks/useCertificate"
 import DropdownOneSelect from "../../../superadmincomponents/DropdownOneSelect"
+import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal"
 
 const UpdateCertificate = () => {
     const { id } = useParams<{id: string}>();
     const { certificate, fetchCertificateById, updateCertificate } = useCertificate();
-    const { product, products, fetchProducts } = useProduct();
+    const { products, fetchProducts } = useProduct();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: "",
@@ -70,15 +71,14 @@ const UpdateCertificate = () => {
             if (certificationDocs) data.append("certificationDocs", certificationDocs);
             
             await updateCertificate(id, data);
-            setSuccessMessage("Certificate berhasil diupdate!");
+            setSuccessMessage("Sertifikat berhasil diupdate!");
             setShowSuccess(true);
             setTimeout(() => {
                 router.push('/dashboard/list-certificate');
             }, 2000)
         } catch (err) {
-            console.error("Update gagal:", err);
-            setSuccessMessage("Gagal update certificate");
-            setShowSuccess(true);
+            setErrorMessage("Gagal update sertifikat");
+            setShowError(true);
         }
     };
 
@@ -182,8 +182,14 @@ const UpdateCertificate = () => {
             <SuccessModal
                 isOpen={showSuccess}
                 onClose={() => setShowSuccess(false)}
-                title="Certificate Berhasil diupdate"
+                title="Sertifikat Berhasil diupdate"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Sertifikat Gagal diupdate"
+                message={errorMessage}
             />
         </div>
     )

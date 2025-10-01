@@ -3,13 +3,11 @@
 import { useEffect, useState } from "react"
 import SuccessModal from "../../../admincomponents/SuccessPopUpModal"
 import Link from "next/link"
-import { useUser } from "@/app/hooks/useUser"
-import Image from "next/image"
-import { useCompany } from "@/app/hooks/useCompany"
 import { useRouter } from "next/navigation"
 import { useProduct } from "@/app/hooks/useProduct"
 import { useCertificate } from "@/app/hooks/useCertificate"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
+import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
 
 const CreateCertificate = () => {
     const router = useRouter();
@@ -17,7 +15,8 @@ const CreateCertificate = () => {
     const { createCertificate } = useCertificate();
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
-    const [showPassword, setShowPassword] = useState(false);
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState({
         name: "",
         expired: "",
@@ -59,7 +58,7 @@ const CreateCertificate = () => {
             
             await createCertificate(data)
 
-            setSuccessMessage(`Certificate berhasil dibuat`);
+            setSuccessMessage(`Sertifikat berhasil dibuat`);
             setShowSuccess(true);
             setFormData({ 
                 name: "",
@@ -70,9 +69,8 @@ const CreateCertificate = () => {
             setCertificationDocs(null)
             setTimeout(() => router.push("/dashboard/list-certificate"), 2000);
         } catch (err) {
-            console.error("Failed to create certificate:", err);
-            setSuccessMessage("Gagal membuat certificate")
-            setShowSuccess(true)
+            setErrorMessage("Tidak Berhasil Membuat Sertifikat");
+            setShowError(true);
         }
     }
 
@@ -174,6 +172,12 @@ const CreateCertificate = () => {
                 onClose={() => setShowSuccess(false)}
                 title="Sertifikat Berhasil dibuat"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Sertifikat Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     )
