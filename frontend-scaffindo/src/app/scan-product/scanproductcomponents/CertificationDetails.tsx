@@ -4,24 +4,40 @@ import invoiceProducts from "@/app/data/invoiceProducts";
 import { useCertificate } from "@/app/hooks/useCertificate";
 import { useProduct } from "@/app/hooks/useProduct";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
-type Props = { productId: number };
+type Props = { productId: string };
 
 export default function CertificationDetails({ productId }: Props) {
-    const product = invoiceProducts.find((p) => p.id === productId);
-    const { fetchCertificateById } = useCertificate();
+    const { fetchCertificateByProductId } = useCertificate();
+    const [certifications, setCertifications] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    if (!product) {
-        return (
-            <div className="p-6">
-                <h2 className="text-red-500 font-bold">Product not found</h2>
-            </div>
-        );
-    }
+    useEffect(() => {
+        if (!productId) return;
+
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const data = await fetchCertificateByProductId(productId);
+                setCertifications(data || []);
+            } catch (err: any) {
+                setError(err.message || "Failed to fetch certifications");
+                setCertifications([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [productId, fetchCertificateByProductId]);
 
     return (
         <div className="mt-10 p-6 bg-white rounded-lg shadow-md">
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
             <Image
                 src={product.image}
                 width={80}
@@ -33,13 +49,13 @@ export default function CertificationDetails({ productId }: Props) {
                 <h1 className="text-2xl font-bold text-blue-900">{product.labels[0].id}</h1>
                 <p className="text-gray-600">{product.description}</p>
             </div>
-        </div>
+        </div> */}
 
         <div className="mt-6">
             <h3 className="font-semibold text-lg">Certification</h3>
-            {product.certification && product.certification.length > 0 ? (
+            {certifications.length > 0 ? (
                 <div className="mt-3 grid grid-cols-3 gap-4">
-                    {product.certification.map((cert, index) => (
+                    {certifications.map((cert, index) => (
                         <div
                             key={index}
                             className="border rounded p-4 bg-gray-50 hover:bg-gray-100 transition"
