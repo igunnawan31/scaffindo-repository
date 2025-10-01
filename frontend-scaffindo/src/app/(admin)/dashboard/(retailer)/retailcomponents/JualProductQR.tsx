@@ -7,6 +7,7 @@ import SuccessModal from "../../admincomponents/SuccessPopUpModal";
 import { useLabels } from "@/app/hooks/useLabels";
 import { useProduct } from "@/app/hooks/useProduct";
 import axios from "axios";
+import ErrorPopUpModal from "../../admincomponents/ErrorPopUpModal";
 
 type SelectedProduct = {
     code: string;
@@ -22,6 +23,8 @@ const JualProductQR = () => {
     const [openScanner, setOpenScanner] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [paymentMethod, setPaymentMethod] = useState("CASH");
@@ -95,11 +98,10 @@ const JualProductQR = () => {
             setSuccessMessage(`Checkout berhasil! Total: Rp ${totalAmount.toLocaleString("id-ID")}`);
             setShowSuccess(true);
             setCart([]);
-            
             fetchLabelsPenjualan();
         } catch (err) {
-            console.error("Checkout failed:", err);
-            alert("Checkout gagal. Silakan coba lagi.");
+            setErrorMessage("Tidak Berhasil Checkout");
+            setShowError(true);
         } finally {
             setLoading(false);
         }
@@ -208,6 +210,12 @@ const JualProductQR = () => {
                 onClose={() => setShowSuccess(false)}
                 title="Checkout Sukses"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="User Gagal dibuat"
+                message={errorMessage}
             />
         </div>
     );

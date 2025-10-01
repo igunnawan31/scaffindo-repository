@@ -12,6 +12,7 @@ import SuccessModal from "./SuccessPopUpModal";
 import { useRouter } from "next/navigation";
 import { useCompany } from "@/app/hooks/useCompany";
 import DropdownOneSelect from "../(superadmin)/superadmincomponents/DropdownOneSelect";
+import ErrorPopUpModal from "./ErrorPopUpModal";
 
 type Props = { 
     invoiceId: string;
@@ -33,6 +34,8 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
     const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState({
         title: "",
         nextCompanyId: "",
@@ -76,7 +79,6 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 title: formData.title,
                 description: formData.description
             });
-            console.log(res)
 
             setSuccessMessage(`Invoice ${scannedCode} updated successfully!`);
             setShowSuccess(true);
@@ -86,8 +88,8 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 router.push('/dashboard/pengecekkan-barang');
             }, 2000)
         } catch (err) {
-            setSuccessMessage("Gagal membuat invoice");
-            setShowSuccess(true);
+            setErrorMessage("Gagal update Invoice");
+            setShowError(true);
         }
     };
 
@@ -110,9 +112,8 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 router.push(`/dashboard/pengecekkan-barang-${backHomeLink}`);
             }, 2000);
         } catch (err) {
-            console.error("handleTerimaBarang error:", err);
-            setSuccessMessage("Gagal membuat invoice");
-            setShowSuccess(true);
+            setErrorMessage("Gagal menerima Invoice");
+            setShowError(true);
         }
     };
 
@@ -269,7 +270,7 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 onConfirm={async () => {
                     if (!modalInvoice) return;
 
-                    await handleTerimaBarang(modalInvoice);  // ✅ Kirim string invoice code
+                    await handleTerimaBarang(modalInvoice);
                     setModalInvoice(null);
                 }}
                 onCancel={() => setModalInvoice(null)}
@@ -287,6 +288,12 @@ const DetailedInvoices = ({ invoiceId, showButton, statusUpdate, acceptButton, b
                 }}
                 title="Invoice Updated"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Invoice Gagal diupdate"
+                message={errorMessage}
             />
         </div>
     )

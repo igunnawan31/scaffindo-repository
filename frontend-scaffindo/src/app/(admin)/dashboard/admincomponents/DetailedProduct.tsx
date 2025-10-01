@@ -1,16 +1,13 @@
 import Image from "next/image"
-import { useParams, useRouter } from "next/navigation";
-import dummyProducts from "@/app/data/productsData";
 import { useEffect, useState } from "react";
-import dummyDistributors from "@/app/data/distributorData";
 import { useProduct } from "@/app/hooks/useProduct";
 import getImageUrl from "@/app/lib/path";
-import { Product } from "@/app/type/types";
 import { useInvoice } from "@/app/hooks/useInvoices";
 import { useCompany } from "@/app/hooks/useCompany";
 import DropdownOneSelect from "../(superadmin)/superadmincomponents/DropdownOneSelect";
 import SuccessModal from "./SuccessPopUpModal";
 import { generateLabelPDF } from "@/app/lib/generateLabelPDF";
+import ErrorPopUpModal from "./ErrorPopUpModal";
 interface DetailedProductProps {
     productId: string;
 }
@@ -19,11 +16,12 @@ export default function DetailedProduct({ productId }: DetailedProductProps) {
     const { fetchProductById, product } = useProduct();
     const { fetchDistributors, distributors } = useCompany();
     const { createInvoice } = useInvoice();
-    const router = useRouter();
     const [showDownloadPopup, setShowDownloadPopup] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [lastCreatedInvoice, setLastCreatedInvoice] = useState<{ id: string; labelIds: string[] } | null>(null);
     const [successMessage, setSuccessMessage] = useState("");
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [formData, setFormData] = useState({
         productId: "",
         nextCompanyId: "",
@@ -71,11 +69,9 @@ export default function DetailedProduct({ productId }: DetailedProductProps) {
                 labelIds: res.labelIds || [],
             });
             }, 2000);
-            console.log("Invoice response:", res);
-            console.log("Label IDs:", res.labelIds);
         } catch (err) {
-            setSuccessMessage("Gagal membuat invoice");
-            setShowSuccess(true);
+            setErrorMessage(`Gagal membuat Invoice`);
+            setShowError(true);
         }
     };
 
@@ -153,8 +149,14 @@ export default function DetailedProduct({ productId }: DetailedProductProps) {
                     setShowSuccess(false);
                     setShowDownloadPopup(true);
                 }}
-                title="Invoice Created"
+                title="Invoice berhasil dibuat"
                 message={successMessage}
+            />
+            <ErrorPopUpModal
+                isOpen={showError}
+                onClose={() => setShowError(false)}
+                title="Invoice Gagal dibuat"
+                message={errorMessage}
             />
 
             {showDownloadPopup && lastCreatedInvoice && (
