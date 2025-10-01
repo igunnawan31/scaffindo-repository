@@ -12,21 +12,8 @@ export function useTrackings() {
         try { 
             setLoading(true);
             setError(null);
-            const token = localStorage.getItem("access_token");
-            
-            if (!token) {
-                setError("No authentication token found");
-                return;
-            }
 
-            const res = await axiosInstance.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/trackings/${labelId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/trackings/${labelId}`);
 
             const data = Array.isArray(res.data) ? res.data : [];
             return data;

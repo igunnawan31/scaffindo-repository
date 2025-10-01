@@ -6,84 +6,93 @@ interface Props {
 }
 
 interface Props {
-  onProductCode: (code: string) => void;
-  disabled?: boolean;
+    onProductCode: (code: string) => void;
+    disabled?: boolean;
 }
 
 const ScanProductAdmin: React.FC<Props> = ({ onProductCode, disabled = false }) => {
     const [mode, setMode] = useState<"camera" | "code">("camera");
     const [productCode, setProductCode] = useState<string>("");
-
+    const isTransitioningRef = useRef(false);
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const isScanningRef = useRef(false);
 
     useEffect(() => {
-    if (disabled) return;
+        if (scannerRef.current) return;
+        scannerRef.current = new Html5Qrcode("reader");
 
-    const initScanner = async () => {
-        if (mode !== "camera") {
-            if (isScanningRef.current) {
+        return () => {
+            const cleanupScanner = async () => {
                 try {
-                    await scannerRef.current?.stop();
-                } catch {}
-                isScanningRef.current = false;
+                    if (isScanningRef.current) {
+                        await scannerRef.current?.stop();
+                        isScanningRef.current = false;
+                    }
+                    await scannerRef.current?.clear();
+                } catch (err) {
+                    console.warn("Cleanup error:", err);
+                }
+            };
+
+            cleanupScanner();
+        };
+    }, []);
+
+    useEffect(() => {
+        const initScanner = async () => {
+            if (!scannerRef.current || isTransitioningRef.current) return;
+
+            isTransitioningRef.current = true;
+
+            if (mode !== "camera") {
+                if (isScanningRef.current) {
+                    await scannerRef.current.stop().catch(() => {});
+                    isScanningRef.current = false;
+                }
+
+                try {
+                    await scannerRef.current.start(
+                        { facingMode: "environment" },
+                        { fps: 20 },
+                        (decodedText) => {
+                            onProductCode(decodedText);
+                            if (isScanningRef.current) {
+                                scannerRef.current?.stop().finally(() => {
+                                    isScanningRef.current = false;
+                                });
+                            }
+                        },
+                        (err) => console.warn("QR error:", err)
+                    );
+                    isScanningRef.current = true;
+                } catch (err) {
+                    console.error("Failed to start scanner:", err);
+                }
+            } else {
+                if (isScanningRef.current) {
+                    await scannerRef.current.stop().catch(() => {});
+                    isScanningRef.current = false;
+                }
             }
-            return;
+            isTransitioningRef.current = false;
         }
-
-        if (!scannerRef.current) {
-            scannerRef.current = new Html5Qrcode("reader");
-        }
-
-        if (isScanningRef.current) return; // ✅ prevent duplicate start
-
-        const readerElement = document.getElementById("reader");
-        let qrboxConfig = { width: 300, height: 300 };
-
-        if (readerElement) {
-            const rect = readerElement.getBoundingClientRect();
-            const size = Math.min(rect.width, rect.height);
-            qrboxConfig = { width: size * 1.5, height: size * 1.5 };
-        }
-
-        try {
-            await scannerRef.current.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: qrboxConfig },
-                (decodedText) => {
-                    onProductCode(decodedText);
-                    scannerRef.current?.stop().then(() => (isScanningRef.current = false));
-                },
-                (err) => console.warn("QR error:", err)
-            );
-            isScanningRef.current = true;
-        } catch (e) {
-            console.warn("Scanner start failed:", e);
-        }
-    };
-
-    initScanner();
-
-    return () => {
-        if (isScanningRef.current) {
-            scannerRef.current?.stop().then(() => (isScanningRef.current = false));
-        }
-    };
-}, [mode, onProductCode, disabled]);
+        
+        initScanner();
+    }, [mode, onProductCode, disabled]);
 
     return (
         <div className="mt-10 flex flex-col lg:flex-row gap-6">
             <div className="lg:w-1/2 w-full order-1">
                 {disabled ? (
-                    <div className="w-full h-[24rem] flex items-center justify-center border border-dashed rounded-lg text-gray-500">
+                    <div className="w-full h-auto flex items-center justify-center border border-dashed rounded-lg text-gray-500">
                         Isi form terlebih dahulu untuk scan produk
                     </div>
                 ) : mode === "camera" ? (
-                    <div className="w-full h-full bg-black flex items-center justify-center text-white">
-                        <div id="reader" className="w-full h-full"></div>
+                    <div className="w-full h-auto bg-black flex items-center justify-center text-white">
+                        <div id="reader" className="w-full h-auto"></div>
                     </div>
                 ) : (
-                    <div className="w-full h-[24rem] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
+                    <div className="w-full h-auto bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
                         <p className="text-gray-500 mb-4">Enter Product Code</p>
                         <input
                             type="text"

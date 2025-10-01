@@ -1,12 +1,15 @@
 "use client";
 
 import invoiceProducts from "@/app/data/invoiceProducts";
+import { useCertificate } from "@/app/hooks/useCertificate";
+import { useProduct } from "@/app/hooks/useProduct";
 import Image from "next/image";
 
 type Props = { productId: number };
 
 export default function CertificationDetails({ productId }: Props) {
     const product = invoiceProducts.find((p) => p.id === productId);
+    const { fetchCertificateById } = useCertificate();
 
     if (!product) {
         return (

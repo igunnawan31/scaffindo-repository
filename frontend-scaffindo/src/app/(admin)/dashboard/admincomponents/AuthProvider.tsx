@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: any | null;
@@ -21,12 +22,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user from localStorage when app starts
+  const router = useRouter();
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
     setAuthReady(true);
   }, []);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (authReady && !user) {
+      router.push("/sign-in"); // change to your login route
+    }
+  }, [authReady, user, router]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -58,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("user");
     setUser(null);
+    router.push("/sign-in"); // redirect after logout
   };
 
   const getToken = () => localStorage.getItem("access_token");

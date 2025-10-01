@@ -4,10 +4,10 @@ import { IoCheckmarkCircle } from "react-icons/io5"
 import { motion, Variants } from 'framer-motion'
 import Link from "next/link";
 import Image from "next/image";
-import { useParams } from "next/navigation";
-import invoiceProducts from "@/app/data/invoiceProducts";
 import React, { useEffect, useState } from "react";
 import { useTrackings } from "@/app/hooks/useTrackings";
+import { useProduct } from "@/app/hooks/useProduct";
+import { useLabels } from "@/app/hooks/useLabels";
 
 const leftVariants: Variants = {
     hidden: { opacity: 0, x: -50 },
@@ -26,20 +26,25 @@ interface Props {
 const JourneyProduct: React.FC<Props> = ({labelId}) => {
     const { fetchTrackingById } = useTrackings();
     const [trackingData, setTrackingData] = useState<any[]>([]);
+    const { fetchLabelById } = useLabels();
+    const [label, setLabel] = useState<any | null>(null);
 
     useEffect(() => {
-        if (labelId) {
-            fetchTrackingById(labelId).then((data) => {
-                if (Array.isArray(data)) {
-                    const sorted = [...data].sort(
-                        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-                    );
-                    setTrackingData(sorted);
-                }
-            });
-        }
-    }, [labelId]);
+        if (!labelId) return;
 
+        fetchTrackingById(labelId).then((data) => {
+            if (Array.isArray(data)) {
+                const sorted = [...data].sort(
+                    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+                );
+                setTrackingData(sorted);
+            }
+        });
+
+        fetchLabelById(labelId).then((data) => {
+            if (data) setLabel(data);
+        });
+    }, [labelId, fetchTrackingById, fetchLabelById]);
     if (trackingData.length === 0) {
         return (
             <div className="p-6">
@@ -165,7 +170,7 @@ const JourneyProduct: React.FC<Props> = ({labelId}) => {
 
             <div className="flex items-center justify-center pt-10"> 
                 <Link
-                    href={`/scan-product/${labelId ?? ""}`}
+                    href={`/scan-product/${label.productId}`}
                     className="group p-5 bg-blue-900 border-2 border-blue-900 text-white 
                         hover:bg-white hover:border-blue-900 hover:text-blue-900
                         rounded-lg font-semibold mx-3 flex items-center"
