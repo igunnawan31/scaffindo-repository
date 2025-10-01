@@ -7,7 +7,7 @@ type Props = {
 };
 
 const CertificationProduct:React.FC<Props> = ({ params }: Props) => {
-    const productId = Number(params.productId);
+    const productId = params.productId;
     return (
         <>
             <NavbarComponentsHome />

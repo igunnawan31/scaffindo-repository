@@ -80,6 +80,22 @@ export function useCertificate() {
         }
     }, []);
 
+    const fetchCertificateByProductId = useCallback(async (productId: string) => {
+        try { 
+            setLoading(true);
+            setError(null);
+
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications/product-certs/${productId}`);
+            setCertificate(res.data);
+            return res.data
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to fetch certificate by ID");
+            setCertificate(null);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const updateCertificate = useCallback(async(id: string, updateData: Partial<Certificate> | FormData) => {
         try {
             setLoading(true);
@@ -187,6 +203,7 @@ export function useCertificate() {
         error,
         fetchCertificates,
         fetchCertificateById,
+        fetchCertificateByProductId,
         updateCertificate,
         createCertificate,
         deleteCertificate

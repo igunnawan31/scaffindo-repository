@@ -41,10 +41,10 @@ const JourneyProduct: React.FC<Props> = ({labelId}) => {
             }
         });
 
-        fetchLabelById(labelId).then((data) => {
-            if (data) setLabel(data);
-        });
+        if (labelId) fetchLabelById(labelId);
     }, [labelId, fetchTrackingById, fetchLabelById]);
+
+    console.log(label)
     if (trackingData.length === 0) {
         return (
             <div className="p-6">
@@ -170,7 +170,7 @@ const JourneyProduct: React.FC<Props> = ({labelId}) => {
 
             <div className="flex items-center justify-center pt-10"> 
                 <Link
-                    href={`/scan-product/${label.productId}`}
+                    href={`/scan-product/${label?.productId || null}`}
                     className="group p-5 bg-blue-900 border-2 border-blue-900 text-white 
                         hover:bg-white hover:border-blue-900 hover:text-blue-900
                         rounded-lg font-semibold mx-3 flex items-center"
