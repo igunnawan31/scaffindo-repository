@@ -8,7 +8,7 @@ import { useProduct } from "@/app/hooks/useProduct";
 import { useCertificate } from "@/app/hooks/useCertificate";
 import DropdownMultipleSelect from "../../../superadmincomponents/DropdownMultipleSelect";
 import Image from "next/image";
-import getImageUrl from "@/app/lib/path";
+import {getImageUrl} from "@/app/lib/path";
 import ErrorPopUpModal from "@/app/(admin)/dashboard/admincomponents/ErrorPopUpModal";
 const CATEGORY_OPTIONS = ["CLOTHING", "FOOD_BEVERAGE", "ELECTRONIC"] as const;
 

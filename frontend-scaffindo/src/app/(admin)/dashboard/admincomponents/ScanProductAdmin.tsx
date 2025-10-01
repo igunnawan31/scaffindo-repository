@@ -39,60 +39,60 @@ const ScanProductAdmin: React.FC<Props> = ({ onProductCode, disabled = false }) 
     }, []);
 
     useEffect(() => {
-        const initScanner = async () => {
-            if (!scannerRef.current || isTransitioningRef.current) return;
+    const initScanner = async () => {
+        if (!scannerRef.current || isTransitioningRef.current) return;
+        isTransitioningRef.current = true;
 
-            isTransitioningRef.current = true;
-
-            if (mode !== "camera") {
-                if (isScanningRef.current) {
-                    await scannerRef.current.stop().catch(() => {});
-                    isScanningRef.current = false;
-                }
-
-                try {
-                    await scannerRef.current.start(
-                        { facingMode: "environment" },
-                        { fps: 20 },
-                        (decodedText) => {
-                            onProductCode(decodedText);
-                            if (isScanningRef.current) {
-                                scannerRef.current?.stop().finally(() => {
-                                    isScanningRef.current = false;
-                                });
-                            }
-                        },
-                        (err) => console.warn("QR error:", err)
-                    );
-                    isScanningRef.current = true;
-                } catch (err) {
-                    console.error("Failed to start scanner:", err);
-                }
-            } else {
-                if (isScanningRef.current) {
-                    await scannerRef.current.stop().catch(() => {});
-                    isScanningRef.current = false;
-                }
+        if (mode === "camera" && !disabled) {
+            const reader = document.getElementById("reader");
+            if (!reader || reader.clientWidth === 0) {
+                console.warn("Reader not ready, retrying...");
+                setTimeout(initScanner, 200);
+                isTransitioningRef.current = false;
+                return;
             }
-            isTransitioningRef.current = false;
+
+            try {
+                await scannerRef.current.start(
+                    { facingMode: "environment" },
+                    { fps: 20 },
+                    (decodedText) => {
+                        onProductCode(decodedText);
+                        scannerRef.current?.stop();
+                        isScanningRef.current = false;
+                    },
+                    (err) => console.warn("QR error:", err)
+                );
+                isScanningRef.current = true;
+            } catch (err) {
+                console.error("Failed to start scanner:", err);
+            }
+        } else {
+            if (isScanningRef.current) {
+                await scannerRef.current.stop().catch(() => {});
+                isScanningRef.current = false;
+            }
         }
-        
-        initScanner();
-    }, [mode, onProductCode, disabled]);
+
+        isTransitioningRef.current = false;
+    };
+
+    initScanner();
+}, [mode, onProductCode, disabled]);
 
     return (
         <div className="mt-10 flex flex-col lg:flex-row gap-6">
             <div className="lg:w-1/2 w-full order-1">
                 {disabled ? (
-                    <div className="w-full h-auto flex items-center justify-center border border-dashed rounded-lg text-gray-500">
+                    <div className="w-full h-[auto] flex items-center justify-center border border-dashed rounded-lg text-gray-500">
                         Isi form terlebih dahulu untuk scan produk
                     </div>
                 ) : mode === "camera" ? (
-                    <div className="w-full h-auto bg-black flex items-center justify-center text-white">
-                        <div id="reader" className="w-full h-auto"></div>
+                    <div className="w-full h-[auto] bg-black flex items-center justify-center text-white">
+                        <div id="reader" className="w-full h-[auto]"></div>
                     </div>
                 ) : (
-                    <div className="w-full h-auto bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
+                    <div className="w-full h-[auto] bg-gray-100 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-400 p-6">
                         <p className="text-gray-500 mb-4">Enter Product Code</p>
                         <input
                             type="text"

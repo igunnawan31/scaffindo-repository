@@ -30,7 +30,7 @@ const PermintaanBarangAgent = () => {
 
     const filteredInvoices = useMemo(() => {
         return invoices.filter((p: Invoice) => {
-            const matchCompany = p.companyId === companyId;
+            const matchCompany = p.nextCompanyId === companyId;
             const matchSearch =
                 p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.description.toLowerCase().includes(searchQuery.toLowerCase());

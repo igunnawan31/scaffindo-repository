@@ -25,18 +25,23 @@ const ListInvoicePage = () => {
     }, []);
 
     useEffect(() => {
-        labels.forEach(async (label: Label) => {
-            const trackingData = await fetchTrackingById(label.id);
-            console.log(trackingData)
+        const loadTrackings = async () => {
+            const map: Record<string, string | null> = {};
 
-            if (Array.isArray(trackingData) && trackingData.length > 0) {
-                const lastTracking = trackingData[trackingData.length - 1];
-                setTrackingMap(prev => ({
-                    ...prev,
-                    [label.id]: lastTracking?.companyId || null
-                }));
+            for (const label of labels) {
+                const trackingData = await fetchTrackingById(label.id);
+                if (Array.isArray(trackingData) && trackingData.length > 0) {
+                    const lastTracking = trackingData[trackingData.length - 1];
+                    map[label.id] = lastTracking?.companyId || null;
+                } else {
+                    map[label.id] = null;
+                }
             }
-        });
+
+            setTrackingMap(map);
+        };
+
+        if (labels.length) loadTrackings();
     }, [labels]);
 
     const statusFilters = [

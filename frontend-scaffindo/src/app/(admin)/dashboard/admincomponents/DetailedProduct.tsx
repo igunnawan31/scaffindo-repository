@@ -169,7 +169,7 @@ export default function DetailedProduct({ productId }: DetailedProductProps) {
                         className="mr-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-500"
                         onClick={async () => {
                             await generateLabelPDF(lastCreatedInvoice, {
-                                labelTextSize: 10,
+                                labelTextSize: 5,
                             });
                             setShowDownloadPopup(false);
                         }}
