@@ -92,7 +92,6 @@ export class CertificationsController {
     return this.certificationsService.findCertificates(+id);
   }
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetCertificationResponseDto })
   findOne(@Param('id') id: string) {
     return this.certificationsService.findOne(id);
