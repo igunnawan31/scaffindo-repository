@@ -33,7 +33,6 @@ import { UpdateCertificationResponseDto } from './dto/response/update-response.d
 import { DeleteCertificationResponseDto } from './dto/response/delete-response.dto';
 
 @Controller('certifications')
-@ApiBearerAuth('access-token')
 export class CertificationsController {
   constructor(private readonly certificationsService: CertificationsService) {}
 
