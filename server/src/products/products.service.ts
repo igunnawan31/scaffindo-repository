@@ -176,7 +176,10 @@ export class ProductsService {
       const skip = (page - 1) * limit;
 
       const where: Prisma.ProductWhereInput = {
-        companyId: user.role === Role.SUPERADMIN || Role.RETAIL ? undefined : user.companyId,
+        companyId:
+          user.role === Role.SUPERADMIN || user.role === Role.RETAIL
+            ? undefined
+            : user.companyId,
       };
 
       if (searchTerm) {
@@ -260,7 +263,10 @@ export class ProductsService {
       const product = await this.prisma.product.findUnique({
         where: {
           id: id,
-          companyId: user.role === Role.SUPERADMIN || Role.RETAIL ? undefined : user.companyId,
+          // companyId:
+          //   user.role === Role.SUPERADMIN || Role.RETAIL
+          //     ? undefined
+          //     : user.companyId,
         },
         include: {
           labels: true,

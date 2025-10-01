@@ -109,6 +109,7 @@ export class ProductsController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetAllProductResponseDto, status: 200 })
   findAll(
     @Query() filters: productFilterDto,
@@ -118,7 +119,6 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetProductResponseDto, status: 200 })
   findOne(
     @Param('id') id: string,
