@@ -138,6 +138,20 @@ export class CertificationsService {
     }
   }
 
+  async findCertificates(id: number): Promise<GetCertificationResponseDto[]> {
+    try {
+      const certificate = await this.prisma.certification.findMany({
+        where: { productId: id },
+      });
+      if (!certificate) {
+        throw new NotFoundException(`Product with ID ${id} not found`);
+      }
+      return plainToInstance(GetCertificationResponseDto, certificate);
+    } catch (err) {
+      handlePrismaError(err, 'Certification', id);
+    }
+  }
+
   async update(
     id: string,
     updateCertificationDto: UpdateCertificationDto,

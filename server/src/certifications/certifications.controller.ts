@@ -34,12 +34,12 @@ import { DeleteCertificationResponseDto } from './dto/response/delete-response.d
 
 @Controller('certifications')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class CertificationsController {
   constructor(private readonly certificationsService: CertificationsService) {}
 
   @Post()
   @ApiResponse({ type: CreateCertificationResponseDto })
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.SUPERADMIN)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'certificationDocs', maxCount: 5 }], {
@@ -81,18 +81,27 @@ export class CertificationsController {
   }
 
   @Get()
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetAllCertificationResponseDto })
   findAll(@Query() filters: CertificationFilterDto) {
     return this.certificationsService.findAll(filters);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiResponse({ type: GetCertificationResponseDto })
   findOne(@Param('id') id: string) {
     return this.certificationsService.findOne(id);
   }
 
+  @Get('product-certs/:id')
+  @ApiResponse({ type: [GetCertificationResponseDto] })
+  findProductCerts(@Param('id') id: string) {
+    return this.certificationsService.findCertificates(+id);
+  }
+
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.SUPERADMIN)
   @ApiResponse({ type: UpdateCertificationResponseDto })
   @UseInterceptors(
@@ -156,6 +165,7 @@ export class CertificationsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.SUPERADMIN)
   @ApiResponse({ type: DeleteCertificationResponseDto })
   remove(@Param('id') id: string) {
