@@ -31,11 +31,12 @@ const PermintaanBarangRetail = () => {
     const filteredInvoices = useMemo(() => {
         return invoices.filter((p: Invoice) => {
             const matchCompany = p.nextCompanyId === companyId;
+            const matchStatus = p.status === "WAITING_RETAIL";
             const matchSearch =
                 p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-            return matchCompany && matchSearch;
+            return matchCompany && matchSearch && matchStatus;
         });
     }, [invoices, companyId, searchQuery]);
     

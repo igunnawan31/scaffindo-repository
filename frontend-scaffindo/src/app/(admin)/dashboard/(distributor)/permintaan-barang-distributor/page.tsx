@@ -31,19 +31,14 @@ const PermintaanBarangDistributor = () => {
     }, []);
 
     const filteredInvoices = useMemo(() => {
-        const allowedStatuses = [
-            "WAITING_DISTRIBUTOR",
-            "DISTRIBUTOR_ACCEPTED",
-            "DISTRIBUTOR_PICKED_UP",
-            "ARRIVED_AT_DISTRIBUTOR"
-        ];
         return invoices.filter((p: Invoice) => {
             const matchCompany = p.nextCompanyId === companyId;
+            const matchStatus = p.status === "WAITING_DISTRIBUTOR";
             const matchSearch =
                 p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-            return matchCompany && matchSearch;
+            return matchCompany && matchSearch && matchStatus;
         });
     }, [invoices, companyId, searchQuery, selectedCategory]);
 

@@ -26,10 +26,7 @@ export default function AdminRootLayout({
                                 </div>
                                 <div className="font-sans">
                                     <span className="hidden xl:block text-sm text-white font-bold">
-                                        username
-                                    </span>
-                                    <span className="hidden xl:block text-sm text-white">
-                                        userEmail
+                                        Dashboard Business
                                     </span>
                                 </div>
                             </div>

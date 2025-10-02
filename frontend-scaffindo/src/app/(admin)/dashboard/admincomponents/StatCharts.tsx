@@ -11,7 +11,7 @@ import {
 
 export default function StatCharts({
   data,
-  title = "📊 System Overview",
+  title = "System Overview",
 }: {
   data: { name: string; value: number }[];
   title?: string;

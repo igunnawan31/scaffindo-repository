@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import SuperAdminDashboard from "./admincomponents/SuperAdminDashboard";
+import FactoryDashboard from "./admincomponents/FactoryDashboard";
+import DistributorDashboard from "./admincomponents/DistributorDashboard";
+import AgentDashboard from "./admincomponents/AgentDashboard";
+import RetailDashboard from "./admincomponents/RetailDashboard";
 
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
@@ -17,30 +21,14 @@ export default function Dashboard() {
         case "SUPERADMIN":
             return <SuperAdminDashboard />;
         case "FACTORY":
-            return <FactoryDashboard subRole={user.subRole} />;
+            return <FactoryDashboard subRole={user.subRole} companyId={user.companyId} />;
         case "DISTRIBUTOR":
-            return <DistributorDashboard subRole={user.subRole} />;
+            return <DistributorDashboard subRole={user.subRole} companyId={user.companyId} />;
         case "AGENT":
-            return <AgentDashboard subRole={user.subRole} />;
+            return <AgentDashboard subRole={user.subRole} companyId={user.companyId} />;
         case "RETAIL":
-            return <RetailDashboard subRole={user.subRole} />;
+            return <RetailDashboard subRole={user.subRole} companyId={user.companyId} />;
         default:
             return <p>Role not recognized</p>;
     }
-}
-
-function FactoryDashboard({ subRole }: { subRole: string }) {
-    return <div>🏭 Factory Dashboard ({subRole})</div>;
-}
-
-function DistributorDashboard({ subRole }: { subRole: string }) {
-    return <div>🚚 Distributor Dashboard ({subRole})</div>;
-}
-
-function AgentDashboard({ subRole }: { subRole: string }) {
-    return <div>🤝 Agent Dashboard ({subRole})</div>;
-}
-
-function RetailDashboard({ subRole }: { subRole: string }) {
-    return <div>🛒 Retail Dashboard ({subRole})</div>;
 }
