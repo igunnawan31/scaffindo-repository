@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const Navbar = () => {
     const [isDropdownMenuOpen, setIsDropdownMenuOpen] = useState(false);
-    const [user, setUser] = useState<any>(null); // ✅ Store user here
+    const [user, setUser] = useState<any>(null);
     const dropdownRef = useRef(null);
     const router = useRouter();
 
