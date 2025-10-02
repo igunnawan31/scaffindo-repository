@@ -3,12 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { User } from "../type/types";
 import axios from "axios";
-import { useSearchParams } from "next/navigation";
 import axiosInstance from "../lib/axiosInstance";
+import { useRoleFromQuery } from "./useRoleFromQuery";
 
 export function useUser() {
-    const searchParams = useSearchParams();
-    const role = searchParams.get("role")
+    const role = useRoleFromQuery();
     const [users, setUsers] = useState<User[]>([]);
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);

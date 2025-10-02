@@ -1,10 +1,13 @@
+"use client"
+
+import { Suspense } from "react"
 import AdminList from "../superadmincomponents/AdminList"
 
 const ManageAdminPage = () => {
     return (
-        <div>
+        <Suspense fallback={<div>Loading...</div>}>
             <AdminList />
-        </div>
+        </Suspense>
     )
 }
 
