@@ -102,11 +102,6 @@ const CardLogin = () => {
                         </span>
                     </div>
 
-                    <div className='flex justify-center mt-5'>
-                        <a href="/sign-in/forgot-password" className='text-blue-400 underline hover:opacity-80'>
-                            Forgot Password?
-                        </a>
-                    </div>
                     <div className="flex justify-center mt-5">
                         <button 
                             type="submit"

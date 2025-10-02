@@ -9,7 +9,7 @@ export default function SignInLayout({
   children: React.ReactNode;
 }>) {
     return (
-        <section id="SignIn" className="relative min-h-screen overflow-hidden">
+        <section id="SignIn" className="relative min-h-screen overflow-hidden text-black">
             <div className="absolute inset-0">
                 <Image 
                     src="/assets/images/sucofindo-1.jpg" 
