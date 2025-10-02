@@ -8,7 +8,7 @@ import Image from "next/image"
 import { useCompany } from "@/app/hooks/useCompany"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
-import { useRouter } from "next/router"
+import { useRouter } from "next/navigation"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
 const subRoles = ["ADMIN", "USER"]
@@ -38,6 +38,18 @@ const CreateAdmin = () => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value })
     }
+
+    useEffect(() => {
+        if (formData.companyId) {
+            const selectedCompany = companies.find(c => c.id === formData.companyId);
+            if (selectedCompany) {
+                setFormData(prev => ({
+                    ...prev,
+                    role: selectedCompany.companyType
+                }));
+            }
+        }
+    }, [formData.companyId, companies]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -135,20 +147,13 @@ const CreateAdmin = () => {
                 </div>
 
                 <div>
-                    <DropdownOneSelect
-                        label="Role"
-                        options={roles.map((role) => ({
-                            value: role,
-                            label: role,
-                        }))}
-                        selected={formData.role || null}
-                        onChange={(newRole) =>
-                            setFormData((prev) => ({
-                            ...prev,
-                            role: newRole || "",
-                            }))
-                        }
-                        placeholder="Select Role"
+                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
+                    <input
+                        type="text"
+                        id="role"
+                        value={formData.role}
+                        disabled
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
                     />
                 </div>
 

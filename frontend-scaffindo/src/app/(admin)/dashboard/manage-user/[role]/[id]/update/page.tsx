@@ -78,10 +78,10 @@ const UpdateUser = () => {
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Email</label>
+                    <label htmlFor="email" className="block font-semibold text-blue-900 mb-1">Email</label>
                     <input
-                        type="text"
-                        id="role"
+                        type="email"
+                        id="email"
                         value={formData.email}
                         disabled
                         className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
