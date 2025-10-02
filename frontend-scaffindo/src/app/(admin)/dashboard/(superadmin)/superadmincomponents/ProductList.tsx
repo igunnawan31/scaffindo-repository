@@ -1,6 +1,5 @@
 'use client'
 
-import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
@@ -8,7 +7,7 @@ import SuccessModal from "../../admincomponents/SuccessPopUpModal"
 import CategoryProducts from "../../admincomponents/CategoryProducts"
 import SearchProducts from "../../admincomponents/SearchProducts"
 import Pagination from "../../admincomponents/Pagination"
-import { Company, Product } from "@/app/type/types"
+import { Product } from "@/app/type/types"
 import { useProduct } from "@/app/hooks/useProduct"
 import Image from "next/image"
 import { getImageUrl } from "@/app/lib/path"

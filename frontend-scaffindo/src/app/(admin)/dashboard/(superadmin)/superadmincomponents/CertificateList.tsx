@@ -1,11 +1,9 @@
 'use client'
 
-import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
 import SuccessModal from "../../admincomponents/SuccessPopUpModal"
-import CategoryProducts from "../../admincomponents/CategoryProducts"
 import SearchProducts from "../../admincomponents/SearchProducts"
 import Pagination from "../../admincomponents/Pagination"
 import { Certificate } from "@/app/type/types"
