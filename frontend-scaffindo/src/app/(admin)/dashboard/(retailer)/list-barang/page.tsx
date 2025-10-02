@@ -8,40 +8,50 @@ import ProductRetailsPage from "../../admincomponents/productRetails";
 import { useLabels } from "@/app/hooks/useLabels";
 import { useTrackings } from "@/app/hooks/useTrackings";
 
-const ListInvoicePage = () => {
-    const {fetchLabels, labels, loading: labelsLoading} = useLabels();
+const ListBarangPage = () => {
+    const {fetchLabels, labels} = useLabels();
     const { fetchTrackingById, tracking } = useTrackings();
     const [trackingMap, setTrackingMap] = useState<Record<string, string | null>>({});
     const [searchQuery, setSearchQuery] = useState("");
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-
+    const [fullLoading, setFullLoading] = useState(true);
+    
     const handleSearch = (query: string) => {
         setSearchQuery(query);
     };
 
     useEffect(() => {
-        fetchLabels();
+        const loadLabels = async () => {
+            setFullLoading(true);
+            await fetchLabels();
+        };
+        loadLabels();
     }, []);
 
     useEffect(() => {
         const loadTrackings = async () => {
+            if (labels.length === 0) return;
+
             const map: Record<string, string | null> = {};
 
-            for (const label of labels) {
-                const trackingData = await fetchTrackingById(label.id);
-                if (Array.isArray(trackingData) && trackingData.length > 0) {
-                    const lastTracking = trackingData[trackingData.length - 1];
-                    map[label.id] = lastTracking?.companyId || null;
-                } else {
-                    map[label.id] = null;
-                }
-            }
+            await Promise.all(
+                labels.map(async (label) => {
+                    const trackingData = await fetchTrackingById(label.id);
+                    if (Array.isArray(trackingData) && trackingData.length > 0) {
+                        const lastTracking = trackingData[trackingData.length - 1];
+                        map[label.id] = lastTracking?.companyId || null;
+                    } else {
+                        map[label.id] = null;
+                    }
+                })
+            );
 
             setTrackingMap(map);
+            setFullLoading(false);
         };
 
-        if (labels.length) loadTrackings();
+        loadTrackings();
     }, [labels]);
 
     const statusFilters = [
@@ -99,10 +109,10 @@ const ListInvoicePage = () => {
                 />
             </div>
             <div className="mt-5">
-                <ProductRetailsPage label={filteredLabels} link="list-barang" loading={labelsLoading}/>
+                <ProductRetailsPage label={filteredLabels} link="list-barang" loading={fullLoading}/>
             </div>
         </>
     )
 }
 
-export default ListInvoicePage
+export default ListBarangPage

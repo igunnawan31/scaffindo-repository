@@ -52,7 +52,7 @@ const ProductRetailsPage: React.FC<LabelShowsPageProps> = ({
         <div className="flex flex-col gap-4 w-full">
             {loading ? (
                 Array.from({ length: itemsPerPage }).map((_, i) => (
-                    <div key={i} className="animate-pulse w-full bg-gray-200 h-28 rounded-lg"></div>
+                    <div key={i} className="animate-pulse w-full bg-blue-200 h-44 rounded-lg"></div>
                 ))
             ) : (
                 displayedLabels.map((label) => (
