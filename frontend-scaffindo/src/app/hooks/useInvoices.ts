@@ -52,7 +52,7 @@ export function useInvoice() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/invoices?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/invoices`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

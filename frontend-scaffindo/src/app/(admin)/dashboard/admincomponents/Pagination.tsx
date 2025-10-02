@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client"
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { IoArrowForwardCircle,IoArrowBackCircle } from "react-icons/io5";
 
@@ -19,6 +21,10 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const [inputPage, setInputPage] = useState(currentPage);
+
+    useEffect(() => {
+        setInputPage(currentPage);
+    }, [currentPage]);
 
     return (
         <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">

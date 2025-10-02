@@ -49,7 +49,7 @@ const JualProductQR = () => {
             return;
         }
 
-        const label = penjualan.find((l) => l.id === qr);
+        const label = penjualan.find((l) => l.id === cleanQr);
         
         if (!label) {
             setErrorMessage(`Label dengan kode ${qr} tidak ditemukan atau belum bisa dijual.`);
@@ -138,7 +138,7 @@ const JualProductQR = () => {
 
             <button
                 onClick={() => setOpenScanner(true)}
-                disabled={loading}
+                disabled={loading || loadingPenjualan}
                 className="w-full py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 mb-4 disabled:bg-gray-400"
             >
                 {loadingPenjualan ? "Menyiapkan data label..." : (loading ? "Loading..." : "+ Scan Produk")}

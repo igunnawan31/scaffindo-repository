@@ -21,7 +21,7 @@ export function usePenjualan() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/penjualan?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/penjualan`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
