@@ -173,7 +173,7 @@ const CreateUser = () => {
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/manage-user'}
+                        href={`/dashboard/manage-user/${formData.role}`}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali

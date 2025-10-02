@@ -76,7 +76,7 @@ const CreateCertificate = () => {
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full mx-auto">
-            <h2 className="text-xl font-bold text-blue-900 mb-6">Create User</h2>
+            <h2 className="text-xl font-bold text-blue-900 mb-6">Create Certificate</h2>
             <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="name" className="block font-semibold text-blue-900 mb-1">Nama</label>

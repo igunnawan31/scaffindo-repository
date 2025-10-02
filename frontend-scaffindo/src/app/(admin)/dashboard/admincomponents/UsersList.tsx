@@ -22,8 +22,6 @@ const UserLists = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
 
-    console.log(role);
-
     useEffect(() => {
         if (role) fetchUsers(role);
     }, [role, fetchUsers]);

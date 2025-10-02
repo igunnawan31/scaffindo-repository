@@ -78,56 +78,41 @@ const UpdateUser = () => {
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block font-semibold text-blue-900 mb-1">
-                        Email
-                    </label>
+                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Email</label>
                     <input
-                        type="email"
-                        id="email"
+                        type="text"
+                        id="role"
                         value={formData.email}
-                        onChange={handleChange}
-                        placeholder="user@example.com"
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
+                        disabled
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
                     />
                 </div>
 
                 <div>
-                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">
-                        Role
-                    </label>
-                    <select
+                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Role</label>
+                    <input
+                        type="text"
                         id="role"
                         value={formData.role}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
-                    >
-                        <option value="">-- Select Role --</option>
-                        <option value="FACTORY">Factory</option>
-                        <option value="DISTRIBUTOR">Distributor</option>
-                        <option value="AGENT">Agent</option>
-                        <option value="RETAIL">Retail</option>
-                    </select>
+                        disabled
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
+                    />
                 </div>
 
                 <div>
-                    <label htmlFor="subRole" className="block font-semibold text-blue-900 mb-1">
-                        Sub Role
-                    </label>
-                    <select
-                        id="subRole"
+                    <label htmlFor="role" className="block font-semibold text-blue-900 mb-1">Sub Role</label>
+                    <input
+                        type="text"
+                        id="role"
                         value={formData.subRole}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2"
-                    >
-                        <option value="">-- Select Sub Role --</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="USER">User</option>
-                    </select>
+                        disabled
+                        className="w-full px-4 py-3 rounded-full bg-gray-100 text-sm shadow-md"
+                    />
                 </div>
 
                 <div className="flex justify-between">
                     <Link
-                        href={'/dashboard/list-admin'}
+                        href={`/dashboard/manage-user/${formData.role}`}
                         className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500 cursor-pointer"
                     >
                         Kembali

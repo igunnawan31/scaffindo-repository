@@ -8,11 +8,13 @@ import Image from "next/image"
 import { useCompany } from "@/app/hooks/useCompany"
 import DropdownOneSelect from "../../superadmincomponents/DropdownOneSelect"
 import ErrorPopUpModal from "../../../admincomponents/ErrorPopUpModal"
+import { useRouter } from "next/router"
 
 const roles = ["FACTORY", "DISTRIBUTOR", "AGENT", "RETAIL"]
 const subRoles = ["ADMIN", "USER"]
 
 const CreateAdmin = () => {
+    const router = useRouter();
     const { fetchCompanies, companies } = useCompany();
     const { createUser, loading, error } = useUser();
     const [showSuccess, setShowSuccess] = useState(false);
@@ -44,6 +46,7 @@ const CreateAdmin = () => {
             setSuccessMessage(`User ${res.name} berhasil dibuat`);
             setShowSuccess(true);
             setFormData({ name: "", email: "", password: "", companyId: "", role: "", subRole: "" });
+            setTimeout(() => router.push("/dashboard/list-admin"), 2000);
         } catch (err) {
             setErrorMessage("Tidak Berhasil Membuat User");
             setShowError(true);
