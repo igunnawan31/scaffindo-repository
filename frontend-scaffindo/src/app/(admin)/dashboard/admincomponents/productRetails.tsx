@@ -10,16 +10,17 @@ import QRCode from "qrcode";
 type LabelShowsPageProps = {
     label: Label[];
     link: string;
+    loading?: boolean;
 };
 
 const ProductRetailsPage: React.FC<LabelShowsPageProps> = ({
     label,
     link,
+    loading = false,
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [qrDataUrls, setQrDataUrls] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(true);
 
     const displayedLabels = label.slice(
         (currentPage - 1) * itemsPerPage,
@@ -31,27 +32,27 @@ const ProductRetailsPage: React.FC<LabelShowsPageProps> = ({
     }, [label]);
 
     useEffect(() => {
-        setLoading(true);
+        setQrDataUrls({});
+    }, [label]);
+
+    useEffect(() => {
         const missingLabels = displayedLabels.filter((lbl) => !qrDataUrls[lbl.id]);
 
-        if (missingLabels.length === 0) {
-            setLoading(false);
-            return;
-        }
+        if (missingLabels.length === 0) return;
 
         Promise.all(
             missingLabels.map(async (lbl) => {
                 const url = await QRCode.toDataURL(lbl.id);
                 setQrDataUrls((prev) => ({ ...prev, [lbl.id]: url }));
             })
-        ).then(() => setLoading(false));
+        );
     }, [displayedLabels]);
 
     return (
         <div className="flex flex-col gap-4 w-full">
             {loading ? (
                 Array.from({ length: itemsPerPage }).map((_, i) => (
-                    <div key={i} className="animate-pulse w-full bg-blue-200 h-44 rounded-lg"></div>
+                    <div key={i} className="animate-pulse w-full bg-gray-200 h-28 rounded-lg"></div>
                 ))
             ) : (
                 displayedLabels.map((label) => (

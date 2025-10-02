@@ -9,7 +9,7 @@ import { useLabels } from "@/app/hooks/useLabels";
 import { useTrackings } from "@/app/hooks/useTrackings";
 
 const ListInvoicePage = () => {
-    const {fetchLabels, labels} = useLabels();
+    const {fetchLabels, labels, loading: labelsLoading} = useLabels();
     const { fetchTrackingById, tracking } = useTrackings();
     const [trackingMap, setTrackingMap] = useState<Record<string, string | null>>({});
     const [searchQuery, setSearchQuery] = useState("");
@@ -99,7 +99,7 @@ const ListInvoicePage = () => {
                 />
             </div>
             <div className="mt-5">
-                <ProductRetailsPage label={filteredLabels} link="list-barang" />
+                <ProductRetailsPage label={filteredLabels} link="list-barang" loading={labelsLoading}/>
             </div>
         </>
     )
