@@ -23,7 +23,7 @@ export function useCertificate() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/certifications`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

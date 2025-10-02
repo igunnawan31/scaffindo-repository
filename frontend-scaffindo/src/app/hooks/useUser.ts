@@ -26,7 +26,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN&limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?subRole=ADMIN`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -67,7 +67,7 @@ export function useUser() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?role=${role}&limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/users?role=${role}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

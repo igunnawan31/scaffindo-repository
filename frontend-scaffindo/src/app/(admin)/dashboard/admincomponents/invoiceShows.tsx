@@ -27,6 +27,7 @@ const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [modalInvoice, setModalInvoice] = useState<string | null>(null);
     const [qrDataUrls, setQrDataUrls] = useState<Record<string, string>>({});
+    const [loading, setLoading] = useState(true);
 
     const displayedInvoices = invoice.slice(
         (currentPage - 1) * itemsPerPage,
@@ -38,14 +39,21 @@ const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
     }, [invoice]);
 
     useEffect(() => {
-        displayedInvoices.forEach((inv) => {
-            if (!qrDataUrls[inv.id]) {
-                QRCode.toDataURL(inv.id).then((url) => {
-                    setQrDataUrls((prev) => ({ ...prev, [inv.id]: url }));
-                });
-            }
-        });
-    }, [displayedInvoices, qrDataUrls]);
+        setLoading(true);
+        
+        const missingInvoices = displayedInvoices.filter((lbl) => !qrDataUrls[lbl.id]);
+        if (missingInvoices.length === 0) {
+            setLoading(false);
+            return;
+        }
+
+        Promise.all(
+            missingInvoices.map(async (lbl) => {
+                const url = await QRCode.toDataURL(lbl.id);
+                setQrDataUrls((prev) => ({ ...prev, [lbl.id]: url}));
+            })
+        ).then(() => setLoading(false));
+    }, [displayedInvoices]);
 
     return (
         <div className="flex flex-col gap-4 w-full">

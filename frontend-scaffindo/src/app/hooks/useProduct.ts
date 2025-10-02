@@ -23,7 +23,7 @@ export function useProduct() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/products?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

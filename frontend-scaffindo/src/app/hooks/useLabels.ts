@@ -22,7 +22,7 @@ export function useLabels() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?limit=100`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -62,7 +62,7 @@ export function useLabels() {
                 return;
             }
 
-            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?status=ARRIVED_AT_RETAIL&limit=1000`, {
+            const res = await axiosInstance.get(`${process.env.NEXT_PUBLIC_API_URL}/labels?status=ARRIVED_AT_RETAIL`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
