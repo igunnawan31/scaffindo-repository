@@ -12,13 +12,19 @@ const ListInvoicePage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [fullLoading, setFullLoading] = useState(true);
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
     };
 
     useEffect(() => {
-        fetchInvoices();
+        const loadInvoices = async () => {
+            setFullLoading(true);
+            await fetchInvoices();
+            setFullLoading(false);
+        };
+        loadInvoices();
     }, []);
 
     const statusFilters = [
@@ -76,7 +82,7 @@ const ListInvoicePage = () => {
                 />
             </div>
             <div className="mt-5">
-                <InvoiceShowsPage invoice={filteredInvoices} link="list-invoices" />
+                <InvoiceShowsPage invoice={filteredInvoices} link="list-invoices" loading={fullLoading}/>
             </div>
         </>
     )

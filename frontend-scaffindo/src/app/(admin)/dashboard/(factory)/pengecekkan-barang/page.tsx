@@ -1,9 +1,6 @@
 "use client"
 
-import ProductShows from "../../admincomponents/ProductShows";
-import dummyProducts from "@/app/data/productsData";
 import SearchProducts from "../../admincomponents/SearchProducts";
-import CategoryProducts from "../../admincomponents/CategoryProducts";
 import { useEffect, useMemo, useState } from "react";
 import InvoiceShowsPage from "../../admincomponents/invoiceShows";
 import { useInvoice } from "@/app/hooks/useInvoices";

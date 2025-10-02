@@ -3,7 +3,6 @@
 import SearchProducts from "../../admincomponents/SearchProducts"
 import CategoryProducts from "../../admincomponents/CategoryProducts";
 import ProductShows from "../../admincomponents/ProductShows";
-import dummyProducts from "@/app/data/productsData";
 import { useEffect, useMemo, useState } from 'react';
 import { useProduct } from "@/app/hooks/useProduct";
 import { Category, Product } from "@/app/type/types";
@@ -13,14 +12,20 @@ const PrintLabelPage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [companyId, setCompanyId] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [fullLoading, setFullLoading] = useState(true);
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
     };
 
     useEffect(() => {
-        fetchProducts();
-    }, [fetchProducts]);
+        const loadProducts = async () => {
+            setFullLoading(true);
+            await fetchProducts();
+            setFullLoading(false);
+        };
+        loadProducts();
+    }, []);
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -75,8 +80,8 @@ const PrintLabelPage = () => {
                 />
             </div>
             <div className="mt-5">
-                <ProductShows title="Recently Printed" products={filteredProducts} limit={3} />
-                <ProductShows title="All Products" products={filteredProducts} defaultItemsPerPage={10} />
+                <ProductShows title="Recently Printed" products={filteredProducts} limit={3} loading={fullLoading} />
+                <ProductShows title="All Products" products={filteredProducts} defaultItemsPerPage={10} loading={fullLoading} />
             </div>
         </>
     )

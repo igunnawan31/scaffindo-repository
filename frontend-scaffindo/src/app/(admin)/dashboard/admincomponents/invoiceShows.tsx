@@ -14,6 +14,7 @@ type InvoiceShowsPageProps = {
     buttonText?: string;
     link: string;
     onButtonClick?: (invoiceId: string) => void;
+    loading?: boolean;
 };
 
 const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
@@ -21,13 +22,13 @@ const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
     invoice,
     buttonText = "Aksi",
     link,
-    onButtonClick
+    onButtonClick,
+    loading = false,
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [modalInvoice, setModalInvoice] = useState<string | null>(null);
     const [qrDataUrls, setQrDataUrls] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(true);
 
     const displayedInvoices = invoice.slice(
         (currentPage - 1) * itemsPerPage,
@@ -39,11 +40,8 @@ const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
     }, [invoice]);
 
     useEffect(() => {
-        setLoading(true);
-        
         const missingInvoices = displayedInvoices.filter((lbl) => !qrDataUrls[lbl.id]);
         if (missingInvoices.length === 0) {
-            setLoading(false);
             return;
         }
 
@@ -52,7 +50,7 @@ const InvoiceShowsPage: React.FC<InvoiceShowsPageProps> = ({
                 const url = await QRCode.toDataURL(lbl.id);
                 setQrDataUrls((prev) => ({ ...prev, [lbl.id]: url}));
             })
-        ).then(() => setLoading(false));
+        );
     }, [displayedInvoices]);
 
     return (
