@@ -27,7 +27,7 @@ import { DeleteInvoiceResponseDto } from './dto/response/delete-response.dto';
 
 @Injectable()
 export class InvoicesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
   create(
     createInvoiceDto: CreateInvoiceDto,
     user: UserRequest,
@@ -176,7 +176,7 @@ export class InvoicesService {
     user: UserRequest,
   ): Promise<GetAllInvoiceResponseDto> {
     try {
-      const { productId, page = 1, limit = 10, sortBy, sortOrder } = filters;
+      const { productId, page = 1, limit, sortBy, sortOrder } = filters;
       const where: Prisma.InvoiceWhereInput = {
         productId: productId ?? undefined,
         // Product: {
@@ -202,8 +202,8 @@ export class InvoicesService {
       const [invoices, total] = await Promise.all([
         this.prisma.invoice.findMany({
           where,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: (page - 1) * (limit ?? 0),
+          take: limit ?? undefined,
           include: {
             labels: { select: { id: true } },
             PICs: { select: { userId: true } },
@@ -226,7 +226,7 @@ export class InvoicesService {
           total,
           page,
           limit,
-          totalPages: Math.ceil(total / limit),
+          totalPages: Math.ceil(total / (limit ?? total)),
         },
       });
     } catch (err) {

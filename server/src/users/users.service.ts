@@ -36,7 +36,7 @@ export class UsersService {
     filters: UserFilterDto,
     user: UserRequest,
   ): Promise<GetAllUserResponseDto> {
-    const { name, role, companyId, subRole, page = 1, limit = 10 } = filters;
+    const { name, role, companyId, subRole, page = 1, limit } = filters;
     const userCompanyId =
       user.role === Role.SUPERADMIN ? companyId : user.companyId;
     try {
@@ -54,7 +54,7 @@ export class UsersService {
       const [users, total] = await this.prisma.$transaction([
         this.prisma.user.findMany({
           where,
-          skip: (page - 1) * limit,
+          skip: (page - 1) * (limit ?? 0),
           take: limit,
         }),
         this.prisma.user.count({ where }),
@@ -65,8 +65,8 @@ export class UsersService {
         meta: {
           total,
           page,
-          limit,
-          totalPages: Math.ceil(total / limit),
+          limit: limit ?? 0,
+          totalPages: Math.ceil(total / (limit ?? total)),
         },
       };
       return res;

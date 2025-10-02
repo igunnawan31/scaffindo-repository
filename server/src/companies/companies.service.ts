@@ -39,7 +39,7 @@ export class CompaniesService {
     const {
       searchTerm,
       page = 1,
-      limit = 10,
+      limit,
       sortBy,
       sortOrder,
       companyType,
@@ -82,8 +82,8 @@ export class CompaniesService {
       const [companies, total] = await Promise.all([
         this.prisma.company.findMany({
           where,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: (page - 1) * (limit ?? 0),
+          take: limit ?? undefined,
           orderBy,
         }),
         this.prisma.company.count({ where }),
@@ -100,7 +100,7 @@ export class CompaniesService {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total / limit),
+          totalPages: Math.ceil(total / (limit ?? total)),
         },
       });
     } catch (err) {
@@ -149,6 +149,10 @@ export class CompaniesService {
       const existingCompany = await this.findOne(id);
       if (!existingCompany)
         throw new NotFoundException(`Company with ID ${id} not found`);
+
+      await this.prisma.user.deleteMany({
+        where: { companyId: id },
+      });
 
       const query = await this.prisma.company.delete({
         where: { id },

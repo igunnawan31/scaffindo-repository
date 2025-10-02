@@ -12,15 +12,11 @@ import { handlePrismaError } from 'src/common/utils/prisma-exception.util';
 @Injectable()
 export class PenjualanService {
   constructor(private readonly prisma: PrismaService) {}
-  async findAll(filters: PenjualanFilterDto = {} as PenjualanFilterDto): Promise<GetAllPenjualanResponseDto> {
+  async findAll(
+    filters: PenjualanFilterDto,
+  ): Promise<GetAllPenjualanResponseDto> {
     try {
-      const {
-        minCreatedDate,
-        sortBy,
-        sortOrder,
-        page = 1,
-        limit = 10,
-      } = filters;
+      const { minCreatedDate, sortBy, sortOrder, page = 1, limit } = filters;
       const where: Prisma.PenjualanWhereInput = {};
       if (minCreatedDate) {
         where.createdAt = { gte: new Date(minCreatedDate) };
@@ -35,8 +31,8 @@ export class PenjualanService {
       const [penjualans, total] = await Promise.all([
         this.prisma.penjualan.findMany({
           where,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: (page - 1) * (limit ?? 0),
+          take: limit ?? undefined,
           include: { labels: { select: { id: true } } },
           orderBy,
         }),
@@ -55,7 +51,7 @@ export class PenjualanService {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total / limit),
+          totalPages: Math.ceil(total / (limit ?? total)),
         },
       });
     } catch (err) {

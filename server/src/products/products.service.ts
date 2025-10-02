@@ -169,11 +169,11 @@ export class ProductsService {
         companyId,
         categories,
         page = 1,
-        limit = 10,
+        limit,
         sortBy,
         sortOrder,
       } = filters;
-      const skip = (page - 1) * limit;
+      const skip = (page - 1) * (limit ?? 0);
 
       const where: Prisma.ProductWhereInput = {
         companyId:
@@ -222,7 +222,7 @@ export class ProductsService {
         this.prisma.product.findMany({
           where,
           skip,
-          take: limit,
+          take: limit ?? undefined,
           include: {
             certifications: { select: { id: true } },
             labels: { select: { id: true } },
@@ -234,9 +234,9 @@ export class ProductsService {
       ]);
       const meta: meta = {
         page,
-        limit,
+        limit: limit ?? 0,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / (limit ?? total)),
       };
 
       return plainToInstance(GetAllProductResponseDto, {

@@ -43,7 +43,7 @@ export class LabelsService {
         minCreatedDate,
         minUpdatedDate,
         page = 1,
-        limit = 10,
+        limit,
         sortBy,
         sortOrder,
       } = filters;
@@ -65,8 +65,8 @@ export class LabelsService {
       const [labels, total] = await Promise.all([
         this.prisma.label.findMany({
           where,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: (page - 1) * (limit ?? 0),
+          take: limit ?? undefined,
           include: {
             // Product: { select: { id: true } },
             // Penjualan: { select: { id: true } },
@@ -88,7 +88,7 @@ export class LabelsService {
           page,
           limit,
           total,
-          totalPages: Math.ceil(total / limit),
+          totalPages: Math.ceil(total / (limit ?? total)),
         },
       });
     } catch (err) {

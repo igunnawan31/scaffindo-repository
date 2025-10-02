@@ -50,7 +50,7 @@ export class CertificationsService {
       expired,
       productId,
       page = 1,
-      limit = 10,
+      limit,
       sortBy,
       sortOrder,
     } = filters;
@@ -100,17 +100,17 @@ export class CertificationsService {
       const [certificates, total] = await Promise.all([
         this.prisma.certification.findMany({
           where,
-          skip: (page - 1) * limit,
-          take: limit,
+          skip: (page - 1) * (limit ?? 0),
+          take: limit ?? undefined,
           orderBy,
         }),
         this.prisma.certification.count({ where }),
       ]);
       const meta: meta = {
         page,
-        limit,
+        limit: limit ?? 0,
         total,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / (limit ?? total)),
       };
 
       return plainToInstance(GetAllCertificationResponseDto, {

@@ -66,4 +66,18 @@ export class TrackingsService {
       handlePrismaError(err, 'Tracking', id);
     }
   }
+  // async getAllTrackLog(ids: string[]): Promise<GetTrackingResponseDto[]> {
+  //   try {
+  //     const label = await this.prisma.label.findUnique({ where: { id } });
+  //     if (!label) throw new NotFoundException(`Label with ID ${id} not found`);
+  //
+  //     const trackings = await this.prisma.tracking.findMany({
+  //       where: { Label: { id: label.id } },
+  //     });
+  //
+  //     return plainToInstance(GetTrackingResponseDto, trackings);
+  //   } catch (err) {
+  //     handlePrismaError(err, 'Tracking', id);
+  //   }
+  // }
 }
