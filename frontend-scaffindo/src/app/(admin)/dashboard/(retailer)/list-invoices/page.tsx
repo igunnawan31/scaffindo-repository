@@ -57,9 +57,7 @@ const ListInvoicePage = () => {
         return invoices.filter((p: Invoice) => {
             const matchCompany = p.companyId === companyId;
             const matchStatus = allowedStatuses.includes(p.status);;
-            const matchSearch =
-                p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                p.description.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchSearch = p.id.toLowerCase().includes(searchQuery.toLowerCase());
             const matchCategory = !selectedCategory 
                 || selectedCategory === "all" 
                 || p.status === selectedCategory;

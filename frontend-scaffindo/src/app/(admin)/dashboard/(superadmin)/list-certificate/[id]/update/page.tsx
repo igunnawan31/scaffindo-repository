@@ -34,9 +34,14 @@ const UpdateCertificate = () => {
 
     useEffect(() => {
         if (!certificate) return;
+
+        const formattedDate = certificate.expired
+            ? new Date(certificate.expired).toISOString().split("T")[0]
+            : "";
+
         setFormData({
             name: certificate.name ?? "",
-            expired: certificate.expired ?? "",
+            expired: formattedDate,
             details: certificate.details ?? "",
             productId: certificate.productId ?? "",
         });
@@ -84,7 +89,7 @@ const UpdateCertificate = () => {
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full mx-auto">
-            <h2 className="text-xl font-bold text-blue-900 mb-6">Update User</h2>
+            <h2 className="text-xl font-bold text-blue-900 mb-6">Update Certificate</h2>
                 <form className="space-y-5" onSubmit={handleSubmit}>
                 <div>
                     <label htmlFor="name" className="block font-semibold text-blue-900 mb-1">

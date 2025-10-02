@@ -26,6 +26,9 @@ function AgentDashboard({ subRole, companyId }: DistributorDashboardProps) {
             const filteredInvoicesByCompany = invoices.filter(
                 (p: Invoice) => p.companyId === companyId
             );
+            const filteredInvoicesByNextCompany = invoices.filter(
+                (p: Invoice) => p.nextCompanyId === companyId
+            );
             const invoiceIn = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "WAITING_AGENT")
             const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "AGENT_ACCEPTED");
 

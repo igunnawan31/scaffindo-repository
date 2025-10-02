@@ -8,12 +8,14 @@ const DropdownMultipleSelect = ({
     selected,
     onChange,
     placeholder = "Select...",
+    disabled = false,
 }: {
     label?: string;
     options: { value: string; label: string }[];
     selected: string[];
     onChange: (newSelected: string[]) => void;
     placeholder?: string;
+    disabled?: boolean
 }) => {
     const ref = useRef<HTMLDivElement | null>(null);
     const [open, setOpen] = useState(false);
@@ -39,8 +41,11 @@ const DropdownMultipleSelect = ({
             {label && <label className="block font-semibold text-blue-900 mb-1">{label}</label>}
             <button
                 type="button"
-                onClick={() => setOpen((v) => !v)}
-                className="w-full px-4 py-3 rounded-full bg-white text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 items-center justify-between flex"
+                onClick={() => !disabled && setOpen((v) => !v)}
+                className={`w-full px-4 py-3 rounded-full text-sm shadow-md items-center justify-between flex
+                    ${disabled ? "bg-gray-100 cursor-not-allowed" : "bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"}
+                `}
+                disabled={disabled}
             >
                 <div className="flex gap-2 flex-wrap">
                     {selected.length === 0 ? (
@@ -53,20 +58,22 @@ const DropdownMultipleSelect = ({
                         ))
                     )}
                     </div>
-                <span className="ml-2 text-sm">▾</span>
+                {!disabled && (
+                    <span className="ml-2 text-sm">▾</span>
+                )}
             </button>
 
-            {open && (
+            {open && !disabled && (
                 <div className="absolute z-40 mt-2 w-full max-h-56 overflow-auto rounded-md border bg-white p-2 shadow">
                     {options.map((opt) => (
                         <label key={opt.value} className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded">
-                        <input
-                            type="checkbox"
-                            checked={selected.includes(opt.value)}
-                            onChange={() => toggleOption(opt.value)}
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                        <span>{opt.label}</span>
+                            <input
+                                type="checkbox"
+                                checked={selected.includes(opt.value)}
+                                onChange={() => toggleOption(opt.value)}
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                            <span>{opt.label}</span>
                         </label>
                     ))}
                 </div>

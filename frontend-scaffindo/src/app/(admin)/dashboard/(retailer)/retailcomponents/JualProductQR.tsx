@@ -30,22 +30,38 @@ const JualProductQR = () => {
     const [paymentMethod, setPaymentMethod] = useState("CASH");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loadingPenjualan, setLoadingPenjualan] = useState(true);
 
     useEffect(() => {
-        fetchLabelsPenjualan();
+        const load = async () => {
+            await fetchLabelsPenjualan();
+            setLoadingPenjualan(false);
+        };
+        load();
     }, [fetchLabelsPenjualan]);
 
     const handleProductScan = async (qr: string) => {
+        const cleanQr = qr.trim();
+
+        if (loadingPenjualan) {
+            setErrorMessage("Data label belum siap, tunggu sebentar.");
+            setShowError(true);
+            return;
+        }
+
         const label = penjualan.find((l) => l.id === qr);
+        
         if (!label) {
-            alert(`Label dengan kode ${qr} tidak ditemukan atau belum bisa dijual.`);
+            setErrorMessage(`Label dengan kode ${qr} tidak ditemukan atau belum bisa dijual.`);
+            setShowError(true);
             return;
         }
 
         const productData = await fetchProductById(label.productId);
 
         if (!productData) {
-            alert("Produk terkait label ini tidak ditemukan!");
+            setErrorMessage("Produk terkait label ini tidak ditemukan!");
+            setShowError(true);
             return;
         }
 
@@ -76,7 +92,8 @@ const JualProductQR = () => {
 
     const handleCheckout = async () => {
         if (cart.length === 0) {
-            alert("Keranjang kosong!");
+            setErrorMessage("Keranjang Kosong");
+            setShowError(true);
             return;
         }
 
@@ -124,7 +141,7 @@ const JualProductQR = () => {
                 disabled={loading}
                 className="w-full py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 mb-4 disabled:bg-gray-400"
             >
-                {loading ? "Loading..." : "+ Scan Produk"}
+                {loadingPenjualan ? "Menyiapkan data label..." : (loading ? "Loading..." : "+ Scan Produk")}
             </button>
 
             {cart.length > 0 ? (

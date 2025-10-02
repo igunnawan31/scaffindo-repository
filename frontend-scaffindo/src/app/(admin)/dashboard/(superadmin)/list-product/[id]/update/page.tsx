@@ -200,6 +200,7 @@ export default function UpdateProduct() {
                         selected={formData.certifications}
                         onChange={(vals) => handleMultiChange("certifications", vals)}
                         placeholder="Select certifications"
+                        disabled
                     />
                 </div>
 
@@ -230,7 +231,7 @@ export default function UpdateProduct() {
                 </div>
 
                 <div className="flex justify-between">
-                    <Link href={"/dashboard/products"} className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500">
+                    <Link href={"/dashboard/list-product"} className="p-3 bg-gray-600 text-white rounded-lg hover:bg-gray-500">
                         Kembali
                     </Link>
                     <button type="submit" className="p-3 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600">

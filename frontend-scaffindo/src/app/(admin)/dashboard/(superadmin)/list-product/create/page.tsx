@@ -176,17 +176,7 @@ const CreateProduct = () => {
                         placeholder="Select categories"
                     />
                 </div>
-
-                <div>
-                    <DropdownMultipleSelect
-                        label="Certifications"
-                        options={certificateOptionsList}
-                        selected={formData.certifications}
-                        onChange={(vals: any) => handleMultiChange("certifications", vals)}
-                        placeholder="Select certifications"
-                    />
-                </div>
-
+                
                 <div>
                     <label className="block font-semibold text-blue-900 mb-1">Image</label>
                     <input
