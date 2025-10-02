@@ -1,6 +1,5 @@
 'use client'
 
-import UserDummy from "@/app/data/UserDummy"
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { IoCreateOutline, IoTrashOutline, IoAddCircle } from "react-icons/io5"
