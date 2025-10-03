@@ -51,7 +51,7 @@ function RetailDashboard({ subRole, companyId }: DistributorDashboardProps) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard title="Total Request Invoice" value={stats.invoicesIn} />
                 <StatCard title="Invoice Not Checked" value={stats.invoiceNotChecked} />
-                <StatCard title="Invoice Not Checked" value={stats.invoiceChecked} />
+                <StatCard title="Invoice Checked" value={stats.invoiceChecked} />
             </div>
 
             <StatCharts
