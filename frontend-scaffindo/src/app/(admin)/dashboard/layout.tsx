@@ -3,6 +3,13 @@ import Image from "next/image";
 import Menu from "./admincomponents/Menu";
 import Navbar from "./admincomponents/Navbar";
 import { AuthProvider } from "@/app/(admin)/dashboard/admincomponents/AuthProvider";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Business Admin | ChainTrack",
+  description: "Blockchain-based QR Chain Tracking System",
+};
+
 
 export default function AdminRootLayout({
     children,
