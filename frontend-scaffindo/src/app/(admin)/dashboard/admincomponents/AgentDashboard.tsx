@@ -22,22 +22,20 @@ function AgentDashboard({ subRole, companyId }: DistributorDashboardProps) {
     }, []);
 
     useEffect(() => {
-        if (invoices.length) {
-            const filteredInvoicesByCompany = invoices.filter(
-                (p: Invoice) => p.companyId === companyId
-            );
-            const filteredInvoicesByNextCompany = invoices.filter(
-                (p: Invoice) => p.nextCompanyId === companyId
-            );
-            const invoiceIn = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "WAITING_AGENT")
-            const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "AGENT_ACCEPTED");
+        const filteredInvoicesByCompany = invoices.filter(
+            (p: Invoice) => p.companyId === companyId
+        );
+        const filteredInvoicesByNextCompany = invoices.filter(
+            (p: Invoice) => p.nextCompanyId === companyId
+        );
+        const invoiceIn = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "WAITING_AGENT")
+        const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "AGENT_ACCEPTED");
 
-            setStats({
-                invoicesIn: invoiceIn.length,
-                invoiceNotChecked: invoiceNotChecked.length,
-            });
-            setLoading(false);
-        }
+        setStats({
+            invoicesIn: invoiceIn.length,
+            invoiceNotChecked: invoiceNotChecked.length,
+        });
+        setLoading(false);
     }, [invoices]);
     
     if (loading) return <p>Loading dashboard...</p>;

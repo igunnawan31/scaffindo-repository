@@ -30,15 +30,13 @@ function SuperAdminDashboard() {
     }, []);
 
     useEffect(() => {
-        if (companies.length || products.length || users.length || certificates.length) {
-            setStats({
-                companies: companies.length,
-                users: users.length,
-                products: products.length,
-                certificates: certificates.length,
-            });
-            setLoading(false);
-        }
+        setStats({
+            companies: companies.length,
+            users: users.length,
+            products: products.length,
+            certificates: certificates.length,
+        });
+        setLoading(false);
     }, [companies, users, products, certificates]);
     
     const factoryCompanies = companies.filter((c) => c.companyType === "FACTORY");
@@ -52,10 +50,6 @@ function SuperAdminDashboard() {
         selectedCompany === "ALL"
         ? productCountPerCompany
         : productCountPerCompany.filter((item) => item.name === selectedCompany);
-
-    if (loading) return <p>Loading dashboard...</p>;
-
-    if (loading) return <p>Loading dashboard...</p>;
 
     return (
         <div>

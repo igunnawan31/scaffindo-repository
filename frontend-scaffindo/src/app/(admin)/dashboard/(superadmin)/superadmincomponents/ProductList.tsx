@@ -33,14 +33,10 @@ const ProductList = () => {
         return matchSearch && matchCategory;
     });
 
-    console.log(filteredProducts.length);
-
     const displayedProducts = filteredProducts.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
-
-    console.log(displayedProducts);
 
     const handleDelete = async (id: string) => {
         try {

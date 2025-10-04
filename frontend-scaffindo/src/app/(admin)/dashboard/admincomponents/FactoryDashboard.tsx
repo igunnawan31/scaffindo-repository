@@ -28,18 +28,16 @@ function FactoryDashboard({ subRole, companyId }: FactoryProps) {
     }, []);
 
     useEffect(() => {
-        if (invoices.length) {
-            const filteredInvoicesByCompany = invoices.filter(
-                (p: Invoice) => p.companyId === companyId
-            );
-            const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "FACTORY_DONE");
+        const filteredInvoicesByCompany = invoices.filter(
+            (p: Invoice) => p.companyId === companyId
+        );
+        const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "FACTORY_DONE");
 
-            setStats({
-                invoices: filteredInvoicesByCompany.length,
-                invoiceNotChecked: invoiceNotChecked.length,
-            });
-            setLoading(false);
-        }
+        setStats({
+            invoices: filteredInvoicesByCompany.length,
+            invoiceNotChecked: invoiceNotChecked.length,
+        });
+        setLoading(false);
     }, [invoices]);
     
     if (loading) return <p>Loading dashboard...</p>;

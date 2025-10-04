@@ -23,27 +23,23 @@ function RetailDashboard({ subRole, companyId }: DistributorDashboardProps) {
     }, []);
 
     useEffect(() => {
-        if (invoices.length) {
-            const filteredInvoicesByCompany = invoices.filter(
-                (p: Invoice) => p.companyId === companyId
-            );
-            const filteredInvoicesByNextCompany = invoices.filter(
-                (p: Invoice) => p.nextCompanyId === companyId
-            );
-            const invoiceIn = filteredInvoicesByNextCompany.filter((p: Invoice) => p.status === "WAITING_RETAIL")
-            const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "RETAIL_ACCEPTED");
-            const invoiceChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "ARRIVED_AT_RETAIL");
+        const filteredInvoicesByCompany = invoices.filter(
+            (p: Invoice) => p.companyId === companyId
+        );
+        const filteredInvoicesByNextCompany = invoices.filter(
+            (p: Invoice) => p.nextCompanyId === companyId
+        );
+        const invoiceIn = filteredInvoicesByNextCompany.filter((p: Invoice) => p.status === "WAITING_RETAIL")
+        const invoiceNotChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "RETAIL_ACCEPTED");
+        const invoiceChecked = filteredInvoicesByCompany.filter((p: Invoice) => p.status === "ARRIVED_AT_RETAIL");
 
-            setStats({
-                invoicesIn: invoiceIn.length,
-                invoiceNotChecked: invoiceNotChecked.length,
-                invoiceChecked: invoiceChecked.length,
-            });
-            setLoading(false);
-        }
+        setStats({
+            invoicesIn: invoiceIn.length,
+            invoiceNotChecked: invoiceNotChecked.length,
+            invoiceChecked: invoiceChecked.length,
+        });
+        setLoading(false);
     }, [invoices]);
-    
-    if (loading) return <p>Loading dashboard...</p>;
 
     return (
         <div>

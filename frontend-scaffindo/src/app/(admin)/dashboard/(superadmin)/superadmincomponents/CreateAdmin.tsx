@@ -104,7 +104,7 @@ const CreateAdmin = () => {
                     />
                     <span
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-9 transform -translate-y-1/2 text-gray-500 cursor-pointer text-lg select-none"
+                        className="absolute right-3 top-10 transform text-gray-500 cursor-pointer text-lg select-none"
                         title={showPassword ? "Hide password" : "Show password"}
                     >
                         {showPassword ? 
