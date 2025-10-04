@@ -76,7 +76,7 @@ const ScanProduct:React.FC<Props> = ({onLabelCode}) => {
     }, [mode, onLabelCode]);
 
     return (
-        <div className={`mt-10 flex flex-col lg:flex-row gap-6 ${labelId ? 'pb-0' : 'pb-52'}`}>
+        <div className={`mt-10 flex flex-col lg:flex-row gap-6`}>
             <div className='lg:w-1/2 w-full order-1'>
                 {mode === "camera" ? (
                     <div className='w-full h-auto bg-black flex items-center justify-center text-white overflow-hidden'>

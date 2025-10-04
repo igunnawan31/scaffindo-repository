@@ -1,37 +1,29 @@
-"use client"
 
-import React, { useEffect, useState } from 'react'
-import Header from './scanproductcomponents/Header'
-import NavbarComponentsHome from '../components/NavbarComponentsHome'
-import ScanProductModal from './scanproductcomponents/ScanProductModal'
-import Webcam from "react-webcam";
-import JourneyProduct from './scanproductcomponents/JourneyProduct'
+import { Metadata } from "next";
+import ScanProductClient from "./scanproductcomponents/ScanProductClient";
 
-export default function ScanProduct() {
-    const [labelId, setLabelId] = useState<string | null>(null);
-    return (
-        <>
-            <NavbarComponentsHome />
-            <section
-                id="ScanProduct"
-                className={`relative pt-32 ${labelId ? 'pb-0' : 'pb-80'} bg-cover bg-center bg-white max-h-full`}
-            >
-                <div className="relative z-10 h-full px-4 lg:px-8">
-                    <div className="container mx-auto max-w-11/12">
-                        <Header />
-                        <ScanProductModal onLabelCode={setLabelId} />
-                    </div>
-                </div>
-            </section>
-            {labelId && (
-                <section id="InformationProduct" className="relative bg-cover bg-center pt-12 bg-white">
-                    <div className="relative z-10 h-full px-4 lg:px-8">
-                        <div className="container mx-auto max-w-11/12">
-                            <JourneyProduct labelId={labelId} />
-                        </div>
-                    </div>
-                </section>
-            )}
-        </>
-    )
+export const metadata: Metadata = {
+    title: "Scan Product | ChainTrack",
+    description: "Scan and verify product authenticity using blockchain-based QR tracking.",
+    icons: {
+        icon: "/icon.png" 
+    },
+    openGraph: {
+        title: "Scan Product - ChainTrack",
+        description: "Instant product verification powered by blockchain technology.",
+        url: "https://chaintrack.id/scan-product",
+            images: [
+            {
+                url: "https://chaintrack.id/assets/icons/sucoffindo.png",
+                width: 1200,
+                height: 630,
+                alt: "ChainTrack QR Scanner",
+            },
+        ],
+    },
+    robots: "index,follow",
+};
+
+export default function Page() {
+    return <ScanProductClient />;
 }

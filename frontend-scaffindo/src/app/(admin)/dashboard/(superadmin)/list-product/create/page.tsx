@@ -63,12 +63,37 @@ const CreateProduct = () => {
         e: React.ChangeEvent<HTMLInputElement>,
         type: "image"
     ) => {
-        if (!e.target.files || !e.target.files[0]) return
-        if (type === "image") setImage(e.target.files[0])
-    }
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const validExtensions = [".jpeg", ".png"];
+        const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+
+        if (!validExtensions.includes(ext)) {
+            setErrorMessage("Hanya format .jpeg dan .png yang diperbolehkan! (.jpg tidak diterima)");
+            setShowError(true);
+            e.target.value = "";
+            setImage(null);
+            return;
+        }
+
+        setImage(file);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
+
+        if (!formData.name || !formData.description || !formData.price || !formData.companyId || !formData.categories) {
+            setErrorMessage("Nama, Harga, Deskripsi, dan Company wajib diisi!");
+            setShowError(true);
+            return;
+        }
+
+        if (!image) {
+            setErrorMessage("Gambar produk wajib diupload!");
+            setShowError(true);
+            return;
+        }
 
         try {
             const data = new FormData()
@@ -76,6 +101,7 @@ const CreateProduct = () => {
             data.append("description", formData.description)
             data.append("price", formData.price)
             data.append("companyId", formData.companyId)
+            data.append("image", image)
 
             if (formData.categories.length > 0) {
                 data.append("categories", JSON.stringify(formData.categories))
@@ -111,11 +137,6 @@ const CreateProduct = () => {
         value: c,
         label: c,
     }))
-    const certificateOptionsList: { value: string; label: string }[] =
-        (certOptions || []).map((c: CertificateOption) => ({
-            value: c.id,
-            label: c.name,
-        }))
 
     return (
         <div className="p-6 bg-white rounded-lg shadow-md w-full mx-auto">
@@ -178,9 +199,10 @@ const CreateProduct = () => {
                 </div>
                 
                 <div>
-                    <label className="block font-semibold text-blue-900 mb-1">Image</label>
+                    <label className="block font-semibold text-blue-900 mb-1">Image (JPEG/PNG)</label>
                     <input
                         type="file"
+                        accept="image/png, image/jpeg"
                         onChange={(e) => handleFileChange(e, "image")}
                         className="block w-full text-sm text-gray-500
                         file:mr-4 file:py-2 file:px-4
