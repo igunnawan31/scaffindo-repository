@@ -10,7 +10,7 @@ export function useUser() {
     const role = useRoleFromQuery();
     const [users, setUsers] = useState<User[]>([]);
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const fetchUsersAdmin = useCallback(async () => {
