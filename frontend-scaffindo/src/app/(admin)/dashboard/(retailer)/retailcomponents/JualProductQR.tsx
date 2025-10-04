@@ -111,7 +111,6 @@ const JualProductQR = () => {
             };
 
             const result = await bulkBuy(payload);
-            console.log(result);
             setSuccessMessage(`Checkout berhasil! Total: Rp ${totalAmount.toLocaleString("id-ID")}`);
             setShowSuccess(true);
             setCart([]);

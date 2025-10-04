@@ -29,8 +29,6 @@ export function useAuth() {
             localStorage.setItem("access_token", res.data.access_token);
             localStorage.setItem("refresh_token", res.data.refresh_token);
             localStorage.setItem("user", JSON.stringify(user));
-            console.log("Access Token:", res.data.access_token);
-            console.log("User:", user);
             return user;
         } catch (err: any) {
             setError(err.response?.data?.message || "Login failed");

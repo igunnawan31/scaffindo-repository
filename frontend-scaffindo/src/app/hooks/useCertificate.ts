@@ -32,13 +32,10 @@ export function useCertificate() {
             let certificateData: Certificate[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 certificateData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 certificateData = res.data.data;
             } else if (Array.isArray(res.data?.certificates)) {
-                console.log("res.data.certificates berhasil")
                 certificateData = res.data.certificates;
             }
 
@@ -184,7 +181,6 @@ export function useCertificate() {
                 }
             );
 
-            console.log("Delete response:", res.data);
             setCertificates((prev) => prev.filter((u) => u.id !== id));
 
             return res.data;

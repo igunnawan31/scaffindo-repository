@@ -90,7 +90,7 @@ const JourneyProduct: React.FC<Props> = ({labelId}) => {
                         </div>
                         <div className="ml-4 flex-1">
                             <div className="bg-white shadow-md rounded-lg p-5">
-                                <h3 className="font-semibold text-lg">{track.title}</h3>
+                                <h3 className="font-semibold text-lg text-blue-900">{track.title}</h3>
                                 <p className="text-sm text-gray-500">{new Date(track.createdAt).toLocaleString()}</p>
                                 <ul className="mt-3 text-gray-700 text-sm space-y-1">
                                     {track.description}

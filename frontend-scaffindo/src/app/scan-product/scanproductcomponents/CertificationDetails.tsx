@@ -25,7 +25,6 @@ export default function CertificationDetails({ productId }: Props) {
 
             try {
                 const data = await fetchCertificateByProductId(productId);
-                console.log(data);
                 setCertifications(data || []);
             } catch (err: any) {
                 setError(err.message || "Failed to fetch certifications");

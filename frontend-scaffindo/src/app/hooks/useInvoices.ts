@@ -61,13 +61,10 @@ export function useInvoice() {
             let invoiceData: Invoice[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 invoiceData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 invoiceData = res.data.data;
             } else if (Array.isArray(res.data?.certificates)) {
-                console.log("res.data.certificates berhasil")
                 invoiceData = res.data.certificates;
             }
 

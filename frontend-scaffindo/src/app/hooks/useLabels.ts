@@ -31,13 +31,10 @@ export function useLabels() {
             let labelData: Label[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 labelData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 labelData = res.data.data;
             } else if (Array.isArray(res.data?.certificates)) {
-                console.log("res.data.certificates berhasil")
                 labelData = res.data.certificates;
             }
 

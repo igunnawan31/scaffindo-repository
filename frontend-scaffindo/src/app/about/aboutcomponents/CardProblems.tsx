@@ -28,7 +28,7 @@ const CardProblems: React.FC<ProblemsProps> = ({title, problems}) => {
                 {displayedProblems.map((problem) => (
                     <div
                         key={problem.id}
-                        className="w-full bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700"
+                        className="w-full bg-white border border-gray-200 rounded-lg shadow-lg"
                     >
                         <Image
                             src={problem.image}
@@ -38,8 +38,8 @@ const CardProblems: React.FC<ProblemsProps> = ({title, problems}) => {
                             className="w-full h-48 object-cover rounded-t-lg"
                         />
                         <div className="p-5">
-                            <h5 className="mb-2 text-center text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{problem.name}</h5>
-                            <p className="mb-3 text-center font-normal text-gray-700 dark:text-gray-400">{problem.description}</p>
+                            <h5 className="mb-2 text-center text-2xl font-bold tracking-tight text-gray-900">{problem.name}</h5>
+                            <p className="mb-3 text-center font-normal text-gray-700">{problem.description}</p>
                             
                         </div>
                     </div>

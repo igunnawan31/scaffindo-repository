@@ -103,21 +103,21 @@ const ProductList = () => {
                     {displayedProducts.map((product) =>
                         <div
                             key={product.id}
-                            className="w-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
+                            className="w-full bg-white border border-gray-200 rounded-lg shadow-sm"
                         >
-                            <Image
+                            {/* <Image
                                 src={getImageUrl(product.image[product.image.length - 1].path)}
                                 alt={product.image[product.image.length - 1]?.filename ?? "Product image"}
                                 width={400}
                                 height={200}
                                 className="w-full h-48 object-cover rounded-t-lg"
-                            />
+                            /> */}
                             <div className="p-5">
                                 <div className="flex justify-between">
-                                    <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{product.name}</h2>
-                                    <h3 className="mb-3 font-normal text-gray-700 dark:text-gray-400">{product.price}</h3>
+                                    <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{product.name}</h2>
+                                    <h3 className="mb-3 font-normal text-gray-700">Rp {Number(product.price).toLocaleString("id-ID")}</h3>
                                 </div>
-                                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{product.description}</p>
+                                <p className="mb-3 font-normal text-gray-700">{product.description}</p>
                                 <div className="flex items-end justify-end gap-2 md:gap-2">
                                     <Link
                                         href={`/dashboard/list-product/${product.id}/update`}

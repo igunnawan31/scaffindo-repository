@@ -34,13 +34,10 @@ export function useUser() {
             let userData: User[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 userData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 userData = res.data.data;
             } else if (Array.isArray(res.data?.users)) {
-                console.log("res.data.users berhasil")
                 userData = res.data.users;
             }
 
@@ -75,13 +72,10 @@ export function useUser() {
             let userData: User[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 userData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 userData = res.data.data;
             } else if (Array.isArray(res.data?.users)) {
-                console.log("res.data.users berhasil")
                 userData = res.data.users;
             }
 
@@ -211,7 +205,6 @@ export function useUser() {
                 }
             );
 
-            console.log("Delete response:", res.data);
             setUsers((prev) => prev.filter((u) => u.id !== id));
 
             return res.data;

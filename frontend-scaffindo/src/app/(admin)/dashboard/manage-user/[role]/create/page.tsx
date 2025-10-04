@@ -32,7 +32,6 @@ const CreateUser = () => {
         const userStr = localStorage.getItem("user");
         if (userStr) {
             const loggedInUser = JSON.parse(userStr);
-            console.log(loggedInUser)
 
             setFormData((prev) => ({
                 ...prev,

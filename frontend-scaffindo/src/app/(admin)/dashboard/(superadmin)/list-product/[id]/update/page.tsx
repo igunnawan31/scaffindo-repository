@@ -54,8 +54,6 @@ export default function UpdateProduct() {
     }, [id, fetchProductById, fetchCertificates]);
 
     useEffect(() => {
-        console.log("certOptions", certOptions);
-        console.log("formData.certifications", formData.certifications);
     }, [certOptions, formData.certifications]);
 
     useEffect(() => {

@@ -18,10 +18,8 @@ const CardLogin = () => {
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Submitting login", form);
         try {
             const user = await login(form.email, form.password);
-            console.log("Login result", user);
             if (user) {
                 toast.success("Login Berhasil");
                 router.push("/dashboard");

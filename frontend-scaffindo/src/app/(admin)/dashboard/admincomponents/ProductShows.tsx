@@ -35,7 +35,7 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
                         <Link
                             href={`/dashboard/print-label/${product.id}`}
                             key={product.id}
-                            className="w-full bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700"
+                            className="w-full bg-white border border-gray-200 rounded-lg shadow-sm"
                         >
                             <Image
                                 src={getImageUrl(product.image[product.image.length - 1].path)}
@@ -45,9 +45,9 @@ const ProductShows: React.FC<ProductShowsProps> = ({ title, products, limit, def
                                 className="w-full h-48 object-cover rounded-t-lg"
                             />
                             <div className="p-5">
-                                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{product.name}</h5>
-                                <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">{product.description}</p>
-                                <div className="inline-flex items-center px-3 py-2 gap-2 text-sm font-medium text-center text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{product.name}</h5>
+                                <p className="mb-3 font-normal text-gray-700">{product.description}</p>
+                                <div className="inline-flex items-center px-3 py-2 gap-2 text-sm font-medium text-center text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 focus:ring-4 focus:outline-none focus:ring-blue-300">
                                     Print Label
                                     <Image 
                                         src={'/assets/icons/print.svg'}

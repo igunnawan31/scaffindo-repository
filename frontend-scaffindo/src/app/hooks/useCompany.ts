@@ -35,13 +35,10 @@ export function useCompany() {
             let companyData: Company[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 companyData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 companyData = res.data.data;
             } else if (Array.isArray(res.data?.companies)) {
-                console.log("res.data.companies berhasil")
                 companyData = res.data.companies;
             }
 
@@ -166,7 +163,6 @@ export function useCompany() {
                 }
             );
 
-            console.log("Delete response:", res.data);
             setCompanies((prev) => prev.filter((u) => u.id !== id));
 
             return res.data;
@@ -199,13 +195,10 @@ export function useCompany() {
             let companyData: Company[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 companyData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 companyData = res.data.data;
             } else if (Array.isArray(res.data?.companies)) {
-                console.log("res.data.companies berhasil")
                 companyData = res.data.companies;
             }
 
@@ -240,13 +233,10 @@ export function useCompany() {
             let companyData: Company[] = [];
             
             if (Array.isArray(res.data)) {
-                console.log("res.data berhasil")
                 companyData = res.data;
             } else if (res.data && Array.isArray(res.data.data)) {
-                console.log("res.data.data berhasil")
                 companyData = res.data.data;
             } else if (Array.isArray(res.data?.companies)) {
-                console.log("res.data.companies berhasil")
                 companyData = res.data.companies;
             }
 

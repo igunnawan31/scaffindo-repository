@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "chaintrack.id",
-	port: "",
+	      port: "",
         pathname: "/files/**",
       },
     ],

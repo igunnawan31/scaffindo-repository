@@ -26,8 +26,6 @@ const CertificateList = () => {
             certificate.name?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    console.log(filteredCertificates.length);
-
     const displayedCertificates = filteredCertificates.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage

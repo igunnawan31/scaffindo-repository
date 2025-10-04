@@ -13,7 +13,7 @@ export default function ScanProductClient() {
             <NavbarComponentsHome />
             <section
                 id="ScanProduct"
-                className={`relative pt-32 bg-cover bg-center bg-white h-screen`}
+                className={`relative pt-32 ${labelId ? 'pb-0' : 'h-screen pb-80'} bg-cover bg-center bg-white`}
             >
                 <div className="relative z-10 h-full px-4 lg:px-8">
                     <div className="container mx-auto max-w-11/12">
@@ -21,16 +21,16 @@ export default function ScanProductClient() {
                         <ScanProductModal onLabelCode={setLabelId} />
                     </div>
                 </div>
-            </section>
-            {labelId && (
-                <section id="InformationProduct" className="relative bg-cover bg-center pt-12 bg-white">
-                    <div className="relative z-10 h-full px-4 lg:px-8">
-                        <div className="container mx-auto max-w-11/12">
-                            <JourneyProduct labelId={labelId} />
+                {labelId && (
+                    <section id="InformationProduct" className="relative bg-cover bg-center pt-12 bg-white h-screen">
+                        <div className="relative z-10 h-full px-4 lg:px-8">
+                            <div className="container mx-auto max-w-11/12">
+                                <JourneyProduct labelId={labelId} />
+                            </div>
                         </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )}
+            </section>
         </>
     )
 }
