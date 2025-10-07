@@ -101,13 +101,13 @@ const ProductList = () => {
                             key={product.id}
                             className="w-full bg-white border border-gray-200 rounded-lg shadow-sm"
                         >
-                            {/* <Image
+                            <Image
                                 src={getImageUrl(product.image[product.image.length - 1].path)}
                                 alt={product.image[product.image.length - 1]?.filename ?? "Product image"}
                                 width={400}
                                 height={200}
                                 className="w-full h-48 object-cover rounded-t-lg"
-                            /> */}
+                            />
                             <div className="p-5">
                                 <div className="flex justify-between">
                                     <h2 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">{product.name}</h2>
